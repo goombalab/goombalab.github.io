@@ -2,7 +2,7 @@
 # Site settings
 # -----------------------------------------------------------------------------
 
-title: Goomba Lab <img src="/assets/img/goomba_transparent.png" width="40" height="40"> # the website title (if blank, full name will be used instead)
+title: Goomba Lab <img src="/assets/img/goomba_transparent.png" width="30" height="30"> # the website title (if blank, full name will be used instead)
 first_name: Goomba
 middle_name: AI
 last_name: Lab
