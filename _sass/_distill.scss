@@ -48,8 +48,98 @@ d-article {
   b i {
     display: inline;
   }
+
   blockquote {
-    border-left: 2px solid var(--global-theme-color) !important;
+    background: var(--global-bg-color);
+    border-left: 5px solid var(--global-theme-color);
+    margin: 1.5em 0;
+    padding: 1em;
+    font-size: 1.2rem;
+    font-style: italic;
+
+    p {
+      margin-bottom: 0;
+    }
+
+    /* Tips, warnings, and dangers blockquotes */
+    &.block-tip {
+      border-color: var(--global-tip-block);
+      background-color: var(--global-tip-block-bg);
+
+      p {
+        color: var(--global-tip-block-text) !important;
+        font-style: italic !important;
+      }
+
+      h1, h2, h3, h4, h5, h6 {
+        color: var(--global-tip-block-title) !important;
+        font-style: normal !important;
+        font-weight: 400 !important;
+      }
+
+      // Italics
+      em {
+        color: var(--global-tip-block-text) !important;
+        font-style: normal !important;
+      }
+
+      // Bold
+      strong {
+        color: var(--global-tip-block-text) !important;
+      }
+    }
+
+    &.block-warning {
+      border-color: var(--global-warning-block);
+      background-color: var(--global-warning-block-bg);
+
+      p {
+        color: var(--global-warning-block-text) !important;
+      }
+
+      h1, h2, h3, h4, h5, h6 {
+        color: var(--global-warning-block-title);
+        font-style: normal !important;
+        font-weight: 400 !important;
+      }
+
+      // Italics
+      em {
+        color: var(--global-warning-block-text) !important;
+        font-style: normal !important;
+      }
+
+      // Bold
+      strong {
+        color: var(--global-warning-block-text) !important;
+      }
+    }
+
+    &.block-danger {
+      border-color: var(--global-danger-block);
+      background-color: var(--global-danger-block-bg);
+
+      p {
+        color: var(--global-danger-block-text) !important;
+      }
+
+      h1, h2, h3, h4, h5, h6 {
+        color: var(--global-danger-block-title);
+        font-style: normal !important;
+        font-weight: 400 !important;
+      }
+
+      // Italics
+      em {
+        color: var(--global-danger-block-text) !important;
+        font-style: normal !important;
+      }
+
+      // Bold
+      strong {
+        color: var(--global-danger-block-text) !important;
+      }
+    }
   }
 
   // Style taken from code blocks
