@@ -40,9 +40,9 @@ toc:
 
 ---
 
-1. [Part I - The Model]({% post_url 2024-05-31-mamba-2-model %})
-2. [Part II - The Theory]({% post_url 2024-05-31-mamba-2-theory %})
-3. [Part III - The Algorithm]({% post_url 2024-05-31-mamba-2-algorithm %})
+1. [Part I - The Model]({% post_url 2024-05-31-mamba2-part1-model %})
+2. [Part II - The Theory]({% post_url 2024-05-31-mamba2-part2-theory %})
+3. [Part III - The Algorithm]({% post_url 2024-05-31-mamba2-part3-algorithm %})
 4. Part IV - The Systems
 
 

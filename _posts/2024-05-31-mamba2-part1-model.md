@@ -50,9 +50,9 @@ toc:
 [Code](https://github.com/state-spaces/mamba)
 
 1. Part I - The Model
-2. [Part II - The Theory]({% post_url 2024-05-31-mamba-2-theory %})
-3. [Part III - The Algorithm]({% post_url 2024-05-31-mamba-2-algorithm %})
-4. [Part IV - The Systems]({% post_url 2024-05-31-mamba-2-systems %})
+2. [Part II - The Theory]({% post_url 2024-05-31-mamba2-part2-theory %})
+3. [Part III - The Algorithm]({% post_url 2024-05-31-mamba2-part3-algorithm %})
+4. [Part IV - The Systems]({% post_url 2024-05-31-mamba2-part4-systems %})
 
 Since the release of [Mamba](https://arxiv.org/abs/2312.00752) 6 months ago, we've been pleasantly surprised by the overwhelming [community response](https://github.com/AvivBick/awesome-ssm-ml).
 It's been incredibly gratifying to see the line of research on efficient sequence models we've been pursuing for years really resonate with the machine learning community and take off more than we could have anticipated.
@@ -366,6 +366,6 @@ We're not quite sure why to be honest, and it would be great to ablate the other
 
 [//]: # [AG: perhaps include a section to shout out related work and directions?]
 
-In [the next part of this series],
+In [the next part of this series]({% post_url 2024-05-31-mamba2-part2-theory %}),
 we'll go more into the full SSD framework, including how to prove the claimed "duality" of the SSD layer,
 and strong generalizations of it!

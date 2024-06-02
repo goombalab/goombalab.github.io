@@ -49,12 +49,12 @@ toc:
 
 ---
 
-1. [Part I - The Model]({% post_url 2024-05-31-mamba-2-model %})
+1. [Part I - The Model]({% post_url 2024-05-31-mamba2-part1-model %})
 2. Part II - The Theory
-3. [Part III - The Algorithm]({% post_url 2024-05-31-mamba-2-algorithm %})
-4. [Part IV - The Systems]({% post_url 2024-05-31-mamba-2-systems %})
+3. [Part III - The Algorithm]({% post_url 2024-05-31-mamba2-part3-algorithm %})
+4. [Part IV - The Systems]({% post_url 2024-05-31-mamba2-part4-systems %})
 
-In [Part I]({% post_url 2024-05-31-mamba-2-model %}) of this series, we defined the state space dual (SSD) *model*.
+In [Part I]({% post_url 2024-05-31-mamba2-part1-model %}) of this series, we defined the state space dual (SSD) *model*.
 In isolation, this model is relatively simple to define,
 and we claimed that it can be computed either as an SSM recurrence or with an attention-like pattern.
 If you just want to use the model, feel free to skip this post!
@@ -81,7 +81,7 @@ Note that this theory is *not necessary* to use the SSD model itself; this part 
 
 ## Recap: The SSD Model
 
-[Part I]({% post_url 2024-05-31-mamba-2-model %}) of this series introduced the SSD layer, which is
+[Part I]({% post_url 2024-05-31-mamba2-part1-model %}) of this series introduced the SSD layer, which is
 defined as a selective SSM
 
 $$

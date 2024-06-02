@@ -44,14 +44,14 @@ toc:
 
 ---
 
-1. [Part I - The Model]({% post_url 2024-05-31-mamba-2-model %})
-2. [Part II - The Theory]({% post_url 2024-05-31-mamba-2-theory %})
+1. [Part I - The Model]({% post_url 2024-05-31-mamba2-part1-model %})
+2. [Part II - The Theory]({% post_url 2024-05-31-mamba2-part2-theory %})
 3. Part III - The Algorithm
-4. [Part IV - The Systems]({% post_url 2024-05-31-mamba-2-systems %})
+4. [Part IV - The Systems]({% post_url 2024-05-31-mamba2-part4-systems %})
 
 
 The theoretical framework of structured state space duality
-(see [Part I]({% post_url 2024-05-31-mamba-2-model %}) and [Part II]({% post_url 2024-05-31-mamba-2-theory %}) of this series)
+(see [Part I]({% post_url 2024-05-31-mamba2-part1-model %}) and [Part II]({% post_url 2024-05-31-mamba2-part2-theory %}) of this series)
 connects SSMs and (linear) attention through structured matrices.
 As mentioned in Part I, this connection allows us to derive new algorithms for selective SSMs that are faster than the parallel associative scan in Mamba-1 by leveraging matrix multiplication as a primitive.
 Moreover, the connection can bring system optimizations (e.g. tensor parallelism, sequence parallelism, variable sequence length) originally developed for Transformer to SSM-land.
@@ -294,7 +294,7 @@ should work equally well.
 {: .block-tip}
 
 ## What's Next
-In the [final part of this series]({% post_url 2024-05-31-mamba-2-systems %}), we'll continue talking about the implementation of Mamba-2, but on a more macroscopic level – about the entire neural network, instead of just details of the core SSD layer.
+In the [final part of this series]({% post_url 2024-05-31-mamba2-part4-systems %}), we'll continue talking about the implementation of Mamba-2, but on a more macroscopic level – about the entire neural network, instead of just details of the core SSD layer.
 
 We'll also talk about the actual speed of the algorithm covered in this post.
 
