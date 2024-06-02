@@ -49,6 +49,11 @@ toc:
 
 [Code](https://github.com/state-spaces/mamba)
 
+1. Part I - The Model
+2. [Part II - The Theory]({% post_url 2024-05-31-mamba-2-theory %})
+3. [Part III - The Algorithm]({% post_url 2024-05-31-mamba-2-algorithm %})
+4. [Part IV - The Systems]({% post_url 2024-05-31-mamba-2-systems %})
+
 Since the release of [Mamba](https://arxiv.org/abs/2312.00752) 6 months ago, we've been pleasantly surprised by the overwhelming [community response](https://github.com/AvivBick/awesome-ssm-ml).
 It's been incredibly gratifying to see the line of research on efficient sequence models we've been pursuing for years really resonate with the machine learning community and take off more than we could have anticipated.
 We've seen an enormous amount of exciting follow-up work, from direct applications
@@ -89,14 +94,15 @@ These are the main questions that Mamba-2 -- in particular, its new state space 
 ## The SSD Model
 
 The main point of the Mamba-2 paper is what we call **structured state space duality** (SSD),
-which refers to both
-1. a specific model, or more precisely a standalone layer like an SSM or attention that can be incorporated into deep neural networks.
-2. a general framework for reasoning about this model (and beyond).
+which refers to several things:
+1. The **SSD model** refers to a specific standalone layer, like attention or an SSM, that can be incorporated into deep neural networks
+2. The **SSD framework** is a general framework for reasoning about this model (and many more theoretical connections)
+3. The **SSD algorithm** is an algorithm for computing SSD layers much more efficiently than previous SSMs
 
 The main "state space dual model" itself really isn't so scary!
 In this first part of a series of blog posts, we'll provide a self-contained description of the SSD layer (and Mamba-2) in isolation and how it compares to related models, particularly Mamba-1.
 
-In [the next part], we'll describe the general framework and theoretical connections, which aren't necessary to actually use Mamba-2.
+In the next parts of this series, we'll describe the general framework and theoretical connections, which aren't necessary to actually use Mamba-2.
 
 ### The Linear (SSM) Mode
 
@@ -355,7 +361,11 @@ which was one of the primary motivations of Mamba-2 in the first place.
 Interestingly, Mamba-2 also appears to be noticeably better than Mamba-1 on this particular task even when the state size is controlled.
 We're not quite sure why to be honest, and it would be great to ablate the other aspects of the architecture to investigate...
 
-## What's Next?
 
-[AG: perhaps include a section to shout out related work and directions?]
+## Next Up
 
+[//]: # [AG: perhaps include a section to shout out related work and directions?]
+
+In [the next part of this series],
+we'll go more into the full SSD framework, including how to prove the claimed "duality" of the SSD layer,
+and strong generalizations of it!
