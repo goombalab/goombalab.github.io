@@ -4,7 +4,7 @@ title: State Space Duality (Mamba-2) Part 1 - The Model
 description: 
 tags:
 giscus_comments: true
-date: 2024-05-27
+date: 2024-05-31
 featured: true
 
 authors:
@@ -43,7 +43,7 @@ toc:
 
 ---
 
-{% include figure.liquid loading="eager" path="assets/img/2024-06-01-mamba2/mamba-2-V3-transparent.png" %}
+{% include figure.liquid loading="eager" path="assets/img/2024-05-31-mamba-2/mamba-2-V3-transparent.png" %}
 
 [Paper]
 
@@ -283,7 +283,7 @@ During inference, there's no trade-off: the SSM mode is designed for fast autore
 But what about training?
 There's a tension between FLOPs and hardware efficiency where the attention mode uses more FLOPs, but uses them more efficiently through matrix multiplications.
 
-{% include figure.liquid loading="eager" path="assets/img/2024-06-01-mamba2/ssd_algorithm.png" %}
+{% include figure.liquid loading="eager" path="assets/img/2024-05-31-mamba-2/ssd_algorithm.png" %}
 
 It turns out we can get the best of both worlds by combining the algorithms!
 There are two equivalent interpretations of this "state space dual" algorithm, either as
@@ -318,7 +318,7 @@ and also dramatically speeds up training comparing to general state space models
 Although the core contribution of Mamba-2 is the new SSD layer,
 we also make some small changes to Mamba's neural network architecture.
 
-{% include figure.liquid loading="eager" path="assets/img/2024-06-01-mamba2/architecture_2.png" %}
+{% include figure.liquid loading="eager" path="assets/img/2024-05-31-mamba-2/architecture_2.png" %}
 
 The main change is producing the $(A, B, C)$ SSM parameters in parallel with the $X$ input, instead of sequentially.
 This is partly motivated by the connections to attention;
@@ -332,7 +332,7 @@ However, we do want to emphasize that these architectural changes aren't really 
 In terms of empirical results, we didn't test Mamba-2 as extensively as Mamba-1, but believe it should generally be on par or better.
 Our full language model results use the same protocol as Mamba, and found slightly better scaling both at Chinchilla laws :warning: (figure).
 
-{% include figure.liquid loading="eager" path="assets/img/2024-06-01-mamba2/pile_8k_mamba2.png" %}
+{% include figure.liquid loading="eager" path="assets/img/2024-05-31-mamba-2/pile_8k_mamba2.png" %}
 
 Fully trained models on the Pile dataset :warning: and the standard zero-shot downstream evaluations show similar trends.
 We emphasize that even when the performance is comparable, Mamba-2 is *much* faster to train than Mamba-1!
@@ -345,7 +345,7 @@ many follow-up works have begun investigating harder associative recall tasks.
 The multi-query associative recall (MQAR) task introduced by the Zoology and Based :warning: line of work
 has become a de facto standard.
 
-{% include figure.liquid loading="eager" path="assets/img/2024-06-01-mamba2/mqar.png" %}
+{% include figure.liquid loading="eager" path="assets/img/2024-05-31-mamba-2/mqar.png" %}
 
 We ran a version of this task that's much harder than the one usually reported in the literature,
 and found that Mamba-2 is substantially better than Mamba-1.
@@ -378,7 +378,7 @@ the SSD framework is much more general opens up many directions for future work.
 
 #### The State Space Duality framework
 
-{% include figure.liquid loading="eager" path="assets/img/2024-06-01-mamba2/ssd_venn.png" title="Structured State Space Duality" caption="SSD Framework (red, blue): State space models (i.e. semiseparable matrices) and structured masked attention encapsulate large classes of efficient sequence models. Their intersection is the SSD model (purple)." %}
+{% include figure.liquid loading="eager" path="assets/img/2024-05-31-mamba-2/ssd_venn.png" title="Structured State Space Duality" caption="SSD Framework (red, blue): State space models (i.e. semiseparable matrices) and structured masked attention encapsulate large classes of efficient sequence models. Their intersection is the SSD model (purple)." %}
 
 
 For each of the two parts of this framework, we'll
@@ -455,7 +455,7 @@ and the full paper talks about more of their properties.
 For example, an alternative characterization of semiseparable matrices is their *structured rank property*,
 which says that every submatrix contained in the lower-triangular portion is low rank!
 
-{% include figure.liquid loading="eager" path="assets/img/2024-06-01-mamba2/semiseparable.png" %}
+{% include figure.liquid loading="eager" path="assets/img/2024-05-31-mamba-2/semiseparable.png" %}
 
 [//]: # The power of writing state space models as matrix transformations is that 
 
@@ -738,7 +738,7 @@ This corresponds exactly to the original SSM recurrence!
 Structured masked attention not only helps define the SSD model and prove its duality,
 but it is a much broader framework of efficient attention models.
 
-{% include figure.liquid loading="eager" path="assets/img/2024-06-01-mamba2/sma.png" %}
+{% include figure.liquid loading="eager" path="assets/img/2024-05-31-mamba-2/sma.png" %}
 
 Prior examples include the original linear attention as well as the recent Retentive Network (RetNet) model<d-cite key="sun2023retentive"></d-cite>.
 These can be viewed as direct special cases of SSD.
