@@ -11,7 +11,7 @@ authors:
   - name: Albert Gu
     url:
     affiliations:
-      name: Carnegie Mellon University
+      name: CMU
   - name: Tri Dao
     url:
     affiliations:

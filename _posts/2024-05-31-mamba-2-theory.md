@@ -11,7 +11,7 @@ authors:
   - name: Albert Gu
     url:
     affiliations:
-      name: Carnegie Mellon University
+      name: CMU
   - name: Tri Dao
     url:
     affiliations:
@@ -35,16 +35,16 @@ toc:
     subsections:
       - name: Matrix Transformations
       - name: Semiseparable Matrices
-      - name: Deriving the SSD Layer Duality (SSM →  Attention)
-      - name: Going Beyond SSD
+      - name: "Deriving the Duality: SSM to Attention"
+      - name: Going Beyond the SSD Layer 1
   - name: "SSD Framework 2: Structured Attention"
     subsections:
       - name: "Warm-up: Kernel Attention"
       - name: (Causal) Linear Attention
       - name: A Tensor Contraction Proof of Linear Attention
       - name: Structured Masked Attention
-      - name: Deriving the SSD Layer Duality (Attention →  SSM)
-      - name: Going Beyond SSD
+      - name: "Deriving the Duality: Attention to SSM"
+      - name: Going Beyond the SSD Layer 2
   - name: State Space Duality
 
 ---
@@ -170,9 +170,10 @@ $$
   \end{bmatrix}
 $$
 
-$$
+\begin{equation}
+\label{eq:ssm-matrix}
 (\text{Matrix Transformation Representation of State Space Models})
-$$
+\end{equation}
 
 ### Semiseparable Matrices
 
@@ -190,12 +191,14 @@ which says that every submatrix contained in the lower-triangular portion is low
 For our purposes, we'll care about this form mainly for the algorithmic considerations.
 One of the central messages of this SSD paper is that:
 
+> #### Takeaway: Computing SSMs
+>
 > All algorithms for computing state space models can be viewed as structured matrix multiplication algorithms on semiseparable matrices.
 {: .block-tip}
 
 Let's see an easy instantiation of this, focusing on our main objective!
 
-### Deriving the SSD Layer Duality (SSM →  Attention)
+### Deriving the Duality: SSM to Attention
 
 To show that equation \eqref{eq:ssd-attention} follows from equation \eqref{eq:ssm} (in the case of the SSD model, i.e. scalar SSM), we directly use the matrix form of the state space model \eqref{eq:semiseparable}.
 Because the $A_t$ are all scalars in this case, they can be factored out of the entries
@@ -208,13 +211,15 @@ which directly implies equation \eqref{eq:semiseparable}.
 
 In summary:
 
+> #### Duality Representation 1 (SSM)
+>
 > The duality for the SSD model can be seen as two **different matrix multiplication algorithms** on the semiseparable matrix.
 {: .block-tip}
 
 - The linear form is a *structured matrix multiplication algorithm* that computes the outputs $Y_0, Y_1, \dots$ sequentially, leveraging the structure of the semiseparable matrix.
 - The quadratic form is the *naive matrix multiplication algorithm* that materializes the quadratic matrix.
 
-### Going Beyond SSD
+### Going Beyond the SSD Layer 1
 
 The power of the semiseparable matrix representation applies to *all* state space models,
 with various downstream implications.
@@ -401,6 +406,8 @@ which can be seen as a strong generation of LA.
 > **Structured masked attention (SMA)** is defined as the *four-way tensor contraction* \eqref{eq:sma} using an attention mask $L$ that is a structured matrix.  
 {: .block-tip }
 
+> #### Duality Representation 2 (SMA)
+>
 > SMA has **dual quadratic and linear**<d-footnote>Assuming that the structured matrix $L$ has linear time matrix-vector multiplication</d-footnote> **modes** which are simply *two different pairwise reduction orders* \eqref{eq:sma-quad} and \eqref{eq:sma-lin}.
 {: .block-tip }
 
@@ -414,7 +421,7 @@ Finally, let's just connect this back to the commonly held view of linear attent
 
 Next, let's look at some consequences of the structured attention framework.
 
-### Deriving the SSD Layer Duality (Attention →  SSM)
+### Deriving the Duality: Attention to SSM
 
 Recall that the SSD model is defined as either a scalar-identity SSM in equation \eqref{eq:ssm},
 or through the attention-like form in equation \eqref{eq:ssd-attention}.
@@ -460,7 +467,7 @@ This corresponds exactly to the original SSM recurrence!
 (In fact, multiplication by 1-SS matrices $L$ can be computed in a *lot* more ways, which we compile in the full paper! Alternative algorithms can reveal more insights: for example, the associative scan algorithm used by S5 <d-cite key="smith2023s5"></d-cite> and Mamba can also be shown to be a structured matrix multiplication algorithm on 1-SS matrices.)
 
 
-### Going Beyond SSD
+### Going Beyond the SSD Layer 2
 
 Structured masked attention not only helps define the SSD model and prove its duality,
 but it is a much broader framework of efficient attention models.
@@ -481,18 +488,20 @@ and generalizing it to incorporate arbitrary graph structures.
 
 We'll end this post with a brief recap of what we've covered.
 
-The **SSD framework** consists of the two broad approaches covered in this post, which is summarized by the [[main figure](#the-state-space-duality-framework)]:
+The **SSD framework** consists of the two broad approaches covered in this post, which is summarized by the two areas of the [[Venn diagram](#the-state-space-duality-framework)]:
 1. Viewing state space models through [[structured matrix transformations](#ssd-framework-1-structured-matrix-transformations)]
-2. Viewing linear attention through [[structured masked attention](#ssd-framework-2-structured-attention)]
+2. Generalizing linear attention through [[tensor contractions](#ssd-framework-2-structured-attention)]
 
-The [[SSD model](#the-state-space-dual-model)] is a particular model which is the purple intersection in the figure, which can be viewed as an instance of either part of the SSD framework, and in particular has dual quadratic and linear forms that can be derived from either representation.
+The [[SSD layer](#recap-the-ssd-model)] is a particular model which is the purple intersection in the figure, which can be viewed as an instance of either part of the SSD framework, and in particular has dual quadratic and linear forms that can be derived from either representation.
 
 
-| SSD Framework                                       | Structured Matrix Transformations                                  | Structured Attention                                              |
-| -------------                                       | -----------                                                        | ----                                                              |
-| Which sequence models does this focus on?           | State space models (SSM)                                           | (Linear) Attention                                                         |
-| The SSD model is an instantiation as...             | Scalar state space models <br> ($A_t$ is a scalar-identity matrix) | 1-semiseparable masked attention <br> ($L$ mask is a 1-SS matrix) |
-| The linear-quadratic duality is revealed through... | Matrix multiplication algorithms                                   | Tensor contraction reduction orderings                            |
+| *SSD Framework*                                          | Structured SSMs                                                   | Structured Attention                                              |
+| -------------                                            | -----------                                                       | ----                                                              |
+| The main representation is...                            | Structured matrix \eqref{eq:ssm-matrix} <br>                      | The 4-way \eqref{eq:sma} <br> tensor contraction                  |
+| This generalizes...                                      | State space models                                                | Linear attention                                                  |
+| The SSD model is <br> an instantiation as...             | Scalar state space model <br> ($A_t$ is a scalar-identity matrix) | 1-semiseparable masked attention <br> ($L$ mask is a 1-SS matrix) |
+| The linear-quadratic duality is <br> revealed through... | Structured matrix <br> multiplication algorithms                  | Tensor contraction <br> reduction orderings                       |
+
 
 ## Code
 
