@@ -80,19 +80,19 @@ How well do these optimizations work? The faster SSD algorithm allows us to incr
 Even though technically Mamba-2 is more restricted than Mamba-1 for the same $\mathtt{N}$, the larger state dimensions generally improve model quality.
 Here we show results for models trained on 300B tokens on the Pile, with Mamba-2 outperforming Mamba-1 and Pythia.
 
-{% include figure.liquid loading="eager" path="assets/img/2024-05-31-mamba-2/blog_lm_downstream.png" title="Downstream Evaluations" %}
+{% include figure.liquid loading="eager" path="assets/img/2024-05-31-mamba-2/blog_lm_downstream.png" title="Downstream Evaluations" caption="Standard downstream evaluations for open source models trained on the Pile" %}
 
 What about **hybrid models**? We have seen from recent and concurrent work (such as [Jamba](https://arxiv.org/abs/2403.19887) and [Zamba](https://arxiv.org/abs/2405.16712))
 that combining Mamba layers with attention layers can improve over pure Transformer or Mamba.
 We validate at 2.7B parameters and 300B tokens scale that a hybrid model with just 6 attention blocks (and 58 SSD blocks) outperforms 64 SSD blocks, as well as our standard Transformer++ baseline (32 gated MLP and 32 attention blocks).
 
-{% include figure.liquid loading="eager" path="assets/img/2024-05-31-mamba-2/blog_hybrid.png" title="Downstream Evaluations for Hybrid Models" %}
+{% include figure.liquid loading="eager" path="assets/img/2024-05-31-mamba-2/blog_hybrid.png" title="Downstream Evaluations for Hybrid Models" caption="Downstream evaluations for hybrid Mamba/attention models" %}
 
 We also validated that the SSD algorithm is significantly faster than the selective scan algorithm from Mamba-1 for the same state dimension,
 and scales much better computationally to larger state dimensions.
 Getting those tensor cores to go brrr is the key!
 
-{% include figure.liquid loading="eager" path="assets/img/2024-05-31-mamba-2/ssm_ssd_dstate.png" title="Efficiency Benchmarks on Sequence Length 2K" %}
+{% include figure.liquid loading="eager" path="assets/img/2024-05-31-mamba-2/ssm_ssd_dstate.png" title="Mamba-2 Efficiency Benchmarks"  caption="Efficiency benchmarks on sequence length 2K" %}
 
 ## Future Directions
 
