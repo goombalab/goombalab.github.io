@@ -5,7 +5,8 @@ description:
 tags:
 giscus_comments: true
 date: 2024-05-31
-featured: true
+featured: false
+thumbnail: assets/img/2024-05-31-mamba-2/mamba_tp.png
 
 authors:
   - name: Tri Dao

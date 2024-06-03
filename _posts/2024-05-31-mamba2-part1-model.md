@@ -5,7 +5,8 @@ description:
 tags:
 giscus_comments: true
 date: 2024-05-31
-featured: true
+featured: false
+thumbnail: assets/img/2024-05-31-mamba-2/mamba-2-V3-transparent.png
 
 authors:
   - name: Albert Gu
@@ -45,7 +46,7 @@ toc:
 
 {% include figure.liquid loading="eager" path="assets/img/2024-05-31-mamba-2/mamba-2-V3-transparent.png" %}
 
-[Paper]
+[Paper](https://arxiv.org/abs/2405.21060)
 
 [Code](https://github.com/state-spaces/mamba)
 
@@ -74,16 +75,17 @@ Yet despite its potential so far, we weren't completely satisfied with the first
 From a conceptual standpoint, one of the reasons we found SSMs so fascinating is how they just feel _fundamental_. One way this is exemplified is how they have rich ties to many major paradigms of sequence models.
 As developed in our earlier works on structured SSMs <d-cite key="gu2021combining"></d-cite><d-cite key="gu2023thesis"></d-cite>, they seem to capture the essence of continuous, convolutional, and recurrent sequence models -- all wrapped up in a simple and elegant model.
 
-But of course, aside from these, there is another major sequence model paradigm: the variants of the ubiquitous **attention** mechanism<d-cite key="bahdanau2015neural"></d-cite><d-cite key="vaswani2017attention"></d-cite>.
+But of course, aside from these, there's another major sequence model paradigm: variants of the ubiquitous **attention** mechanism<d-cite key="bahdanau2015neural"></d-cite><d-cite key="vaswani2017attention"></d-cite>.
 SSMs always felt somewhat disjoint from attention, and we've tried for a while to understand their relationship better.
 
 > Question 1: **What are the conceptual connections between state space models and attention?** Can we combine them?
 
 ### Problem 2 (Efficiency)
 From a computational standpoint, 
-despite the work that went into making Mamba fast (in particular, its hardware-aware selective scan implementation) it is still much less hardware-efficient than mechanisms such as attention.
+despite the work that went into making Mamba fast (in particular, its hardware-aware selective scan implementation) it's still much less hardware-efficient than mechanisms such as attention.
 The missing piece is that modern accelerators such as GPUs and TPUs are *highly* specialized for matrix multiplications.
-While this is not a problem for inference, which is bottlenecked by somewhat different considerations, this can be a big deal during training time.
+While this isn't a problem for inference, which is bottlenecked by somewhat different considerations, this can be a big deal during training time.
+
 [//]: # For example, an end-to-end Mamba-1 model is XX times slower than an equivalent Transformer.
 
 > Question 2: **Can we speed up the training of Mamba models by recasting them as matrix multiplications?**
@@ -99,7 +101,7 @@ which refers to several things:
 2. The **SSD framework** is a general framework for reasoning about this model (and many more theoretical connections)
 3. The **SSD algorithm** is an algorithm for computing SSD layers much more efficiently than previous SSMs
 
-The main "state space dual model" itself really isn't so scary!
+The main SSD model or "state space dual model" itself really isn't so complicated!
 In this first part of a series of blog posts, we'll provide a self-contained description of the SSD layer (and Mamba-2) in isolation and how it compares to related models, particularly Mamba-1.
 
 In the next parts of this series, we'll describe the general framework and theoretical connections, which aren't necessary to actually use Mamba-2.
@@ -125,7 +127,7 @@ To recap, a **structured state space model (SSM)** <d-cite key="gu2022efficientl
 Think of $x_t$ and $y_t$ as being scalars, and the hidden state $h_t$ as an $\mathtt{N}$-dimensional vector, where $\mathtt{N}$ is an independent hyperparameter called the *state size, state dimension, or state expansion factor*.
 
 A *selective* state space model allows the $(A, B, C)$ SSM parameters to vary across time <d-cite key="gu2023mamba"></d-cite>.
-We'll think of them as tensors with shapes $A \in \mathbb{R}^\mathtt{(T, N, N)}$, $B \in \mathbb{R}^\mathtt{(T, N)}$, and $C \in \mathbb{R}^\mathtt{(T, N)}$ respectively.<d-footnote>As with Mamba-1, we take everything over the reals $\mathbb{R}$, although complex variants as with other structured SSMs are also possible.</d-footnote>
+We'll think of them as tensors with shapes $A \in \mathbb{R}^\mathtt{(T, N, N)}$, $B \in \mathbb{R}^\mathtt{(T, N)}$, and $C \in \mathbb{R}^\mathtt{(T, N)}$ respectively.<d-footnote>As with Mamba-1, we take everything over the reals $\mathbb{R}$, although complex variants as with other structured SSMs like the S4 lineage <d-cite key="gu2022efficiently"></d-cite> are also possible.</d-footnote>
 
 Structured SSMs require $A$ to have structure to be efficiently computable, such as the most commonly used diagonal structure <d-cite key="gu2022parameterization"></d-cite><d-cite key="gupta2022diagonal"></d-cite><d-cite key="smith2023s5"></d-cite><d-cite key="gupta2022simplifying"></d-cite>.
 In this case $A$ has shape $\mathtt{(T, N)}$ where only the diagonal elements of the $\mathtt{N} \times \mathtt{N}$ matrices are stored.
@@ -149,6 +151,7 @@ Multiple heads can be constructed completely independently;
 for the remainder of this post, we assume that we're working with a single head.
 Note that these heads are exactly analogous to how heads in multi-head attention models work,
 and in Mamba-2 we also choose similar dimensions as modern Transformers, e.g. $\mathtt{P} = 64$ or $\mathtt{P}=128$.
+(To scale to larger model widths $\mathtt{D} = \mathtt{d\\_model}$, we keep this fixed and increase the number of independent heads.)
 
 We can notate the general (selective) state space model as
 \begin{equation}
@@ -167,11 +170,11 @@ but we're highlighting these so that we can contrast Mamba-2 to Mamba-1 in just 
 
 ### The Quadratic (Attention) Mode
 
-Let's switch tacks and forget about state space models for a moment.
+But first, let's switch tacks and forget about state space models for a moment.
 Given the same tensors above with the same shapes $(A^\mathtt{(T)}, B^\mathtt{(T, N)}, C^\mathtt{(T, N)})$,
 let's define a different object.
 
-First, we'll define the following matrix (don't worry, we'll explain more and give it a name in the second part of this post).
+First, we'll define the following matrix (don't worry, we'll explain more and give it a name in Part II of this series!)
 
 $$
   L =
@@ -214,23 +217,21 @@ $$
 (A^\mathtt{(T)}, B^\mathtt{(T, N)}, C^\mathtt{(T, N)}, X^\mathtt{(T, P)}) \mapsto Y^\mathtt{(T, P)}
 $$
 
-with tensor shapes specified above.
-
-In the general *SSD Framework*, we'll show this equivalence in two completely different ways, both of which are actually much more general and each quite illuminating.
+In the general *SSD Framework* (Part II of this series), we'll show this equivalence in two completely different ways, both of which are actually much more general and each quite illuminating.
 
 If you take our word for it, though, then SSD is relatively simple to contrast in relation to either SSMs or attention.
 
 ### SSD vs. State Space Models
 Compared to previous SSMs, SSD is pretty much the same as the core layer of Mamba but with even more structure on the recurrent $A$ matrices.
 1. Mamba-1 (S6) uses diagonal structure on $A$, while Mamba-2 (SSD) uses scalar-times-identity structure on $A$.
-2. Mamba-1 has a head dimension of $\mathtt{P}=1$ (i.e. all channels are completely independently controlled), while Mamba-2 uses a head dimension of $\mathtt{P}>1$ (something like $\mathtt{P}=64$ by default).
+2. Mamba-1 has a head dimension of $\mathtt{P}=1$ (i.e. all channels are completely independently controlled by separate SSMs), while Mamba-2 uses a head dimension of $\mathtt{P}>1$ (something like $\mathtt{P}=64$ by default).
 
 In particular, this can be viewed as weight-tied in two ways:
-- By restricting the diagonal structure of $A$ to scalar-times-identity, the scalar recurrence dynamics are tied across all $\mathtt{N}$ elements of the state space.
+- By restricting the diagonal structure of $A$ to scalar-times-identity, the recurrence dynamics are shared across all $\mathtt{N}$ elements of the state space.
 - These dynamics are also shared across all $\mathtt{P}$ channels of a given head.
 
 In other words, a single SSM head has total state size $\mathtt{P} \times \mathtt{N}$,
-which are each governed by separate scalar recurrences in Mamba but are controlled by a single shared recurrence in Mamba-2.
+which are each governed by separate scalar recurrences in Mamba-1 but are controlled by a single shared recurrence in Mamba-2.
 
 Why make these restrictions? The main motivation is efficiency: these changes are necessary to be able to view the model in its [[dual attention form](#the-quadratic-attention-mode)], which allows matrix multiplications to be used.
 
@@ -256,18 +257,18 @@ Compared, to standard (self-)attention, SSD also only has two differences:
 1. The softmax normalization is dropped.
 2. A separate elementwise mask matrix is applied multiplicatively.
 
-The first difference can be interpreted as what reduces the effective state size of the model from infinite to finite, and improves its efficiency from quadratic to linear.
+The first difference can be interpreted as what reduces the effective state size of the model from linear to constant, and improves its efficiency from quadratic to linear.
 
 The second difference is what distinguishes SSD from standard linear attention.
 One way to think of the mask is as **input-dependent relative positional encodings**.
-Because of the mask $L$ in \eqref{eq:ssd-attention}, the standard attention score $Q_i K_j$ is attenuated by a weight $a_{i:j}^\times = a_i \cdots a_{j+1}$ which can be interpreted as a "discount factor" based on how far apart the positions $i$ and $j$ are.<d-footnote>This interpretation was concurrently espoused by Tobias Katsch's [GateLoop](https://arxiv.org/abs/2311.01927) paper<d-cite key="katsch2023gateloop"></d-cite></d-footnote>.
+Because of the mask $L$ in \eqref{eq:ssd-attention}, the standard attention score $Q_i K_j$ is attenuated by a weight $a_{i:j}^\times = a_i \cdots a_{j+1}$ which can be interpreted as a "discount factor" based on how far apart the positions $i$ and $j$ are.<d-footnote>This interpretation was concurrently espoused by Tobias Katsch's [GateLoop](https://arxiv.org/abs/2311.01927) paper<d-cite key="katsch2023gateloop"></d-cite></d-footnote>
 In its attention form, this input-dependent positional mask can be interpreted as the key factor that encodes the "selectivity" of Mamba!
 
 
 ## Best of Both Worlds
 
 So why do we care that there are two views of this model?
-Well, first of all, it's extremely mathematically interesting, as we'll cover in [Part 2], and we hope will inspire future directions.
+Well, first of all, it's extremely mathematically interesting, as we'll cover in [Part 2]({% post_url 2024-05-31-mamba2-part2-theory %}), and we hope will inspire future directions.
 But there are immediate practical benefits too! 
 
 ### Efficiency: the SSM and Attention Modes
@@ -275,7 +276,7 @@ But there are immediate practical benefits too!
 The SSM \eqref{eq:ssm} and attention \eqref{eq:ssd-attention} modes represent two different ways of computing the same function,
 so let's contrast them.
 
-First, remember that one main reason why SSMs are interesting to begin with is because computing \eqref{eq:ssm} as a recurrence requires maintaining a *constant-size state* (size $\mathtt{N}$) and scales *linearly in the sequence length* $\mathtt{T}$.
+First, remember that one main reason why SSMs are interesting to begin with is because computing \eqref{eq:ssm} as a recurrence requires maintaining a *constant-size state* (size $\mathtt{N}$ per channel) and scales *linearly in the sequence length* $\mathtt{T}$.
 The downside is that the raw FLOPs don't reflect actual speed in practice because of hardware considerations...
 
 On the other hand, computing this sequence transformation $y = Mx$ through equation \eqref{eq:ssd-attention} takes quadratic time in the sequence length,
@@ -287,29 +288,29 @@ But it can be fast in practice because it only uses matrix multiplications, whic
 So if there are two equivalent ways of computing the same model, when should we use one mode or the other?
 During inference, there's no trade-off: the SSM mode is designed for fast autoregressive inference.
 But what about training?
-There's a tension between FLOPs and hardware efficiency where the attention mode uses more FLOPs, but uses them more efficiently through matrix multiplications.
+Here there's a tension between FLOPs and hardware efficiency where the attention mode uses more FLOPs, but uses them more efficiently through matrix multiplications.
 
 {% include figure.liquid loading="eager" path="assets/img/2024-05-31-mamba-2/ssd_algorithm.png" %}
 
 It turns out we can get the best of both worlds by combining the algorithms!
 There are two equivalent interpretations of this "state space dual" algorithm, either as
-1. A block decomposition of a particular structured matrix that defines the SSD sequence transformation.
-2. A "chunkwise" algorithm that splits the sequence into chunks, computes the quadratic attention form on each chunk, and adjusts the result by passing the SSM states between chunks.
+1. A block decomposition of a particular structured matrix that defines the SSD "token-mixing" sequence transformation.
+2. A "chunkwise" algorithm that splits the sequence into segments, computes the quadratic attention form on each segment, and adjusts the result by passing the SSM states between segments.
 
-We'll leave the details of this algorithm to the [full paper] (Section 6), as it requires a bit of machinery from the theory to derive.
+We'll leave the details of this algorithm to [Part III]({% post_url 2024-05-31-mamba2-part3-algorithm %}) (or Section 6 of the [full paper](https://arxiv.org/abs/2405.21060)), as it requires a bit of machinery from the theory to derive.
 But we do emphasize that the implementation of this algorithm isn't too complicated -- only ~30 lines of PyTorch,
-which we provide in the paper (Listing 1) as well as in the [code release]!
+which we provide in the paper (Listing 1) as well as in the [public repository](https://github.com/state-spaces/mamba)!
 
 The benefits of the SSD algorithm is that it preserves the same efficient FLOP counts as SSMs (compared to quadratic attention),
-and also dramatically speeds up training comparing to general state space models.
+and also dramatically speeds up training compared to general state space models.
 
-|                        | Attention                | SSM             | SSD                |
-| -------------          | -----------              | ----            | ---                |
-| State size             | $\mathrm{T}$             | $\mathbf{N}$    | $\mathbf{N}$       |
-| Training FLOPs         | $\mathrm{T}^2\mathrm{N}$ | $\mathbf{TN^2}$ | $\mathbf{TN^2}$    |
-| Inference FLOPs        | $\mathrm{T}\mathrm{N}$   | $\mathbf{N^2}$  | $\mathbf{N^2}$     |
-| (Naive) memory         | $\mathrm{T}^2$           | $\mathrm{TN}^2$ | $\mathbf{TN}$      |
-| Matrix multiplication? | :heavy_check_mark:       | :x:             | :heavy_check_mark: |
+|                         | Attention                | SSM             | SSD                |
+| -------------           | -----------              | ----            | ---                |
+| State size              | $\mathrm{T}$             | $\mathbf{N}$    | $\mathbf{N}$       |
+| Training FLOPs          | $\mathrm{T}^2\mathrm{N}$ | $\mathbf{TN^2}$ | $\mathbf{TN^2}$    |
+| Inference FLOPs         | $\mathrm{T}\mathrm{N}$   | $\mathbf{N^2}$  | $\mathbf{N^2}$     |
+| (Naive) memory          | $\mathrm{T}^2$           | $\mathrm{TN}^2$ | $\mathbf{TN}$      |
+| Matrix multiplications? | :heavy_check_mark:       | :x:             | :heavy_check_mark: |
 
 [//]: # #### SSD Algorithm View 1: Matrix Decompositions
 [//]: # 
@@ -321,14 +322,14 @@ and also dramatically speeds up training comparing to general state space models
 
 ## The Mamba-2 Architecture
 
-Although the core contribution of Mamba-2 is the new SSD layer,
+Although the core contribution of Mamba-2 is the new SSD layer and theory,
 we also make some small changes to Mamba's neural network architecture.
 
 {% include figure.liquid loading="eager" path="assets/img/2024-05-31-mamba-2/architecture_2.png" %}
 
 The main change is producing the $(A, B, C)$ SSM parameters in parallel with the $X$ input, instead of sequentially.
 This is partly motivated by the connections to attention;
-but more pragmatically, it's simpler and more amenable to scaling techniques such as tensor parallelism, which will be covered in the next part of this series!
+but more pragmatically, it's simpler and more amenable to scaling techniques such as tensor parallelism, which will be covered in Part IV of this series!
 
 There are some other small differences which are covered in more detail in the paper.
 However, we do want to emphasize that these architectural changes aren't really the main point of the model.
@@ -336,11 +337,11 @@ However, we do want to emphasize that these architectural changes aren't really 
 ### Language Modeling
 
 In terms of empirical results, we didn't test Mamba-2 as extensively as Mamba-1, but believe it should generally be on par or better.
-Our full language model results use the same protocol as Mamba, and found slightly better scaling both at Chinchilla laws :warning: (figure).
+Our full language model results use the same protocol as Mamba, and found slightly better scaling at Chinchilla laws <d-cite key="hoffmann2022empirical"></d-cite>.
 
 {% include figure.liquid loading="eager" path="assets/img/2024-05-31-mamba-2/pile_8k_mamba2.png" %}
 
-Fully trained models on the Pile dataset :warning: and the standard zero-shot downstream evaluations show similar trends.
+Fully trained models on the Pile dataset<d-cite key="pile"></d-cite> and the standard zero-shot downstream evaluations show similar trends.
 We emphasize that even when the performance is comparable, Mamba-2 is *much* faster to train than Mamba-1!
 
 ### Synthetic Language Modeling: MQAR
@@ -348,7 +349,7 @@ We emphasize that even when the performance is comparable, Mamba-2 is *much* fas
 More interestingly, we highlight the one synthetic task we tried.
 Since the original Mamba paper, which investigated synthetics such as Synthetic Copying and Induction Heads,
 many follow-up works have begun investigating harder associative recall tasks.
-The multi-query associative recall (MQAR) task introduced by the Zoology and Based :warning: line of work
+The **multi-query associative recall (MQAR)** task introduced by the Zoology and Based <d-cite key="arora2024zoology"></d-cite><d-cite key="arora2024simple"></d-cite> line of work
 has become a de facto standard.
 
 {% include figure.liquid loading="eager" path="assets/img/2024-05-31-mamba-2/mqar.png" %}

@@ -5,7 +5,8 @@ description:
 tags:
 giscus_comments: true
 date: 2024-05-31
-featured: true
+featured: false
+thumbnail: assets/img/2024-05-31-mamba-2/ssd_venn.png
 
 authors:
   - name: Albert Gu
@@ -228,7 +229,7 @@ with various downstream implications.
 
 Algorithmically, the Mamba-2 paper explores several consequences, such as:
 1. The above duality result for the SSD model, i.e. a scalar-identity structured SSM.
-2. New asymptotic efficiency results for state space models ([Theorem 3.7]), which follow directly from applying known results from the semiseparable matrix literature <d-cite key="pernet2016computing"></d-cite><d-cite key="pernet2018time"></d-cite><d-cite key="pernet2023exact"></d-cite>.
+2. New asymptotic efficiency results for state space models ([Theorem 3.7](https://arxiv.org/abs/2405.21060)), which follow directly from applying known results from the semiseparable matrix literature <d-cite key="pernet2016computing"></d-cite><d-cite key="pernet2018time"></d-cite><d-cite key="pernet2023exact"></d-cite>.
 3. A more general hybrid algorithm that can be viewed as combining both the linear and quadratic forms to get the best of both worlds. This can be derived as a new matrix multiplication algorithm utilizing *block decompositions* of the semiseparable matrix. This is the subject of Part 3 of this blog post!
 
 #### Understanding
@@ -289,7 +290,7 @@ $$
 
 This is a somewhat "folklore" interpretation of linear attention.<d-footnote>At least, one lineage of efficient attention; other varieties exist, such as those based on sparsity or hashing. We reserve the term "linear attention" to those related to Katharopoulos et al.<d-cite key="katharopoulos2020transformers"></d-cite>, or more broadly low-rank attention.</d-footnote>
 
-> The most common way of linearizing attention is usually viewed as a consequence of the *associativity of matrix multiplication*
+> The most common way of linearizing attention is usually viewed as a consequence of the **associativity of matrix multiplication**
 
 ### (Causal) Linear Attention
 
@@ -388,7 +389,7 @@ That's the entire proof of linear attention! The beauty of it is that we didn't 
 In particular, the second contraction in equation \eqref{eq:sma-lin} is simply a matrix multiplication by the mask matrix $L$.
 
 This immediately proves our claim about the [cumsum in linear attention](#where-does-the-cumsum-in-linear-attention-come-from).
-Moreover, this immediately reveals that the efficiency of linear attention can be made *much more general*...
+Moreover, this immediately reveals that the efficiency of linear attention can be made much more general...
 
 
 ### Structured Masked Attention
@@ -505,6 +506,6 @@ The [[SSD layer](#recap-the-ssd-model)] is a particular model which is the purpl
 
 ## Next Up
 
-In [the next part of this series], we'll see how to use some of the SSD framework (in particular, the [structured matrix algorithm](#takeaway-computing-ssms) point of view)
+In [the next part of this series]({% post_url 2024-05-31-mamba2-part3-algorithm %}), we'll see how to use some of the SSD framework (in particular, the [structured matrix algorithm](#takeaway-computing-ssms) point of view)
 to derive the more efficient hybrid SSD algorithm that leverages both of the dual forms.
 

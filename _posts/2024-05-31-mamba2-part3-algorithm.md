@@ -5,7 +5,8 @@ description:
 tags:
 giscus_comments: true
 date: 2024-05-31
-featured: true
+featured: false
+thumbnail: assets/img/2024-05-31-mamba-2/ssd_algorithm.png
 
 authors:
   - name: Tri Dao
@@ -104,11 +105,11 @@ Other forms of "chunkwise" recurrences have recently become popular, such as in 
 
 ## The Code
 
-In the "Minimal SSD" code that we provide in the paper and the [code release], we delineate each of these four steps.
+In the "Minimal SSD" code that we provide in the paper and the [code release](https://github.com/state-spaces/mamba/blob/main/mamba_ssm/modules/ssd_minimal.py), we delineate each of these four steps.
 As promised, this algorithm is not only faster but also much easier to implement than the original selective scan of Mamba,
 coming in at just around 25 lines of code!
 
-<d-code block language="javascript">
+<d-code block language="python">
 def segsum(x):
     """Naive segment sum calculation. exp(segsum(A)) produces a 1-SS matrix,
        which is equivalent to a scalar SSM."""
