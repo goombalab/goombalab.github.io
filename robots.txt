@@ -1,4 +1,4 @@
 User-agent: *
 Disallow:
 
-Sitemap: https://gu-group.github.io/sitemap.xml
+Sitemap: https://goombalab.github.io/sitemap.xml
