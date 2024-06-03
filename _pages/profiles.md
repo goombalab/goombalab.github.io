@@ -3,7 +3,7 @@ layout: profiles
 # permalink: /people/
 permalink: /
 title: people
-description: members of the lab
+description: meet the goombas
 nav: false
 nav_order: 7
 
@@ -11,8 +11,8 @@ profiles:
   - role: PI
     image: goomba_light.png
     name: Albert Gu
-    more_info: > 
-      goomboss
+    # more_info: > 
+    #   goomboss
     google_scholar: https://scholar.google.com/citations?hl=en&user=DVCHv1kAAAAJ
     website: /
     github: https://github.com/albertfgu
@@ -21,8 +21,8 @@ profiles:
   - role: phd-student
     image: /people/kevin.jpg
     name: Kevin Li
-    more_info: >
-      bing chilling
+    # more_info: >
+    #   bing chilling
     google_scholar: https://scholar.google.com/citations?hl=en&user=J-cH7HsAAAAJ
     website: https://www.kevinyli.com
     github: https://github.com/kevinli573
@@ -30,7 +30,7 @@ profiles:
 
   - role: phd-student
     image: /people/aakash.jpg
-    name: Aakash Lahoti 
+    name: Aakash Lahoti
     google_scholar: https://scholar.google.com/citations?user=mr9ILgUAAAAJ&hl=en
     github: https://github.com/aakashlahoti
 
@@ -47,5 +47,7 @@ profiles:
     image: /people/aviv.png
     name: Aviv Bick
     website: https://avivbick.github.io
-    github: https://github.com/AvivBick    
+    github: https://github.com/AvivBick
 ---
+
+We are a research group in the [Machine Learning Department](https://www.ml.cmu.edu/) at Carnegie Mellon University led by professor Albert Gu.

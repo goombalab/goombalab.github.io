@@ -3,11 +3,17 @@ layout: page
 ---
 <div class="post">
   <article>
+
+    <div class="clearfix">{{ content }}</div>
+
     {% if page.profiles %}
       <!-- Display the PI's profile at the top -->
       {% assign pi_profile = page.profiles | where: "role", "PI" | first %}
       {% if pi_profile %}
         <hr>
+        <div>
+          <h4>faculty</h4>
+        </div>
         <div class="pi-grid">
           <div class="profile pi-profile">
             {% if pi_profile.image %}
@@ -44,7 +50,7 @@ layout: page
       {% endif %}
       <div>
         <h4>ph.d. students</h4>
-        <p class="post-description">student orderings are randomized</p>
+        <p class="post-description">randomized order</p>
       </div>
       <div id="student-profiles" class="student-grid">
         {% assign student_profiles = page.profiles | where: "role", "phd-student" %}
@@ -140,7 +146,7 @@ layout: page
 @media (min-width: 768px) {
   .pi-grid {
     display: grid;
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: repeat(3, 1fr);
   }
 }
 
@@ -151,13 +157,13 @@ layout: page
 }
 .profile img {
   border-radius: 50%;
-  width: 150px; /* Ensure the image is a perfect circle */
-  height: 150px; /* Ensure the image is a perfect circle */
+  width: 200px; /* Ensure the image is a perfect circle */
+  height: 200px; /* Ensure the image is a perfect circle */
   object-fit: cover; /* Ensure the image covers the circle perfectly */
 }
 .pi-profile img {
-  width: 200px; /* Larger size for the PI profile picture */
-  height: 200px; /* Ensure the image is a perfect circle */
+  width: 150px; /* Larger size for the PI profile picture */
+  height: 150px; /* Ensure the image is a perfect circle */
   border-radius: 50%; /* Ensure the image is a perfect circle */
   object-fit: cover; /* Ensure the image covers the circle perfectly */
 }
