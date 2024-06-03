@@ -62,16 +62,15 @@ Even though we already developed optimized scans implementations for Mamba-1, we
 Typically matrix multiplication (matmul) FLOPs are much faster (up to 16x) than non-matmul FLOPs: the A100 GPU has 312 TFLOPS of BF16 matmul but only 19 TFLOPS of FP32 arithmetics, and the H100 has 989 TFLOPS of BF16 matmul but only 67 TFLOPS of FP32 arithmetics.
 One of our primary goals with Mamba-2 is to **leverage tensor cores to speed up the SSM**.
 
-As SSD connects SSMs and structured matrices, we saw in Part II that efficient algorithms to compute SSM or linear attention correspond directly to different decompositions of the "token-mixing" or "sequence-mixing" matrix $M$.
-
-[//]: # After tying parameters and introducing the head structure, the SSM in Mamba-1 turns into a more restrictive form that has an attention-like formulation.
+To recap, after tying parameters and introducing the head structure, the SSM in Mamba-1 turns into SSD, a more restrictive form that has an attention-like formulation.
+And as SSD connects SSMs and structured matrices, we saw in Part II that efficient algorithms to compute SSMs correspond directly to different decompositions of the "token-mixing" or "sequence-mixing" matrix $M$.
 
 {% include figure.liquid loading="eager" path="assets/img/2024-05-31-mamba-2/ssd_algorithm.png" title="SSD Algorithm" %}
 
-The block decomposition of this matrix corresponds to the SSD algorithm, which has 4 steps.
+We can therefore create new algorithms to compute SSMs simply by looking for alternative ways to multiply this matrix, for example by decomposing it in various ways.
+A simple block decomposition of this matrix, with carefully chosen block sizes, turns out to get all the advantages of both the linear recurrent and quadratic attention dual forms of SSD.
+This leads to the SSD algorithm, which has 4 steps.
 There are two completely different interpretations of this algorithm!
-
-[//]: # [The paper contains the detailed description of each step, here we will just summarize and provide some intuition for each step. ]
 
 ### SSD Algorithm: Block Matrix Decomposition
 
