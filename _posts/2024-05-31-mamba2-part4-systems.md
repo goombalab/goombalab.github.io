@@ -3,7 +3,7 @@ layout: distill
 title: State Space Duality (Mamba-2) Part IV - The Systems
 description: 
 tags:
-giscus_comments: true
+giscus_comments: false
 date: 2024-05-31
 featured: false
 thumbnail: assets/img/2024-05-31-mamba-2/mamba_tp.png
