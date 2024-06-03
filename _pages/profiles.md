@@ -8,54 +8,43 @@ nav_order: 7
 
 profiles:
   - role: PI
-    image: goomboss.jpg
+    image: goomba_light.png
     name: Albert Gu
     more_info: > 
-      Some more information here
-    google_scholar: https://scholar.google.com/yourprofile
-    website: https://yourwebsite.com
-    github: https://github.com/yourprofile
-    twitter: https://twitter.com/yourprofile
+      goomboss
+    google_scholar: https://scholar.google.com/citations?hl=en&user=DVCHv1kAAAAJ
+    website: /
+    github: https://github.com/albertfgu
+    twitter: https://x.com/_albertgu
 
   - role: phd-student
-    image: goomba.png
+    image: /people/kevin.jpg
     name: Kevin Li
     more_info: >
-      Something
-    google_scholar: https://scholar.google.com/studentprofile
-    website: https://studentwebsite.com
-    github: https://github.com/studentprofile
-    twitter: https://twitter.com/studentprofile
+      bing chilling
+    google_scholar: https://scholar.google.com/citations?hl=en&user=J-cH7HsAAAAJ
+    website: https://www.kevinyli.com
+    github: https://github.com/kevinli573
+    twitter: https://x.com/KevinYLi_
 
   - role: phd-student
-    image: goomba.png
-    name: Aakash Lahoti
-    more_info: >
-      Something
-    google_scholar: https://scholar.google.com/studentprofile2
-    website: https://studentwebsite2.com
-    github: https://github.com/studentprofile2
-    twitter: https://twitter.com/studentprofile2
+    image: /people/aakash.jpg
+    name: Aakash Lahoti 
+    google_scholar: https://scholar.google.com/citations?user=mr9ILgUAAAAJ&hl=en
+    github: https://github.com/aakashlahoti
 
   - role: phd-student
-    image: goomba.png
+    image: /people/sukjun.jpeg
     name: Sukjun Hwang
-    more_info: >
-      Something
-    google_scholar: https://scholar.google.com/studentprofile2
-    website: https://studentwebsite2.com
-    github: https://github.com/studentprofile2
-    twitter: https://twitter.com/studentprofile2
+    google_scholar: https://scholar.google.com/citations?user=rW5dpvMAAAAJ&hl=en&oi=ao
+    website: https://sukjunhwang.github.io
+    github: https://github.com/sukjunhwang
+    linkedin: https://www.linkedin.com/in/sukjun-hwang-343360191
+
 
   - role: phd-student
-    image: goomba.png
+    image: /people/aviv.png
     name: Aviv Bick
-    more_info: >
-      Something
-    google_scholar: https://scholar.google.com/studentprofile2
-    website: https://studentwebsite2.com
-    github: https://github.com/studentprofile2
-    twitter: https://twitter.com/studentprofile2
-
-    
+    website: https://avivbick.github.io
+    github: https://github.com/AvivBick    
 ---
