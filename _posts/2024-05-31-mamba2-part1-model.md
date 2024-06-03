@@ -46,9 +46,9 @@ toc:
 
 {% include figure.liquid loading="eager" path="assets/img/2024-05-31-mamba-2/mamba-2-V3-transparent.png" %}
 
-[Paper](https://arxiv.org/abs/2405.21060)
 
-[Code](https://github.com/state-spaces/mamba)
+[[Paper](https://arxiv.org/abs/2405.21060)]
+[[Code](https://github.com/state-spaces/mamba)]
 
 1. Part I - The Model
 2. [Part II - The Theory]({% post_url 2024-05-31-mamba2-part2-theory %})

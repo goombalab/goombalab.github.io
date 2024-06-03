@@ -109,7 +109,9 @@ In the "Minimal SSD" code that we provide in the paper and the [code release](ht
 As promised, this algorithm is not only faster but also much easier to implement than the original selective scan of Mamba,
 coming in at just around 25 lines of code!
 
-<d-code block language="python">
+[//]: # <d-code block language="python">
+
+```python
 def segsum(x):
     """Naive segment sum calculation. exp(segsum(A)) produces a 1-SS matrix,
        which is equivalent to a scalar SSM."""
@@ -165,7 +167,9 @@ def ssd(X, A, B, C, block_len=64, initial_states=None):
     # Add output of intra-chunk and inter-chunk terms (diagonal and off-diagonal blocks)
     Y = rearrange(Y_diag+Y_off, "b c l h p -> b (c l) h p")
     return Y, final_state
-</d-code>
+```
+
+[//]: # </d-code>
 
 
 ## The Details
@@ -245,7 +249,7 @@ def segsum_unstable(x):
     return x_segsum
 ```
 
-(and then the 1-semiseparable matrix is just the exponential of this output)
+(and then the 1-semiseparable matrix is just the exponential of this output).
 
 Sums/differences are a lot more stable than products/quotients, so this should work – right?
 
@@ -260,12 +264,12 @@ And even in log space, these cumsums can be fairly large, which runs into [catas
 This leads to the helper function in the reference SSD code.
 Instead of computing a single cumsum and then subtracting, we find a way to use a batch of independent cumsums that immediately produces the right answer without subtraction.
 
-These details do matter! Without the right implementation of these primitives, the basic SSD algorithm produces NaNs immediately during training.
+These details do matter! Without the right implementation of these primitives, the basic SSD algorithm produces NaNs immediately during training (even with FP32!).
 
 ### Discretization
-The lineage of structured state space models developed from [S4](https://arxiv.org/abs/2111.00396) and [its](https://arxiv.org/abs/2110.13985) [predecessors](https://arxiv.org/abs/2008.07669)which were viewed as continuous-time systems.<d-cite key="gu2023thesis"></d-cite><d-cite key="gu2022efficiently"></d-cite><d-cite key="gu2021combining"></d-cite><d-cite key="gu2020hippo"></d-cite>
+The lineage of structured state space models developed from [S4](https://arxiv.org/abs/2111.00396) and [its](https://arxiv.org/abs/2110.13985) [predecessors](https://arxiv.org/abs/2008.07669) which were viewed as continuous-time systems.<d-cite key="gu2023thesis"></d-cite><d-cite key="gu2022efficiently"></d-cite><d-cite key="gu2021combining"></d-cite><d-cite key="gu2020hippo"></d-cite>
 
-In Mamba, however, we don't actually view the SSM as continuous anymore. In fact, as mentioned in the Discussion (Section 5) of the original paper, Mamba trades off with S4 on modeling different types of data:
+In Mamba, however, we don't actually view the SSM as continuous anymore. In fact, as mentioned in the Discussion (Section 5) of the [original paper](https://arxiv.org/abs/2312.00752), Mamba trades off with S4 on modeling different types of data:
 * S4 is a continuous-time model that excels at modeling continuous data, e.g. perceptual signals such as audio waveforms and pixel-level vision
 * Mamba is a discrete-time model that excels at modeling discrete data, e.g. tokenized data such as language
 
@@ -295,7 +299,7 @@ should work equally well.
 {: .block-tip}
 
 ## What's Next
-In the [final part of this series]({% post_url 2024-05-31-mamba2-part4-systems %}), we'll continue talking about the implementation of Mamba-2, but on a more macroscopic level – about the entire neural network, instead of just details of the core SSD layer.
+In the [final part of this series]({% post_url 2024-05-31-mamba2-part4-systems %}), we'll continue talking about the implementation of Mamba-2, but on a more macroscopic level; about the entire neural network, instead of just details of the core SSD layer.
 
 We'll also talk about the actual speed of the algorithm covered in this post.
 
