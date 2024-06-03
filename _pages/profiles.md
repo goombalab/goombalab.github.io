@@ -1,9 +1,10 @@
 ---
 layout: profiles
-permalink: /people/
+# permalink: /people/
+permalink: /
 title: people
 description: members of the lab
-nav: true
+nav: false
 nav_order: 7
 
 profiles:
