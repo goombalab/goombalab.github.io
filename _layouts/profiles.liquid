@@ -8,37 +8,39 @@ layout: page
       {% assign pi_profile = page.profiles | where: "role", "PI" | first %}
       {% if pi_profile %}
         <hr>
-        <div class="profile pi-profile">
-          {% if pi_profile.image %}
-            {% assign profile_image_path = pi_profile.image | prepend: 'assets/img/' %}
-            {% assign profile_image_class = 'img-fluid z-depth-1 rounded-circle' %}
-            {% capture sizes %}(min-width: {{site.max_width}}) {{ site.max_width | minus: 30 | times: 0.3}}px, (min-width: 576px) 30vw, 95vw"{% endcapture %}
-            {% include figure.liquid loading="eager" path=profile_image_path class=profile_image_class sizes=sizes alt=pi_profile.image %}
-          {% endif %}
-          <!-- Add name under the picture -->
-          {% if pi_profile.name %}
-            <h3>{{ pi_profile.name }}</h3>
-          {% endif %}
-          {% if pi_profile.more_info %}
-            <div class="more-info">{{ pi_profile.more_info }}</div>
-          {% endif %}
-          <!-- Add URL options with Font Awesome icons -->
-          <div class="profile-links">
-            {% if pi_profile.google_scholar %}
-              <a href="{{ pi_profile.google_scholar }}" target="_blank"><i class="fab fa-google-scholar"></i></a>
+        <div class="pi-grid">
+          <div class="profile pi-profile">
+            {% if pi_profile.image %}
+              {% assign profile_image_path = pi_profile.image | prepend: 'assets/img/' %}
+              {% assign profile_image_class = 'img-fluid z-depth-1 rounded-circle' %}
+              {% capture sizes %}(min-width: {{site.max_width}}) {{ site.max_width | minus: 30 | times: 0.3}}px, (min-width: 576px) 30vw, 95vw"{% endcapture %}
+              {% include figure.liquid loading="eager" path=profile_image_path class=profile_image_class sizes=sizes alt=pi_profile.image %}
             {% endif %}
-            {% if pi_profile.website %}
-              <a href="{{ pi_profile.website }}" target="_blank"><i class="fas fa-globe"></i></a>
+            <!-- Add name under the picture -->
+            {% if pi_profile.name %}
+              <h3>{{ pi_profile.name }}</h3>
             {% endif %}
-            {% if pi_profile.github %}
-              <a href="{{ pi_profile.github }}" target="_blank"><i class="fab fa-github"></i></a>
+            {% if pi_profile.more_info %}
+              <div class="more-info">{{ pi_profile.more_info }}</div>
             {% endif %}
-            {% if pi_profile.twitter %}
-              <a href="{{ pi_profile.twitter }}" target="_blank"><i class="fab fa-twitter"></i></a>
-            {% endif %}
+            <!-- Add URL options with Font Awesome icons -->
+            <div class="profile-links">
+              {% if pi_profile.google_scholar %}
+                <a href="{{ pi_profile.google_scholar }}" target="_blank"><i class="fab fa-google-scholar"></i></a>
+              {% endif %}
+              {% if pi_profile.website %}
+                <a href="{{ pi_profile.website }}" target="_blank"><i class="fas fa-globe"></i></a>
+              {% endif %}
+              {% if pi_profile.github %}
+                <a href="{{ pi_profile.github }}" target="_blank"><i class="fab fa-github"></i></a>
+              {% endif %}
+              {% if pi_profile.twitter %}
+                <a href="{{ pi_profile.twitter }}" target="_blank"><i class="fab fa-twitter"></i></a>
+              {% endif %}
+            </div>
           </div>
+          <div class="clearfix"></div>
         </div>
-        <div class="clearfix"></div>
       {% endif %}
       <div>
         <h4>ph.d. students</h4>
@@ -126,6 +128,19 @@ layout: page
     grid-template-columns: repeat(3, 1fr);
   }
 }
+
+.pi-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+@media (min-width: 768px) {
+  .pi-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
 .profile {
   margin-bottom: 20px;
   text-align: center;
