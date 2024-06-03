@@ -42,12 +42,16 @@ profiles:
     github: https://github.com/sukjunhwang
     linkedin: https://www.linkedin.com/in/sukjun-hwang-343360191
 
-
   - role: phd-student
     image: /people/aviv.png
     name: Aviv Bick
     website: https://avivbick.github.io
     github: https://github.com/AvivBick
+
+  - role: ms-student
+    image: /people/ricardo.jpg
+    name: Ricardo Buitrago
+    website: https://www.linkedin.com/in/ricardobuitrago/
 ---
 
 We are a research group in the [Machine Learning Department](https://www.ml.cmu.edu/) at Carnegie Mellon University led by professor Albert Gu.

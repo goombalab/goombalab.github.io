@@ -90,6 +90,47 @@ layout: page
           </div>
         {% endfor %}
       </div>
+      <div>
+        <h4>affiliated m.s. students</h4>
+      </div>
+      <div id="student-profiles" class="student-grid">
+        {% assign student_profiles = page.profiles | where: "role", "ms-student" %}
+        {% for profile in student_profiles %}
+          <div class="profile">
+            {% if profile.image %}
+              {% assign profile_image_path = profile.image | prepend: 'assets/img/' %}
+              {% assign profile_image_class = 'img-fluid z-depth-1 rounded-circle' %}
+              {% capture sizes %}(min-width: {{site.max_width}}) {{ site.max_width | minus: 30 | times: 0.3}}px, (min-width: 576px) 30vw, 95vw"{% endcapture %}
+              {% include figure.liquid loading="eager" path=profile_image_path class=profile_image_class sizes=sizes alt=profile.image %}
+            {% endif %}
+            <!-- Add name under the picture -->
+            {% if profile.name %}
+              <h3>{{ profile.name }}</h3>
+            {% endif %}
+            {% if profile.more_info %}
+              <div class="more-info">{{ profile.more_info }}</div>
+            {% endif %}
+            <!-- Add URL options with Font Awesome icons -->
+            <div class="profile-links">
+              {% if profile.google_scholar %}
+                <a href="{{ profile.google_scholar }}" target="_blank"><i class="fab fa-google-scholar"></i></a>
+              {% endif %}
+              {% if profile.website %}
+                <a href="{{ profile.website }}" target="_blank"><i class="fas fa-globe"></i></a>
+              {% endif %}
+              {% if profile.github %}
+                <a href="{{ profile.github }}" target="_blank"><i class="fab fa-github"></i></a>
+              {% endif %}
+              {% if profile.linkedin %}
+                <a href="{{ profile.linkedin }}" target="_blank"><i class="fab fa-linkedin"></i></a>
+              {% endif %}
+              {% if profile.twitter %}
+                <a href="{{ profile.twitter }}" target="_blank"><i class="fab fa-twitter"></i></a>
+              {% endif %}
+            </div>
+          </div>
+        {% endfor %}
+      </div>
     {% endif %}
   </article>
 </div>
