@@ -496,12 +496,12 @@ The **SSD framework** consists of the two broad approaches covered in this post,
 The [[SSD layer](#recap-the-ssd-model)] is a particular model which is the purple intersection in the figure, which can be viewed as an instance of either part of the SSD framework, and in particular has dual quadratic and linear forms that can be derived from either representation.
 
 
-| *SSD Framework*                                          | Structured SSMs                                                   | Structured Attention                                              |
-| -------------                                            | -----------                                                       | ----                                                              |
-| The main representation is...                            | Structured matrix \eqref{eq:ssm-matrix} <br>                      | The 4-way \eqref{eq:sma} <br> tensor contraction                  |
-| This generalizes...                                      | State space models                                                | Linear attention                                                  |
-| The SSD model is <br> an instantiation as...             | Scalar state space model <br> ($A_t$ is a scalar-identity matrix) | 1-semiseparable masked attention <br> ($L$ mask is a 1-SS matrix) |
-| The linear-quadratic duality is <br> revealed through... | Structured matrix <br> multiplication algorithms                  | Tensor contraction <br> reduction orderings                       |
+| *SSD Framework*                                          | Structured SSMs                                                       | Structured Attention                                              |
+| -------------                                            | -----------                                                           | ----                                                              |
+| The main representation is...                            | Structured matrix \eqref{eq:ssm-matrix} <br> sequence transformations | The 4-way \eqref{eq:sma} <br> tensor contraction                  |
+| This generalizes...                                      | State space models                                                    | Linear attention                                                  |
+| The SSD model is <br> an instantiation as...             | Scalar state space model <br> ($A_t$ is a scalar-identity matrix)     | 1-semiseparable masked attention <br> ($L$ mask is a 1-SS matrix) |
+| The linear-quadratic duality is <br> revealed through... | Structured matrix <br> multiplication algorithms                      | Tensor contraction <br> reduction orderings                       |
 
 
 ## Next Up

@@ -63,6 +63,7 @@ Typically matrix multiplication (matmul) FLOPs are much faster (up to 16x) than 
 One of our primary goals with Mamba-2 is to **leverage tensor cores to speed up the SSM**.
 
 As SSD connects SSMs and structured matrices, we saw in Part II that efficient algorithms to compute SSM or linear attention correspond directly to different decompositions of the "token-mixing" or "sequence-mixing" matrix $M$.
+
 [//]: # After tying parameters and introducing the head structure, the SSM in Mamba-1 turns into a more restrictive form that has an attention-like formulation.
 
 {% include figure.liquid loading="eager" path="assets/img/2024-05-31-mamba-2/ssd_algorithm.png" title="SSD Algorithm" %}
@@ -78,7 +79,7 @@ We first partition the SSM (semiseparable) matrix into blocks of size $\mathtt{Q
 Then, we use the properties of semiseparable matrices to factorize each off-diagonal block, which is low rank.
 
 1. (*Orange*) Each diagonal block is a smaller semiseparable matrix; we can compute this multiplication however we like, in particular, using the quadratic (attention-like) form of SSD.
-2. (*Green*) There are only $\mathtt{T} / \mathtt{Q}$ total different green blocks because many of them are shared. These can be computed with batched matmuls.
+2. (*Green*) There are only $\mathtt{T} / \mathtt{Q}$ total different green blocks because many of them are shared. These can be computed with a batched matmul.
 3. (*Yellow*) Notice that the yellow terms themselves are a 1-semiseparable matrix; in other words, this step is equivalently to an SSM scan (on some modified $A$ factors)!
 4. (*Blue*) Similar to green, these can be computed with a batched matmul.
 
