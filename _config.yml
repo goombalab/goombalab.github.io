@@ -2,7 +2,7 @@
 # Site settings
 # -----------------------------------------------------------------------------
 
-title: Goomba Lab <img src="/assets/img/goomba_transparent.png" width="30" height="30"> # the website title (if blank, full name will be used instead)
+title: Goomba Lab # the website title (if blank, full name will be used instead)
 first_name: Goomba
 middle_name: AI
 last_name: Lab
@@ -15,6 +15,7 @@ keywords: jekyll, jekyll-theme, academic-website, portfolio-website # add your o
 lang: en # the language of your site (for example: en, fr, cn, ru, etc.)
 # icon: ⚛️ # the emoji used as the favicon (alternatively, provide image name in /assets/img/)
 icon: goomba_light.png # the emoji used as the favicon (alternatively, provide image name in /assets/img/)
+logo: /assets/img/goomba_transparent.png
 
 url: https://gu-group.github.io # the base hostname & protocol for your site
 baseurl: # the subpath of your site, e.g. /blog/. Leave blank for root

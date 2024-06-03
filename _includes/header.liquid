@@ -19,6 +19,9 @@
           {% else %}
             {{- site.title -}}
           {% endif %}
+          {% if site.logo %}
+            <img src={{ site.logo }} width='30' height='30'>
+          {% endif %}
         </a>
       {% elsif site.enable_navbar_social %}
         <!-- Social Icons -->
