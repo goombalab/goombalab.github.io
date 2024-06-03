@@ -60,6 +60,10 @@ d-article {
     p {
       margin-bottom: 0;
     }
+    // Italics
+    em {
+      font-style: normal !important;
+    }
 
     /* Tips, warnings, and dangers blockquotes */
     &.block-tip {
