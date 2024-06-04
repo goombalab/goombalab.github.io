@@ -160,7 +160,10 @@ Y^\mathtt{(T,P)} = \mathsf{SSM}(A^\mathtt{(T,...)}, B^\mathtt{(T,N)}, C^\mathtt{
 \end{equation}
 
 Some axes of variation include
-1. The structure on $A$, which affects its parameter shape, e.g. `... = (N)` for diagonal SSMs, or `... = ()` for scalar SSMs (i.e. SSD)
+1. The structure on $A$, which affects its parameter shape:
+    - `... = (N,N)` for general (unstructured) SSMs
+    - `... = (N)` for diagonal SSMs (or other structures, such as diagonal-plus-low-rank <d-cite key="gu2022efficiently"></d-cite>)
+    - `... = ()` for scalar SSMs (i.e. SSD)
 2. The state dimension $\mathtt{N}$ (i.e. `d_state`)
 3. The head dimension $\mathtt{P}$ (i.e. `d_head`)
 
@@ -201,7 +204,7 @@ mapping a 1D input to a 1D output---just as in equation \eqref{eq:ssm}---through
 
 What's special about this?
 Well, you may notice that it looks very similar to an attention computation.
-In fact, if all $a_t = 1$, then $L$ is simply the lower-triangular *causal mask* and \ref{eq:ssd-attention} is exactly **causal linear attention** <d-cite key="katharopoulos2020transformers"></d-cite>:
+In fact, if all $a_t = 1$, then $L$ is simply the lower-triangular *causal mask* and \eqref{eq:ssd-attention} is equivalent to **causal linear attention** <d-cite key="katharopoulos2020transformers"></d-cite>:
 
 $$
 Y = (L \circ Q K^\top) V
@@ -261,14 +264,21 @@ The first difference can be interpreted as what reduces the effective state size
 
 The second difference is what distinguishes SSD from standard linear attention.
 One way to think of the mask is as **input-dependent relative positional encodings**.
-Because of the mask $L$ in \eqref{eq:ssd-attention}, the standard attention score $Q_i K_j$ is attenuated by a weight $a_{i:j}^\times = a_i \cdots a_{j+1}$ which can be interpreted as a "discount factor" based on how far apart the positions $i$ and $j$ are.<d-footnote>This interpretation was concurrently espoused by Tobias Katsch's [GateLoop](https://arxiv.org/abs/2311.01927) paper<d-cite key="katsch2023gateloop"></d-cite></d-footnote>
+Because of the mask $L$ in \eqref{eq:ssd-attention}, the standard attention score $\langle Q_i, K_j \rangle$ is attenuated by a weight
+
+$$
+a_{i:j}^\times = a_i \cdots a_{j+1}
+$$
+
+which can be interpreted as a "discount factor" based on how far apart the positions $i$ and $j$ are.
+(This interpretation was concurrently espoused by Tobias Katsch's [GateLoop](https://arxiv.org/abs/2311.01927) paper<d-cite key="katsch2023gateloop"></d-cite>.)
 In its attention form, this input-dependent positional mask can be interpreted as the key factor that encodes the "selectivity" of Mamba!
 
 
 ## Best of Both Worlds
 
 So why do we care that there are two views of this model?
-Well, first of all, it's extremely mathematically interesting, as we'll cover in [Part 2]({% post_url 2024-05-31-mamba2-part2-theory %}), and we hope will inspire future directions.
+Well, first of all, it's extremely mathematically interesting, as we'll cover in [Part II]({% post_url 2024-05-31-mamba2-part2-theory %}), and we hope will inspire future directions.
 But there are immediate practical benefits too! 
 
 ### Efficiency: the SSM and Attention Modes
@@ -298,11 +308,10 @@ There are two equivalent interpretations of this "state space dual" algorithm, e
 2. A "chunkwise" algorithm that splits the sequence into segments, computes the quadratic attention form on each segment, and adjusts the result by passing the SSM states between segments.
 
 We'll leave the details of this algorithm to [Part III]({% post_url 2024-05-31-mamba2-part3-algorithm %}) (or Section 6 of the [full paper](https://arxiv.org/abs/2405.21060)), as it requires a bit of machinery from the theory to derive.
-But we do emphasize that the implementation of this algorithm isn't too complicated -- only ~30 lines of PyTorch,
-which we provide in the paper (Listing 1) as well as in the [public repository](https://github.com/state-spaces/mamba)!
+But we do emphasize that the implementation of this algorithm isn't too complicated -- a minimal implementation that we provide is only ~30 lines of PyTorch!
 
 The benefits of the SSD algorithm is that it preserves the same efficient FLOP counts as SSMs (compared to quadratic attention),
-and also dramatically speeds up training compared to general state space models.
+and also dramatically speeds up training compared to general state space models by utilizing matmuls.
 
 |                         | Attention                | SSM             | SSD                |
 | -------------           | -----------              | ----            | ---                |
@@ -311,14 +320,6 @@ and also dramatically speeds up training compared to general state space models.
 | Inference FLOPs         | $\mathrm{T}\mathrm{N}$   | $\mathbf{N^2}$  | $\mathbf{N^2}$     |
 | (Naive) memory          | $\mathrm{T}^2$           | $\mathrm{TN}^2$ | $\mathbf{TN}$      |
 | Matrix multiplications? | :heavy_check_mark:       | :x:             | :heavy_check_mark: |
-
-[//]: # #### SSD Algorithm View 1: Matrix Decompositions
-[//]: # 
-[//]: # The way that we derived this algorithm is based on the SSD theory, which says that the state space model $Y = \mathsf{SSM}(A, B, C)(X)$ can actually be written as $Y = MX$ for a particular structured matrix $M$ called a **semiseparable matrix**.
-[//]: # Then the question of computing the model efficiently is reduced to the problem of making this matrix multiplication as fast as possible.
-[//]: # By decomposing it into blocks, we can leverage properties of semiseparable matrices to simplify the off-diagonal blocks.
-[//]: # 
-[//]: # #### SSD Algorithm View 2: Chunking and State Passing
 
 ## The Mamba-2 Architecture
 
@@ -329,14 +330,14 @@ we also make some small changes to Mamba's neural network architecture.
 
 The main change is producing the $(A, B, C)$ SSM parameters in parallel with the $X$ input, instead of sequentially.
 This is partly motivated by the connections to attention;
-but more pragmatically, it's simpler and more amenable to scaling techniques such as tensor parallelism, which will be covered in Part IV of this series!
+but more pragmatically, it's simpler and more amenable to scaling techniques such as tensor parallelism, which will be discussed in Part IV of this series!
 
 There are some other small differences which are covered in more detail in the paper.
 However, we do want to emphasize that these architectural changes aren't really the main point of the model.
 
 ### Language Modeling
 
-In terms of empirical results, we didn't test Mamba-2 as extensively as Mamba-1, but believe it should generally be on par or better.
+In terms of empirical results, we didn't test Mamba-2 as extensively as Mamba-1, but believe it should generally be on par or better across the board.
 Our full language model results use the same protocol as Mamba, and found slightly better scaling at Chinchilla laws <d-cite key="hoffmann2022empirical"></d-cite>.
 
 {% include figure.liquid loading="eager" path="assets/img/2024-05-31-mamba-2/pile_8k_mamba2.png" %}
@@ -360,7 +361,8 @@ One reason for the improved performance is the much larger state size (up to $16
 which was one of the primary motivations of Mamba-2 in the first place.
 
 Interestingly, Mamba-2 also appears to be noticeably better than Mamba-1 on this particular task even when the state size is controlled.
-We're not quite sure why to be honest, and it would be great to ablate the other aspects of the architecture to investigate...
+We're not quite sure why to be honest, and it would be great to ablate the other aspects of the model to investigate...
+for example, could it be possible that the [[restricted structure of SSD](#ssd-vs-state-space-models)] is actually *helpful* here?
 
 
 ## Next Up
@@ -369,4 +371,4 @@ We're not quite sure why to be honest, and it would be great to ablate the other
 
 In [the next part of this series]({% post_url 2024-05-31-mamba2-part2-theory %}),
 we'll go more into the full SSD framework, including how to prove the claimed "duality" of the SSD layer,
-and strong generalizations of it!
+and strong generalizations of it.

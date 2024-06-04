@@ -122,15 +122,15 @@ Now let's see how to prove this!
 The first framing of the duality will be from an SSM-centric perspective, where we'll prove the duality through the framework of **matrix sequence transformations** or "matrix mixers".
 
 ### Matrix Transformations
-The idea is that many sequence models, i.e. sequence transformations $X \in \mathbb{R}^\mathtt{(T,P)} \mapsto Y \in \mathbb{R}^\mathtt{(T,P)}$,
+The idea is that many sequence models, i.e. *sequence transformations* $X \in \mathbb{R}^\mathtt{(T,P)} \mapsto Y \in \mathbb{R}^\mathtt{(T,P)}$,
 can be written in the form of a single matrix multiplication $Y = M(X) \cdot X$ where $M$ is a matrix which can itself depend on $X$.
-We call this a matrix sequence transformation, or matrix transformation for short.
-In the literature sequence transformations have also been referred to as "sequence mixers", and matrix sequence transformations as matrix mixers.
+We call this a *matrix sequence transformation*, or matrix transformation for short.
+In the literature sequence transformations have also been referred to as "sequence mixers" or "token mixers", and matrix sequence transformations as "matrix mixers".
 There are many examples of these, which are distinguished by the structure of the $M$ matrix.
 The de facto example is self-attention itself, where $M = \mathsf{softmax}(QK^\top)$ is the attention matrix.
 Other examples include MLP-Mixer<d-cite key="tolstikhin2021mlp"></d-cite>,
 FNet<d-cite key="lee2021fnet"></d-cite>,
-and Monarch Mixer<d-cite key="dao2022monarch"></d-cite><d-cite key="fu2024monarch"></d-cite>,
+and Monarch Mixer<d-cite key="dao2022monarch"></d-cite><d-cite key="fu2024monarch"></d-cite>.
 
 Why do we care about these types of models?
 > Writing a sequence model as a matrix transformation provides a powerful tool to understand the structure and characteristics of the model.
@@ -179,20 +179,18 @@ $$
 ### Semiseparable Matrices
 
 This type of matrix in fact has a name: it's called a (triangular) **semiseparable matrix**,
-and has been studied fairly extensively in other fields of engineering and computational linear algebra<d-cite key="vandebril2005bibliography"></d-cite>.
+and has been studied in other fields of engineering and computational linear algebra<d-cite key="vandebril2005bibliography"></d-cite>.
 These matrices are (IMO) quite fundamental and beautiful,
 and the full paper talks about more of their properties.
 For example, an alternative characterization of semiseparable matrices is their *structured rank property*,
-which says that every submatrix contained in the lower-triangular portion is low rank!
+which says that every submatrix contained in the lower-triangular portion is low rank.
 
-{% include figure.liquid loading="eager" path="assets/img/2024-05-31-mamba-2/semiseparable.png" %}
-
-[//]: # The power of writing state space models as matrix transformations is that 
+{% include figure.liquid loading="eager" path="assets/img/2024-05-31-mamba-2/semiseparable.png" title="State Space Models are Semiseparable Matrices" caption="All submatrices contained on-and-below the diagonal of a semiseparable matrix are low-rank." %}
 
 For our purposes, we'll care about this form mainly for the algorithmic considerations.
 One of the central messages of this SSD paper is that:
 
-> #### Takeaway: Computing SSMs
+> #### Takeaway: Computing SSMs Through Matrix Multiplication
 >
 > All algorithms for computing state space models can be viewed as structured matrix multiplication algorithms on semiseparable matrices.
 {: .block-tip}
@@ -208,7 +206,7 @@ $$
 C_i^\top A_{i:j}^\times B_j = A_{i:j}^\times \cdot (C_i^\top B_j)
 $$
 
-which directly implies equation \eqref{eq:semiseparable}.
+which directly implies equation \eqref{eq:ssd-attention}.
 
 In summary:
 
@@ -218,7 +216,7 @@ In summary:
 {: .block-tip}
 
 - The linear form is a *structured matrix multiplication algorithm* that computes the outputs $Y_0, Y_1, \dots$ sequentially, leveraging the structure of the semiseparable matrix.
-- The quadratic form is the *naive matrix multiplication algorithm* that materializes the quadratic matrix.
+- The quadratic form is the *naive matrix multiplication algorithm* that materializes the full matrix.
 
 ### Going Beyond the SSD Layer 1
 
@@ -229,15 +227,15 @@ with various downstream implications.
 
 Algorithmically, the Mamba-2 paper explores several consequences, such as:
 1. The above duality result for the SSD model, i.e. a scalar-identity structured SSM.
-2. New asymptotic efficiency results for state space models ([Theorem 3.7](https://arxiv.org/abs/2405.21060)), which follow directly from applying known results from the semiseparable matrix literature <d-cite key="pernet2016computing"></d-cite><d-cite key="pernet2018time"></d-cite><d-cite key="pernet2023exact"></d-cite>.
-3. A more general hybrid algorithm that can be viewed as combining both the linear and quadratic forms to get the best of both worlds. This can be derived as a new matrix multiplication algorithm utilizing *block decompositions* of the semiseparable matrix. This is the subject of Part 3 of this blog post!
+2. New asymptotic efficiency results for state space models ([Theorem 3.7](https://arxiv.org/abs/2405.21060)), which follow from applying known results from the semiseparable matrix literature <d-cite key="pernet2016computing"></d-cite><d-cite key="pernet2018time"></d-cite><d-cite key="pernet2023exact"></d-cite>.
+3. A more general hybrid algorithm that can be viewed as combining both the linear and quadratic forms to get the best of both worlds. This can be derived as a new matrix multiplication algorithm utilizing *block decompositions* of the semiseparable matrix. This is the subject of Part III of this blog series!
 
 #### Understanding
 Conceptually, the matrix transformation viewpoint helps provide a unifying view of sequence models.
-Some example downstream ideas include:
-- New sequence models: Restricting ourselves to matrix transformations reduces the problem of generating new sequence models to that of finding structured matrix classes with target properties. In ongoing work by my students, we study this point of view, and use it to derive the most natural bidirectional extension of Mamba (coming very soon!).
-- Expressivity: Looking at the matrix transformation representation can help us understand what different models can represent from a linear algebraic perspective. In another ongoing work, we use this as a tool to study which subquadratic models are the most amenable to being distilled from Transformers.
-- Interpretability: A concurrent work <d-cite key="ali2024hidden"></d-cite> derived the matrix formulation of SSMs and use it to probe the internal representations of Mamba models.
+Some example downstream ideas include
+- **New sequence models**: Restricting ourselves to matrix transformations reduces the problem of developing new  sequence models to that of finding structured matrix classes with target properties. In ongoing work by my students, we study this point of view, and use it to derive the most natural bidirectional extension of Mamba (coming very soon!).
+- **Expressivity**: Looking at the matrix transformation representation can help us understand what different models can represent from a linear algebraic perspective. In another ongoing work, we use this as a tool to study which subquadratic models are the most amenable to being distilled from Transformers.
+- **Interpretability**: A concurrent work <d-cite key="ali2024hidden"></d-cite> derived the matrix formulation of SSMs and use it to probe the internal representations of Mamba models.
 
 We're excited to see what algorithmic and conceptual ideas from the structured matrix literature can be applied to further improve state space models!
 
@@ -385,8 +383,9 @@ $$
 Now the key observation is that the second line of \eqref{eq:sma-lin} is simply a matrix multiplication by $L$,
 which can be computed with a cumulative sum.
 
-That's the entire proof of linear attention! The beauty of it is that we didn't have to write out a single summation, which was abstracted out into a tensor contraction.
-In particular, the second contraction in equation \eqref{eq:sma-lin} is simply a matrix multiplication by the mask matrix $L$.
+That's the entire proof of linear attention! The beauty of it is that we didn't have to write out a single summation, which was abstracted out into a tensor contraction combined with the structure of $L$.
+
+[//]: # In particular, the second contraction in equation \eqref{eq:sma-lin} encodes a $\mathtt{cumsum}$ through $L$.
 
 This immediately proves our claim about the [cumsum in linear attention](#where-does-the-cumsum-in-linear-attention-come-from).
 Moreover, this immediately reveals that the efficiency of linear attention can be made much more general...

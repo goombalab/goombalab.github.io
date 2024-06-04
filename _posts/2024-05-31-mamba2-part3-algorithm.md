@@ -68,7 +68,7 @@ And as SSD connects SSMs and structured matrices, we saw in Part II that efficie
 {% include figure.liquid loading="eager" path="assets/img/2024-05-31-mamba-2/ssd_algorithm.png" title="SSD Algorithm" %}
 
 We can therefore create new algorithms to compute SSMs simply by looking for alternative ways to multiply this matrix, for example by decomposing it in various ways.
-A simple block decomposition of this matrix, with carefully chosen block sizes, turns out to get all the advantages of both the linear recurrent and quadratic attention dual forms of SSD.
+A simple block decomposition of this matrix, with carefully chosen block sizes, turns out to get all the advantages of both the linear-recurrent and quadratic-attention dual forms of SSD.
 This leads to the SSD algorithm, which has 4 steps.
 There are two completely different interpretations of this algorithm!
 
@@ -77,9 +77,9 @@ There are two completely different interpretations of this algorithm!
 We first partition the SSM (semiseparable) matrix into blocks of size $\mathtt{Q} \times \mathtt{Q}$.
 Then, we use the properties of semiseparable matrices to factorize each off-diagonal block, which is low rank.
 
-1. (*Orange*) Each diagonal block is a smaller semiseparable matrix; we can compute this multiplication however we like, in particular, using the quadratic (attention-like) form of SSD.
+1. (*Orange*) Each diagonal block is a smaller semiseparable matrix; we can compute this multiplication however we like; in particular, using the quadratic (attention-like) form of SSD.
 2. (*Green*) There are only $\mathtt{T} / \mathtt{Q}$ total different green blocks because many of them are shared. These can be computed with a batched matmul.
-3. (*Yellow*) Notice that the yellow terms themselves are a 1-semiseparable matrix; in other words, this step is equivalently to an SSM scan (on some modified $A$ factors)!
+3. (*Yellow*) Notice that the yellow terms themselves form a 1-semiseparable matrix; in other words, this step is equivalently to an SSM scan (on some modified $A$ factors)!
 4. (*Blue*) Similar to green, these can be computed with a batched matmul.
 
 ### SSD Algorithm: Chunking and State Passing
@@ -92,13 +92,13 @@ The steps then have the interpretation
 3. **Pass states**: compute a recurrence on all of the chunks' final states -- using any desired algorithm, e.g. parallel or sequential scan (*what is the actual final state per chunk taking into account all previous inputs?*)
 4. **Output states**: for each chunk, given its true initial state (computed in Step 3), compute the contribution to the output just from the initial state
 
-We see that most of the algorithm (Step 1, 2, and 4) leverages matmuls (and hence tensor cores), and also can be computed completely in parallel!
-Only Step 3 requires a scan, but it operates on a much shorter sequence and usually only takes a small fraction of the time.
+Either way, we see that most of the algorithm (Step 1, 2, and 4) leverages matmuls (and hence tensor cores), and also can be computed completely in parallel!
+Only Step 3 requires a scan, but it operates on a much shorter sequence and usually only takes a small fraction of the time of the full algorithm.
 
 ### Special Cases
 
 We note that special cases of this algorithm have been seen before. In particular RetNet<d-cite key="sun2023retentive"></d-cite>, which we showed in Part II to be a special case of SSD, mention a "chunkwise" algorithm which computes the quadratic form on a chunk of the input one-at-a-time and passes the final state to the next chunk.
-This turns out to be essentially equivalent to the SSD algorithm specialized to this case (i.e. a decay matrix mask $L$).
+This turns out to be essentially equivalent to the SSD algorithm specialized to a restricted case (i.e. a decay matrix mask $L$).
 Our derivation comes from a different direction---the block matrix decomposition---which also makes it more obvious how to parallelize this algorithm and make it really fast in practice.
 
 Other forms of "chunkwise" recurrences have recently become popular, such as in [Gated Linear Attention (GLA)](https://arxiv.org/abs/2312.06635)<d-cite key="yang2024gated"></d-cite>.
@@ -197,20 +197,18 @@ $$
   \end{bmatrix}
 $$
 
-which we covered in Part II (and Section 3 of the paper).
-We compute Step 3 of the algorithm, which is computing a scalar SSM by *any* algorithm of our choice,
+which we covered in Part II (and Section 3.2.2 of the paper).
+In this minimal implementation, we compute Step 3 of the algorithm, which is computing a scalar SSM by *any* algorithm of our choice,
 by explicitly materializing a 1-SS matrix and doing dense matrix multiplication.
 
 We use this version for several reasons:
 1. Code-wise, it's simpler to materialize and multiply by this matrix than to actually implement a parallel associative scan
-2. Because of the block decomposition of the SSM matrix, the sequence length is reduced by a factor of $\approx 100$ -- so doing the scan in time $O(\mathtt{T}^2)$ instead of $O(\mathtt{T})$ isn't too bad
+2. Because of the block decomposition of the SSM matrix, the sequence length $\mathtt{T}$ is reduced by a factor of $\approx 100$ -- so doing the scan in time $O(\mathtt{T}^2)$ instead of $O(\mathtt{T})$ isn't too bad
 3. We have to materialize a 1-SS matrix anyways for Step 1 of the algorithm (the diagonal blocks), so might as well reuse the code ¯\\\_(ツ)\_/¯
 
-While this example code is simpler and reasonably efficient on GPU (and probably TPU as well!), it's no longer truly linear at long sequences. Our most optimized implementation does replace the 1-SS multiplication in Step 3 of the SSD algorithm with an actual associative scan.
+While this example code is simpler and reasonably efficient on GPU (and probably TPU as well!), it's no longer truly linear at long sequences. Our more optimized Triton implementation does replace the 1-SS multiplication in Step 3 with an actual associative scan.
 
 ### Stability
-
-There's still a subtlety with materializing the 1-semiseparable matrix – how should we do this in a simple and fast way?
 
 #### Attempt 1: Ratios of cumprods
 The first naive attempt may be to notice that the entries of this matrix are cumulative products 
@@ -264,18 +262,19 @@ And even in log space, these cumsums can be fairly large, which runs into [catas
 This leads to the helper function in the reference SSD code.
 Instead of computing a single cumsum and then subtracting, we find a way to use a batch of independent cumsums that immediately produces the right answer without subtraction.
 
-These details do matter! Without the right implementation of these primitives, the basic SSD algorithm produces NaNs immediately during training (even with FP32!).
+These details do matter! Without the right implementation of these primitives, the basic SSD algorithm produces NaNs immediately during training (even with FP32).
 
 ### Discretization
-The lineage of structured state space models developed from [S4](https://arxiv.org/abs/2111.00396) and [its](https://arxiv.org/abs/2110.13985) [predecessors](https://arxiv.org/abs/2008.07669) which were viewed as continuous-time systems.<d-cite key="gu2023thesis"></d-cite><d-cite key="gu2022efficiently"></d-cite><d-cite key="gu2021combining"></d-cite><d-cite key="gu2020hippo"></d-cite>
+This lineage of structured state space models developed from [S4](https://arxiv.org/abs/2111.00396) and [its](https://arxiv.org/abs/2110.13985) [predecessors](https://arxiv.org/abs/2008.07669) which were viewed as continuous-time systems.<d-cite key="gu2023thesis"></d-cite><d-cite key="gu2022efficiently"></d-cite><d-cite key="gu2021combining"></d-cite><d-cite key="gu2020hippo"></d-cite>
 
-In Mamba, however, we don't actually view the SSM as continuous anymore. In fact, as mentioned in the Discussion (Section 5) of the [original paper](https://arxiv.org/abs/2312.00752), Mamba trades off with S4 on modeling different types of data:
-* S4 is a continuous-time model that excels at modeling continuous data, e.g. perceptual signals such as audio waveforms and pixel-level vision
-* Mamba is a discrete-time model that excels at modeling discrete data, e.g. tokenized data such as language
+In Mamba, however, we don't really view the SSM as continuous anymore.
+In fact, as mentioned in the Discussion (Section 5) of the [original paper](https://arxiv.org/abs/2312.00752), Mamba trades off with S4 on modeling different types of data:
+* S4 is a continuous-time model that excels at modeling continuous data, e.g. perceptual signals such as audio waveforms and pixel-level vision.
+* Mamba is a discrete-time model that excels at modeling discrete data, e.g. tokenized data such as language.
 
-However, the parameterization of Mamba still used the same discretization step as in prior structured SSMs, where there is another parameter $\Delta$ being modeled. We do this because the discretization step has other side effects such as properly normalizing the activations <d-cite key="orvieto2023resurrecting"></d-cite> which is important for performance.
+However, the parameterization of Mamba still used the same discretization step as in prior structured SSMs, where there is another parameter $\Delta$ being modeled. We do this because the discretization step has other side effects such as properly normalizing the activations <d-cite key="gu2023train"></d-cite><d-cite key="orvieto2023resurrecting"></d-cite> which is important for performance.
 
-The initializations and parameterizations from the previous [theory on structured SSMs](https://arxiv.org/abs/2206.12037) still work out-of-the-box<d-cite key="gu2023train"></d-cite>, so why fix what's not broken?
+The initializations and parameterizations from the previous [theory on structured SSMs](https://arxiv.org/abs/2206.12037) still work out-of-the-box, so why fix what's not broken?
 
 Despite this, we're pretty sure that the discretization step isn't really necessary for Mamba.
 In the Mamba-2 paper, we chose to work directly with the "discrete parameters" $A$ and $B$, which in all previous structured SSM papers (including Mamba-1) were denoted $(\bar{A}, \bar{B})$ and defined through an additional transformation
@@ -287,7 +286,7 @@ $$
 \end{align*}
 $$
 
-This doesn't pose any problems: to use the continuous SSM parameterization, simply transform the parameters through the above formulas before plugging into the SSD code above!
+This doesn't pose any problems: to use the continuous SSM parameterization, simply transform the parameters through the above formulas before plugging into the SSD code above.
 
 In the full Mamba-2 code, we also kept the same parameterization and discretization step as in Mamba---again, why fix what's not broken?---but hypothesize that "discrete-centric" variants
 (such as the *gamma normalization* of [LRU](https://arxiv.org/abs/2303.06349)<d-cite key="orvieto2023resurrecting"></d-cite> and [Griffin](https://arxiv.org/abs/2402.19427)<d-cite key="de2024griffin"></d-cite>)
