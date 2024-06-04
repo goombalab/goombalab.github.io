@@ -50,6 +50,9 @@ toc:
 [[Paper](https://arxiv.org/abs/2405.21060)]
 [[Code](https://github.com/state-spaces/mamba)]
 
+**This series is cross-posted at [tridao.me](https://tridao.me/blog/2024/mamba2-part1-model/)**
+
+
 1. Part I - The Model
 2. [Part II - The Theory]({% post_url 2024-05-31-mamba2-part2-theory %})
 3. [Part III - The Algorithm]({% post_url 2024-05-31-mamba2-part3-algorithm %})
