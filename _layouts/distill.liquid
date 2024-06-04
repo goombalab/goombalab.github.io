@@ -100,7 +100,9 @@
             </nav>
           </d-contents>
         {% endif %}
-        {{ content }}
+        <div>
+          {{ content }}
+        </div>
       </d-article>
 
       <d-appendix>
@@ -118,6 +120,8 @@
 
     <!-- Footer -->
     {% include footer.liquid %}
+
+    <!-- JavaScripts -->
     {% include scripts/bootstrap.liquid %}
     {% include scripts/analytics.liquid %}
     {% include scripts/progressBar.liquid %}
