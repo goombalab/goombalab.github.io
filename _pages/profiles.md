@@ -40,7 +40,7 @@ profiles:
     google_scholar: https://scholar.google.com/citations?user=rW5dpvMAAAAJ&hl=en&oi=ao
     website: https://sukjunhwang.github.io
     github: https://github.com/sukjunhwang
-    linkedin: https://www.linkedin.com/in/sukjun-hwang-343360191
+    twitter: https://x.com/sukjun_hwang
 
   - role: phd-student
     image: /people/aviv.png
