@@ -116,7 +116,7 @@ SSD starts from the same set of equations as Mamba:
 $$
 \begin{aligned}
 h_{t} &= A_t h_{t-1} + B_t x_t \\
-y_t &= C_t^{\top} y_t
+y_t &= C_t^{\top} h_t
 \end{aligned}
 $$
 
