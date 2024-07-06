@@ -160,7 +160,7 @@ $$ where $\textbf{X}$ is the input sequence, $\texttt{flip}(\cdot)$ denotes a fu
 
 Among the various iterations of SSMs, we adopt the latest one -- SSD from Mamba-2. Since SSMs are sub-quadratic, this simple implementation maintains the sub-quadratic cost. Compared to heuristic extensions that use two separate SSMs for bidirectionality, Hydra shares the input processing function $f_X$ for forward and reverse sequence processing, which nearly halves the number of parameters.
 
-You can check out [the actual code](https://github.com/goombalab/hydra_private/blob/main/hydra/modules/hydra.py). To sum up:
+You can check out [the actual code](https://github.com/goombalab/hydra/blob/main/hydra/modules/hydra.py). To sum up:
 - Hydra's matrix mixer is meticulously parameterized to be a quasiseparable matrix with enhanced expressivity through shift operations.
 - Hydra is sub-quadratic and super easy to implement using existing SSM implementations like Mamba.
 - Hydra greatly reduces parameter counts compared to bidirectional extensions using two SSMs.
