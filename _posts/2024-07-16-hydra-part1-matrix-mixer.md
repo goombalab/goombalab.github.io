@@ -4,9 +4,9 @@ title: "Hydra Part I - Matrix Mixer Framework"
 description: 
 tags:
 giscus_comments: false
-date: 2024-07-06
+date: 2024-07-16
 featured: false
-thumbnail: assets/img/2024-07-06-hydra/sequence_mixer_trans.png
+thumbnail: assets/img/2024-07-16-hydra/sequence_mixer_trans.png
 
 authors:
   - name: Sukjun Hwang*
@@ -57,7 +57,7 @@ toc:
 
 
 1. Part I - Matrix Mixer Framework
-2. [Part II - Hydra: The Model]({% post_url 2024-07-06-hydra-part2-model %})
+2. [Part II - Hydra: The Model]({% post_url 2024-07-16-hydra-part2-model %})
 
 
 Attention mechanisms<d-footnote>In this work, Attention<d-cite key="attention"></d-cite> exclusively refers to Self-Attention<d-cite key="transformer"></d-cite></d-footnote> have taken center stage in the world of sequence mixing, celebrated for their significant flexibility and performance. However, this power comes with a price: high computational and memory demands. Despite these challenges, attention has become the go-to solution for many applications.
@@ -66,7 +66,7 @@ In modern state-of-the-art models, architectural designs typically split into tw
 
 Take a glance at the figure below to see this architecture in action. You’ll notice how these components work together to create the robust models we rely on today.
 
-{% include figure.liquid loading="eager" path="assets/img/2024-07-06-hydra/matrix_mixer_trans.png" %}
+{% include figure.liquid loading="eager" path="assets/img/2024-07-16-hydra/matrix_mixer_trans.png" %}
 
 In our work, we study the large and important class of sequence mixers that can be represented as basic matrix multiplications: $\textbf{Y} = \textbf{M}\textbf{X}$. We call this approach ***the matrix mixer framework***. This framework includes diverse and important classes of sequence models such as Attention, convolutions<d-cite key="ckconv"></d-cite><d-cite key="tnn"></d-cite>, and state-space models<d-cite key="s4"></d-cite><d-cite key="mamba"></d-cite><d-cite key="ssd"></d-cite>. For example, the typical self-attention mechanism, $\textbf{Y} = \text{softmax}(\textbf{Q}\textbf{K}^T)\textbf{V}$, can be seen as a special case where the matrix $\textbf{M}$ is defined as $\text{softmax}(\textbf{Q}\textbf{K}^T)$.
 
@@ -76,7 +76,7 @@ So, now the question is, what is a good $\textbf{M}$? Key desiderata for such a 
 - Efficiency: We want sub-quadratic matrix multiplication and parameterization to ensure our models run swiftly and handle long sequences with ease.
 - Performance: The matrix mixer should match the high standards of Attention mechanisms in modeling diverse sequence data across various modalities.
 - Flexibility: The solution should work well with sequences of different lengths
-(+ capable of both causal and bidirectional sequence modeling, which we will tackle in [Part II]({% post_url 2024-07-06-hydra-part2-model %}))
+(+ capable of both causal and bidirectional sequence modeling, which we will tackle in [Part II]({% post_url 2024-07-16-hydra-part2-model %}))
 
 Check out the table below to see how various sequence mixers measure up. While several models like MLP-Mixer<d-cite key="mlpmixer"></d-cite>, FNet<d-cite key="fnet"></d-cite>, TNN<d-cite key="tnn"></d-cite>, LA<d-cite key="la"></d-cite>, and M2<d-cite key="m2"></d-cite> have been introduced, none of them fully meet all our criteria.
 
@@ -119,7 +119,7 @@ Let’s break down these objectives step-by-step and explore which matrices work
 
 ## Solution for Sub-quadratic Complexity: Structured Matrices
 
-{% include figure.liquid loading="eager" path="assets/img/2024-07-06-hydra/matrix_classes_trans.png" %}
+{% include figure.liquid loading="eager" path="assets/img/2024-07-16-hydra/matrix_classes_trans.png" %}
 
 To meet our first key requirement -- sub-quadratic matrix multiplication -- we can focus on a special type of matrices known as **structured matrices**. For a general matrix $\textbf{M}$, matrix multiplication typically incurs a computational cost of $O(L^2)$. However, structured matrices, with their compressed representation, allow us to perform these operations much more efficiently, achieving sub-quadratic complexity. We refer to sequence mixers using these matrices as ***structured matrix mixers***.
 
@@ -216,7 +216,7 @@ where the convolution is implemented using FFT $\mathcal{F}$, and $\textbf{q}, \
 
 #### Quasiseparable [(Code)](https://github.com/goombalab/hydra/blob/main/hydra/modules/matrix_mixers/quasiseparable.py)
 
-> **This variant has a separate name, Hydra. Stay tuned for [Part II]({% post_url 2024-07-06-hydra-part2-model %}) 🤭**
+> **This variant has a separate name, Hydra. Stay tuned for [Part II]({% post_url 2024-07-16-hydra-part2-model %}) 🤭**
 {: .block-tip}
 
 ## Impact of SAM Parameterization

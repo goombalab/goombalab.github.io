@@ -4,9 +4,9 @@ title: "Hydra Part II - The Model"
 description: 
 tags:
 giscus_comments: false
-date: 2024-07-06
+date: 2024-07-16
 featured: false
-thumbnail: assets/img/2024-07-06-hydra/logo_trans.png
+thumbnail: assets/img/2024-07-16-hydra/logo_trans.png
 
 authors:
   - name: Sukjun Hwang*
@@ -56,13 +56,13 @@ toc:
 
 ---
 
-{% include figure.liquid loading="eager" path="assets/img/2024-07-06-hydra/logo_trans.png" %}
+{% include figure.liquid loading="eager" path="assets/img/2024-07-16-hydra/logo_trans.png" %}
 
 [[Paper](https://arxiv.org/abs/TODO)]
 [[Code](https://github.com/goombalab/hydra)]
 
 
-1. [Part I - Matrix Mixer Framework]({% post_url 2024-07-06-hydra-part1-matrix-mixer %})
+1. [Part I - Matrix Mixer Framework]({% post_url 2024-07-16-hydra-part1-matrix-mixer %})
 2. Part II - Hydra: The Model
 
 In our previous post, we systematically compared various sequence models with different mixer matrices, and the quasiseparable SAM mixer emerged as the top performer. So, what exactly is it?
@@ -96,7 +96,7 @@ A straightforward way to make SSMs bidirectional is to use two separate SSMs: on
 
 But what if we could use the matrix mixer framework to systematically derive the optimal $\textbf{M}$? Absolutely, we can! In addition to the three desiderata we discussed previously -- sub-quadratic complexity, extendability, and high-performance -- let’s add one more requirement: **bidirectionality**. For the mixer matrix to achieve bidirectionality, it must feature upper triangular components. So, how should we fill them?
 
-{% include figure.liquid loading="eager" path="assets/img/2024-07-06-hydra/semiquasi_trans.png" %}
+{% include figure.liquid loading="eager" path="assets/img/2024-07-16-hydra/semiquasi_trans.png" %}
 
 ## Structured Matrix of Our Choice: Quasiseparable Matrices
 
@@ -147,7 +147,7 @@ This property of complete freedom in the diagonals of quasiseparable matrices is
 
 These are the actual results we obtained for the C4 and GLUE benchmark, along with the validation loss curve. Supported by these theoretical claims, our Hydra model, which uses a quasiseparable mixer matrix, indeed has shown superior performance to previous heuristic bidirectional extensions!
 
-{% include figure.liquid loading="eager" path="assets/img/2024-07-06-hydra/bidirectionality_trans.png" %}
+{% include figure.liquid loading="eager" path="assets/img/2024-07-16-hydra/bidirectionality_trans.png" %}
 
 ## Hydra: Our Main Bidirectional Sequence Mixer
 
