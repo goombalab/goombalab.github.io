@@ -54,7 +54,7 @@ toc:
 
 {% include figure.liquid loading="eager" path="assets/img/2024-07-16-hydra/logo_trans.png" %}
 
-[[Paper](https://arxiv.org/abs/TODO)]
+[[Paper](https://arxiv.org/abs/2407.09941)]
 [[Code](https://github.com/goombalab/hydra)]
 
 
