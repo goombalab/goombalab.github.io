@@ -48,6 +48,13 @@ profiles:
     website: https://avivbick.github.io
     github: https://github.com/AvivBick
 
+  - role: phd-student
+    image: /people/isaac.jpg
+    name: Isaac Liao
+    google_scholar: https://scholar.google.com/citations?user=ktiXUnoAAAAJ&hl=en
+    website: https://iliao2345.github.io/
+    github: https://github.com/iliao2345
+
   - role: ms-student
     image: /people/ricardo.jpg
     name: Ricardo Buitrago
