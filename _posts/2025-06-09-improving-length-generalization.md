@@ -58,12 +58,7 @@ However, in our work we show that <strong>the distribution of the state $h_t$ ch
 
 {% include figure.liquid loading="eager" path="assets/img/2025-06-11-length-generalization/statemetrics_full.png" %}
 
-At first, one might think that as the sequence position increases, the fixed-size state needs to remember information from a longer sequence and thus somehow saturates. However, in this work we show that this intuition is not correct. Indeed, if this was the case the recurrent model would struggle to "remember" elements in the sequence that are far away. In our work, we introduce Effective Remembrace to measure how much an autoregressive is effectively remembering previous tokens. Denote by $q(\cdot | \text{context})$ the probabilities that an autoregressive sequential model outputs for an element given a context. Then, we define: 
-$$
-    \text{EffRem}_T(t) = d(q(\cdot |x_{0:T}),q(\cdot| x_{t:T}))
-$$
-
-Where $d$ is a distance between probability distributions (total variation). If $\text{EffRem}_T(t)=0$, this means that the predictions using $x_{t:T}$ and using $x_{0:T}$ are the same, meaning that the model does not ``effectively remember'' any of the past tokens $x_{0:t-1}$. Conversely, if $\text{EffRem}_T(t)$ is high, the model is substantially influenced by the tokens $x_{0:t-1}$, since removing them from the context changes the prediction significantly.
+At first, one might think that as the sequence position increases, the fixed-size state needs to remember information from a longer sequence and thus somehow saturates. However, in this work we show that this intuition is not correct. Indeed, if this was the case the recurrent model would struggle to "remember" elements in the sequence that are far away. In our work, we introduce Effective Remembrace to measure how much an autoregressive is effectively remembering previous tokens. Denote by $q(\cdot \| \text{context})$ the probabilities that an autoregressive sequential model outputs for an element given a context. Then, we define $\text{EffRem}_T(t) = d\(q\(\cdot \| x\[0:T\],q(\cdot \| x\[t:T\]\)\)$, where $d$ is a distance between probability distributions (e.g. Total Variation). If $\text{EffRem}_T(t)=0$, this means that the predictions using $x\[t:T\]$ and using $x\[0:T\]$ are the same, meaning that the model does not ``effectively remember'' any of the past tokens $x\[0:t-1\]$. Conversely, if $\text{EffRem}_T(t)$ is high, the model is substantially influenced by the tokens $x\[0:t-1\]$, since removing them from the context changes the prediction significantly.
 
 It turns out that models that fail to length generalize have very high $\text{EffRem}_T(t)$ for small $t$, meaning that the models are disproportionately impacted by early elements of the sequence.
 
