@@ -57,7 +57,7 @@ Indeed, we show the performance of the official Mamba-2 checkpoints <d-cite key=
 <div style="max-width: 500px; margin: 0 auto; text-align: center;">
 
 
-{% include figure.liquid loading="eager" path="assets/img/2025-06-11-length-generalization/mamba2-poswise_reduced.png" %}
+{% include figure.liquid loading="eager" path="assets/img/2025-06-11-length-generalization/mamba2-poswise_reduced2.png" %}
 
 </div>
 
@@ -147,7 +147,7 @@ Ideally, in the case of text we would like the model to pay attention to the rec
 
 It turns out that models that fail to length generalize have very high $\text{EffRem}_T(t)$ for small $t$, meaning that the models are disproportionately impacted by early elements of the sequence. This effect is fixed with the training interventions, showing that models process the context in the intended way.
 <div style="max-width: 500px; margin: 0 auto; text-align: center;">
-{% include figure.liquid loading="eager" path="assets/img/2025-06-11-length-generalization/mamba2-effrem.png" %}
+{% include figure.liquid loading="eager" path="assets/img/2025-06-11-length-generalization/mamba2-effrem-reduced.png" %}
 </div>
 
 Lastly, we note that when models fail to length generalize it is not that the state cannot remember all information from the sequence; rather, in a sense it is so expressive that early elements can completely change its prediction (which is not desirable, as the prediction should mostly focus on the recent context).  Thus, the intuition that the model fails to length generalize because it is not expressive enough to take into account is not correct. The failure to length generalization is related to the models overfitting to early part of the sequences, rather than not being expressive enough.
