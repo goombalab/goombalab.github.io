@@ -111,7 +111,11 @@ The four training interventions can be seen as sampling the initial state $h_{-1
 4. <strong>Truncated Backpropagation Through Time (TBTT)</strong> <d-cite key="TBTT_1990"></d-cite> <d-cite key="TBTT_sutskever"></d-cite>: In this case, we split a long sequence into smaller chunks, and use the final state of each chunk as the initial state of the next one. This is equivalente to processing the whole sequence, yet stopping the gradient propagation between chunks.
 
 The following figure shows the results for each intervention:
-{% include figure.liquid loading="eager" path="assets/img/2025-06-11-length-generalization/training_interventions.png" %}
+
+{% include figure.liquid loading="eager" path="assets/img/2025-06-11-length-generalization/interventions_1.png" %}
+
+{% include figure.liquid loading="eager" path="assets/img/2025-06-11-length-generalization/interventions_2.png" %}
+
 
 Firstly, both State Passing and TBTT - which are the interventions that are closer to realistic states - allow length generalization in sequences order of magnitude longer than those seen during training, which is the first important takeaway of our work: <strong>length generalization is expected to be readily achievable in recurrent models through simple training interventions</strong>. Secondly, we can infer properties of the distribution of states of recurrent models looking at the performance of the Random Noise and Fitted Noise interventions. The Random Noise intervention fails to length generalize in the 370m, yet Fitted Noise works. This suggests that the distribution of attainable states cannot be approximated with a Gaussian with fixed variance, but it can be approximated with an IID Gaussian with fitted variance in each layer and head of the state. However, the Fitted Noise intervention fails to achieve length generalization in the 1.3b model, indicating that the state of large models probably has complex dependency relationships among its elements and thus cannot be approximated with IID values.
 
