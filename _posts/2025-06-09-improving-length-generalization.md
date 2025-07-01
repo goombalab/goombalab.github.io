@@ -36,6 +36,8 @@ toc:
   - name: Why do Recurrent Models Fail to Length Generalize?
   - name: Interventions to Enable Length Generalization
   - name: Performance on Long Context Tasks
+  - name: A Deeper Look into How Recurrent Models Process Context
+  - name: Conclusion
 
 ---
 
@@ -44,9 +46,9 @@ toc:
 
 ## Existing Recurrent Models still Fall Short
 
-Linear recurrent models such as Mamba <d-cite key="mamba"></d-cite><d-cite key="mamba2"></d-cite> and linear attention <d-cite key="LA_katharopoulos2020transformers"></d-cite><d-cite key="RQKV"></d-cite><d-cite key="gated_linear_attention_yang2024gla"></d-cite><d-cite key="delta_net"></d-cite> posses <strong>a remarkable feature: they can process extremely long sequences</strong>, which is key for applications that require long context reasoning (like summarizing long texts or agents with long context memory). Indeed, this is their key advantage over their main competitor, the Transformers <d-cite key="attention_is_all_you_need"></d-cite>, which are bottlenecked by their quadratic complexity over the sequence length.
+Linear recurrent models such as Mamba <d-cite key="mamba"></d-cite><d-cite key="mamba2"></d-cite> and linear attention <d-cite key="LA_katharopoulos2020transformers"></d-cite><d-cite key="RQKV"></d-cite><d-cite key="gated_linear_attention_yang2024gla"></d-cite><d-cite key="delta_net"></d-cite> posses <strong>a remarkable feature: they can process extremely long sequences</strong>, which is key for applications that require long context reasoning (like summarizing long texts or agents with long term memory). Indeed, this is their key advantage over their main competitor, the Transformers <d-cite key="attention_is_all_you_need"></d-cite>, which are bottlenecked by their quadratic complexity over the sequence length.
 
-Previosly, the issue with recurrent models was their performance: on short sequences they were less capable than Transformers. But recent architecture breakthroughs have improved the performance of recurrent models and brought them on par with Transformers, to the point that they are currently used in several industry applications like audio modeling <d-cite key="goel2024sonic"></d-cite> or code completion <d-cite key="mistral2024codestral"></d-cite>. However, several recent works have found out that <em>recurrent models still fall short</em>: they might have comparable performance to Transformers, but in many cases <strong>they have very bad performance on long sequences.</strong>
+Previously, the issue with recurrent models was their performance: on short sequences they were less capable than Transformers. But recent architecture breakthroughs have improved the performance of recurrent models and brought them on par with Transformers, to the point that they are currently used in several industry applications like audio modeling <d-cite key="goel2024sonic"></d-cite> or code completion <d-cite key="mistral2024codestral"></d-cite>. However, several recent works have found out that <em>recurrent models still fall short</em>: they might have comparable performance to Transformers, but in many cases <strong>they have very bad performance on long sequences.</strong>
 
 
 <!-- Transformers <d-cite key="attention_is_all_you_need"></d-cite> have become the most popular architecture in the Machine Learning community thanks to their strong performance across many tasks spanning from lanugage modeling to image generation. However, they suffer from two fundamental bottlenecks: (1) they have quadratic complexity over the sequence length, which make it extremely hard to process long sequences; and (2) they do not naturally have a concept of order elements in the sequence, so they rely on positional embeddings to treat past elements differently from recent elements in the sequence. As an attempt to overcome these two limitations, several linear <em>recurrent models</em> have been proposed, such as Mamba <d-cite key="mamba"></d-cite><d-cite key="mamba2"></d-cite>, which apply a recurrence to the sequence. Thus, <strong>in theory</strong> they can (1)  <strong>efficiently process long sequences </strong>, since recurrences have linear complexity over the sequence length; and (2)  <strong>naturally process sequences of any length </strong> by simply rolling out the state recurrence (i.e. they do not have positional embeddings). Thus, the prevailing attitude is that even if Transformers were strictly more expressive in short sequences, we fundamentally should tend towards linear recurrent arcthiectures for their efficient processing of long sequences. -->
@@ -57,7 +59,7 @@ Indeed, we show the performance of the official Mamba-2 checkpoints <d-cite key=
 <div style="max-width: 500px; margin: 0 auto; text-align: center;">
 
 
-{% include figure.liquid loading="eager" path="assets/img/2025-06-11-length-generalization/mamba2-poswise_reduced2.png" %}
+{% include figure.liquid loading="eager" path="assets/img/2025-06-11-length-generalization/mamba2_poswise_reduced2.png" %}
 
 </div>
 
@@ -72,7 +74,7 @@ Does this mean that recurrent models are useless? Not at all! In our work, we sh
 
 ## Why do Recurrent Models Fail to Length Generalize?
 
-For an input sequence with $t$ elements $(x_1, x_2, ..., x_{t-1}, x_t)$, recurrent models essentially work by compressing the input context $(x_1, x_2, ..., x_{t-1})$ into a fixed-size <em>recurrent state</em> $h_{t-1}$. At time $t=0$, the state is initialized with some value $h_{-1}$, and then it is updated at each $t$ using $x_t$ using an update function $f$:
+For an input sequence with $t$ elements $(x_1, x_2, ..., x_{t-1}, x_t)$, recurrent models essentially work by compressing the input context $(x_1, x_2, ..., x_{t-1})$ into a fixed-size <em>recurrent state</em> $h_{t-1}$. At time $t=0$, the state is initialized with some value $h_{-1}$, and then it is updated at each $t$ using $x_t$ through an update function $f$:
 <div style="text-align: center;">
 $ h_t = f(h_{t-1}, x_t) $
 </div>
@@ -83,13 +85,13 @@ Similarly, the output at time $t$ only depends on the state $h_t$ and the curren
  </div>
 
  
- The function $g$ does not depend on the position $t$, so in theory recurrent models can naturally process any sequence length. But if $g$ is always the same, how can it be that they fail when $t$ is large?
+ The functions $f$ and $g$ do not depend on the position $t$, so in theory recurrent models can naturally process any sequence length. But then, how can it be that they fail when $t$ is large?
 
-In our work we show that <strong>the distribution of the state $h_t$ changes over time</strong>, thus even if $f$ might work properly up to some $T$, other $h_t$ with $T>t$ might be significantly different, and thus $f$ fails to produce the correct output. Indeed, in the following figure we show how the norm of the state of Mamba-2 <d-cite key="mamba2"></d-cite> increases significantly over time:
+In our work we show that <strong>the distribution of the state $h_t$ changes over time</strong>, thus even if $g$ and $f$ work correctly up to some $T$, other $h_t$ with $T>t$ might be significantly different, and thus the model fails to produce the correct output. Indeed, in the following figure we show how the norm of the state of Mamba-2 <d-cite key="mamba2"></d-cite> increases significantly over time:
 <div style="max-width: 400px; margin: 0 auto; text-align: center;">
 {% include figure.liquid loading="eager" path="assets/img/2025-06-11-length-generalization/statemetrics_base.png" width="0.1" %}
 </div>
-This explains why recurrent models fail to length generalize: when processing sequences longer than those seen during training, they encounter states $h_t$ that they have not explored during training, and thus they have not learnt to process them. Based on this insight, we propose the <strong>unexplored states hypothesis</strong> to explain the failure to length generalize: <em>recurrent models fail to length generalize when they are trained only on a subset of all attainable state distributions---i.e. on a subset of the states that would be attained if the state recurrence was rolled out indefinitely. When trained for long enough, the model overfits to this subset and performs poorly on long sequences because it encounters unexplored state distributions.</em>
+This explains why recurrent models fail to length generalize: when processing sequences longer than those seen during training, they encounter states $h_t$ that have not explored during training, and thus they have not learnt to process them. Based on this insight, we propose the <strong>unexplored states hypothesis</strong> to explain the failure to length generalize: <em>recurrent models fail to length generalize when they are trained only on a subset of all attainable state distributions---i.e. on a subset of the states that would be attained if the state recurrence was rolled out indefinitely. When trained for long enough, the model overfits to this subset and performs poorly on long sequences because it encounters unexplored state distributions.</em>
 
 <!-- At first, one might think that as the sequence position increases, the fixed-size state needs to remember information from a longer sequence and thus somehow saturates. However, in this work we show that this intuition is not correct. Indeed, if this was the case the recurrent model would struggle to "remember" elements in the sequence that are far away. In our work, we introduce Effective Remembrace to measure how much an autoregressive is effectively remembering previous tokens. Denote by $q(\cdot \| \text{context})$ the probabilities that an autoregressive sequential model outputs for an element given a context. Then, we define $\text{EffRem}_T(t) = d\(q\(\cdot \| x\[0:T\],q(\cdot \| x\[t:T\]\)\)$, where $d$ is a distance between probability distributions (e.g. Total Variation). If $\text{EffRem}_T(t)=0$, this means that the predictions using $x\[t:T\]$ and using $x\[0:T\]$ are the same, meaning that the model does not ``effectively remember'' any of the past tokens $x\[0:t-1\]$. Conversely, if $\text{EffRem}_T(t)$ is high, the model is substantially influenced by the tokens $x\[0:t-1\]$, since removing them from the context changes the prediction significantly.
 
@@ -102,35 +104,41 @@ It turns out that models that fail to length generalize have very high $\text{Ef
 The results for Effective Remembrance suggest that the models <em>can</em> remember information from long contexts, but the failure to length generalize indicate that they have not <em>learnt</em> to do so - i.e. the have not been trained on certain state distributions. Thus, we propose the <em><strong>unexplored states hypothesis</strong>: Recurrent models fail to length generalize when they are trained only on a subset of all attainable state distributions---i.e. on a subset of the states that would be attained if the state recurrence was rolled out indefinitely. When trained for long enough, the model overfits to this subset and performs poorly on long sequences because it encounters unexplored state distributions.</em> -->
 
 ## Interventions to Enable Length Generalization
-The unexplored states hypothesis indicates that length generalization can be achieved not by changing the architecture or its mechanisms, but by training the model on a more diverse set of state distributions - in particular, on the distributions that arise when rolling out the state recurrence on long sequences. To do so, we could directly train the model on longer sequences, but this might not always be possible due to GPU memory constraints or due to lack of sufficently long training sequences. Thus, in our work we explore interventions on the <em>initial state</em> of the recurrence $h_{-1}$. Most modern architectures assume a zero initial state in the recurrence ($h_{-1}=0$). In our work, we study four interventions on the initial state, which are aimed at letting the model explore more state distributions. Note that using with a non-zero initial state is equivalent to starting to process the sequence with some previous context.
+The unexplored states hypothesis indicates that length generalization can be achieved not by changing the architecture or its mechanisms, but by training the model on a more diverse set of state distributions - in particular, on the distributions that arise when rolling out the state recurrence on long sequences. To do so, we could directly train the model on longer sequences, but this might not always be possible due to GPU memory constraints or due to lack of sufficently long training sequences. 
 
-The four training interventions can be seen as sampling the initial state $h_{-1}$ from four different distributions, that progressively get closer to the distribution of attainable states:
-1. <strong>Random Noise</strong>: The state is initialized with an IID Gaussian with zero mean and a chosen standard deviation.
-2. <strong>Fitted Noise</strong>: During training, we record the mean and standard deviation of the final states of the sequences across all layers and heads. Then, we initialize the state with an IID Gaussian distribution with mean and standard deviation fitted to the ones seen during training.
+In our work we explore simple interventions on the <em>initial state</em> of the recurrence $h_{-1}$. Most modern architectures assume a zero initial state in the recurrence ($h_{-1}=0$). We study four interventions on the initial state which increase the diversity of states that the model explores during training. Note that using with a non-zero initial state is equivalent to starting to process the sequence with some previous context.
+
+The four training interventions can be seen as sampling the initial state $h_{-1}$ from four different distributions that progressively get closer to the distribution of attainable states:
+1. <strong>Random Noise</strong>: The state is initialized with an IID Gaussian with zero mean and a chosen standard deviation (using the same mean / standard deviation for all layers and heads).
+2. <strong>Fitted Noise</strong>: During training, we record the mean and standard deviation of the final states of the sequences across all layers and heads. Then, we initialize the state with an IID Gaussian distribution with mean and standard deviation fitted to the ones seen during training (using a different mean / standard deviation for each layer and head).
 3. <strong>State Passing</strong>: We use the final state of a previous (unrelated) sequence as the initial state (note that this is equivalent to sampling from the distribution of attainable states at the training context $T$).
-4. <strong>Truncated Backpropagation Through Time (TBTT)</strong> <d-cite key="TBTT_1990"></d-cite> <d-cite key="TBTT_sutskever"></d-cite>: In this case, we split a long sequence into smaller chunks, and use the final state of each chunk as the initial state of the next one. This is equivalente to processing the whole sequence, yet stopping the gradient propagation between chunks.
+4. <strong>Truncated Backpropagation Through Time (TBTT)</strong> <d-cite key="TBTT_1990"></d-cite> <d-cite key="TBTT_sutskever"></d-cite>: In this case, we split a long sequence into smaller chunks, and use the final state of each chunk as the initial state of the next one. This is equivalent to processing the whole sequence, yet stopping the gradient propagation between chunks.
 
-The following figure shows the results for each intervention:
-
-{% include figure.liquid loading="eager" path="assets/img/2025-06-11-length-generalization/interventions_1.png" %}
+The following figures shows the results for each intervention:
 
 {% include figure.liquid loading="eager" path="assets/img/2025-06-11-length-generalization/interventions_2.png" %}
 
+{% include figure.liquid loading="eager" path="assets/img/2025-06-11-length-generalization/interventions_1.png" %}
 
-Firstly, both State Passing and TBTT - which are the interventions that are closer to realistic states - allow length generalization in sequences order of magnitude longer than those seen during training, which is the first important takeaway of our work: <strong>length generalization is expected to be readily achievable in recurrent models through simple training interventions</strong>. Secondly, we can infer properties of the distribution of states of recurrent models looking at the performance of the Random Noise and Fitted Noise interventions. The Random Noise intervention fails to length generalize in the 370m, yet Fitted Noise works. This suggests that the distribution of attainable states cannot be approximated with a Gaussian with fixed variance, but it can be approximated with an IID Gaussian with fitted variance in each layer and head of the state. However, the Fitted Noise intervention fails to achieve length generalization in the 1.3b model, indicating that the state of large models probably has complex dependency relationships among its elements and thus cannot be approximated with IID values.
+
+
+
+Firstly, both State Passing and TBTT - which are the interventions that are closer to realistic states - allow length generalization in sequences much longer than those seen during training, which is the first important takeaway of our work: <strong>length generalization is expected to be readily achievable in recurrent models through simple training interventions</strong>. 
+
+Secondly,  <strong>we can infer properties of the distribution of the state of recurrent models looking at the performance of the interventions</strong>. The Random Noise intervention fails to length generalize in the 370m, yet Fitted Noise works. This suggests that for the 370m model the distribution of attainable states cannot be approximated with a Gaussian with fixed variance, but it can be approximated with an IID Gaussian with fitted variance in each layer and head of the state. However, the Fitted Noise intervention fails to achieve length generalization in the 1.3b model, indicating that the state of large models probably has complex dependency relationships among its elements and thus cannot be approximated with IID values.
 
 Additionally, the interventions also fix the increasing state norm behavior we showed before, by making the model output states with similar norm at all timestamps: 
 <div style="max-width: 400px; margin: 0 auto; text-align: center;">
 {% include figure.liquid loading="eager" path="assets/img/2025-06-11-length-generalization/statemetrics_full.png" %}
 </div>
 ## Performance on Long Context Tasks
-These interventions enable length <em>generalization</em> (i.e. not having decreased peformance after the training context $T$), but it is reasonable to ask whether they actually enable enable reasoning over long contexts, in particular capturing relationships between  elements that are separated by more than $T$ positions. In our work we answer affirmatively by showing the results on thee long context tasks.
+These interventions enable length <em>generalization</em> (i.e. not having decreased peformance after the training context $T$), but it is reasonable to ask whether they actually enable reasoning over long contexts, in particular capturing relationships between  elements that are separated by more than $T$ positions. In our work we answer affirmatively by showing the results on thee long context tasks.
 
 <strong>BABILong</strong><d-cite key="babilong"></d-cite>. BABILong is a challenging benchmark which tests both the common sense understanding of a model as well as its ability to capture long range dependencies in text. In the figure below it can be observed that State Passing enhances the length extrapolation capabilities of the model in both the few shot and finetuned settings (we recall that the model is trained and finetuned on sequences of length 2048). Therefore, State Passing is not only useful in fixing the diverging perplexity of established language models, but also in enhancing their ability to solve long context reasoning tasks.
 
 {% include figure.liquid loading="eager" path="assets/img/2025-06-11-length-generalization/babilong.png" %}
 
-<strong>Passkey retrieval</strong><d-cite key="landmark_attention_mohtashami2023randomaccess"></d-cite>. The passkey retrieval task requires the model to retrieve a 5-digit passkey inserted at a given depth of a long context. In the figure below we show that models finetuned with fitted noise are capable of handling relationships between tokens that are much more than 2k positions apart.
+<strong>Passkey retrieval</strong><d-cite key="landmark_attention_mohtashami2023randomaccess"></d-cite>. The passkey retrieval task requires the model to retrieve a 5-digit passkey inserted at a given depth of a long context. In the figure below we show that models finetuned with fitted noise are capable of handling relationships between tokens that are much more than 2k positions apart. In particular, the 780m model can solve the passkey perfectly for sequences of length 256k.
 
 
 {% include figure.liquid loading="eager" path="assets/img/2025-06-11-length-generalization/passkey.png" %}
@@ -139,18 +147,30 @@ These interventions enable length <em>generalization</em> (i.e. not having decre
 
 {% include figure.liquid loading="eager" path="assets/img/2025-06-11-length-generalization/synthetic_copying.png" %}
 
-## A deeper look into how recurrent models process context
+## A Deeper Look into How Recurrent Models Process Context
 
-We have shown that the interventions on the initial state allow length generalization and enable long context capabilities. On top of these findings, we will present a metric that allows us to understand how sequence models process contexts of the sequence even more deeply. 
+We have shown that the interventions on the initial state allow length generalization and enable long context capabilities. On top of these findings, we now present a metric that sheds light on how sequence models process their context.
 
-Ideally, in the case of text we would like the model to pay attention to the recent context, and not focus too much on tokens that are too far away. But how can we quantify this behavior? In our work, we introduce Effective Remembrace to measure how much an autoregressive is "effectively" remembering previous tokens. Denote by $q(\cdot \| \text{context})$ the probabilities that an autoregressive sequential model outputs for an element given a context. Then, we define $\text{EffRem}_T(t) = d\(q\(\cdot \| x\[0:T\],q(\cdot \| x\[t:T\]\)\)$, where $d$ is a distance between probability distributions (e.g. Total Variation). If $\text{EffRem}_T(t)=0$, this means that the predictions using $x\[t:T\]$ and using $x\[0:T\]$ are the same, meaning that the model does not ``effectively remember'' any of the past tokens $x\[0:t-1\]$. Conversely, if $\text{EffRem}_T(t)$ is high, the model is substantially influenced by the tokens $x\[0:t-1\]$, since removing them from the context changes the prediction significantly.
+Ideally, in the case of text modeling we would like the model to pay attention to the recent context, and not focus too much on tokens that are too far away. But how can we quantify this behavior? We introduce <strong>Effective Remembrace</strong> to measure <strong>how much an autoregressive is "effectively" remembering previous tokens</strong>. 
 
-It turns out that models that fail to length generalize have very high $\text{EffRem}_T(t)$ for small $t$, meaning that the models are disproportionately impacted by early elements of the sequence. This effect is fixed with the training interventions, showing that models process the context in the intended way.
+Denote by $q(\cdot \| \text{context})$ the probabilities that an autoregressive sequential model outputs for the next token given a context. Then, we define:
+<div style="text-align: center;">
+ $ \text{EffRem}_T(t) = d(q(\cdot | x[0:T],q(\cdot | x[t:T])) $
+</div>
+<div style="text-align: center;">
+ $ \text{EffRem}_T(t) = d(q(\cdot \| x\[0:T\],q(\cdot \| x\[t:T\]\)\) $
+</div>
+
+where $d(p,\bar{p})$ is a distance between probability distributions (e.g. Total Variation). If $\text{EffRem}_T(t)=0$, this means that the predictions using $x\[t:T\]$ and using $x\[0:T\]$ are the same, meaning that <strong>the model does not "effectively remember" any of the past tokens $x\[0:t-1\]$</strong>. Conversely, if $\text{EffRem}_T(t)$ is high, <strong>the model is substantially influenced by the tokens $x\[0:t-1\]$</strong>, since removing them from the context changes the prediction significantly.
+
+It turns out that models that fail to length generalize have very high $\text{EffRem}_T(t)$ for small $t$, meaning that the models are disproportionately impacted by early elements of the sequence. This effect is fixed with the State Passing intervention, showing that this intervention let the models process the context in the intended way.
 <div style="max-width: 500px; margin: 0 auto; text-align: center;">
 {% include figure.liquid loading="eager" path="assets/img/2025-06-11-length-generalization/mamba2-effrem-reduced.png" %}
 </div>
 
-Lastly, we note that when models fail to length generalize it is not that the state cannot remember all information from the sequence; rather, in a sense it is so expressive that early elements can completely change its prediction (which is not desirable, as the prediction should mostly focus on the recent context).  Thus, the intuition that the model fails to length generalize because it is not expressive enough to take into account is not correct. The failure to length generalization is related to the models overfitting to early part of the sequences, rather than not being expressive enough.
+<!-- Lastly, we note that when models fail to length generalize, it is not that the state cannot remember all information from the sequence; rather, in a sense it is so expressive that early elements can completely change its prediction (which is not desirable, as the prediction should mostly focus on the recent context).  Thus, the intuition that the model fails to length generalize because it is not expressive enough to take into account is not correct. The failure to length generalization is related to the models overfitting to early part of the sequences, rather than not being expressive enough. -->
+
+## Conclusion
 
 
 
