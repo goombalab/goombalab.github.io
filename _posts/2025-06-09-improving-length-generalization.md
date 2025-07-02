@@ -163,10 +163,12 @@ Denote by $q(\cdot \| \text{context})$ the probabilities that an autoregressive 
 
 where $d(p,\bar{p})$ is a distance between probability distributions (e.g. Total Variation). If $\text{EffRem}_T(t)=0$, this means that the predictions using $x\[t:T\]$ and using $x\[0:T\]$ are the same, meaning that <strong>the model does not "effectively remember" any of the past tokens $x\[0:t-1\]$</strong>. Conversely, if $\text{EffRem}_T(t)$ is high, <strong>the model is substantially influenced by the tokens $x\[0:t-1\]$</strong>, since removing them from the context changes the prediction significantly.
 
-It turns out that models that fail to length generalize have very high $\text{EffRem}_T(t)$ for small $t$, meaning that the models are disproportionately impacted by early elements of the sequence. This effect is fixed with the State Passing intervention, showing that this intervention let the models process the context in the intended way.
+The following figure shows $\text{EffRem}_T(t)$ for varying $t$ and $T=8192$ (four times the training context) for two Mamba-2 models:
 <div style="max-width: 500px; margin: 0 auto; text-align: center;">
 {% include figure.liquid loading="eager" path="assets/img/2025-06-11-length-generalization/mamba2-effrem-reduced.png" %}
 </div>
+
+It turns out that models that fail to length generalize have very high $\text{EffRem}_T(t)$ for small $t$, meaning that the models are disproportionately impacted by early elements of the sequence. This effect is fixed with the State Passing intervention, showing that this intervention let the models process the context in the intended way. 
 
 <!-- Lastly, we note that when models fail to length generalize, it is not that the state cannot remember all information from the sequence; rather, in a sense it is so expressive that early elements can completely change its prediction (which is not desirable, as the prediction should mostly focus on the recent context).  Thus, the intuition that the model fails to length generalize because it is not expressive enough to take into account is not correct. The failure to length generalization is related to the models overfitting to early part of the sequences, rather than not being expressive enough. -->
 
