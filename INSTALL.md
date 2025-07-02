@@ -62,6 +62,19 @@ Now, feel free to customize the theme however you like (don't forget to change t
 
 > Beta: You can also use the slimmed docker image with a size below 100MBs and exact same functionality. Just use `docker compose -f docker-compose-slim.yml up`
 
+## Kevin's Notes
+
+I followed the instructions as above, first downloading the docker app then running ``docker compose pull``. However, I got this error 
+
+``bundler: failed to load command: jekyll (/usr/local/bundle/bin/jekyll)``
+
+when trying to run ``docker compose up``.
+
+To fix this, follow this website: https://stackoverflow.com/questions/69890412/bundler-failed-to-load-command-jekyll
+
+tldr: run
+``bundle add webrick`` then ``bundle exec jekyll serve`` will run the dev website.
+
 ### Build your own docker image
 
 > Note: this approach is only necessary if you would like to build an older or very custom version of al-folio.
