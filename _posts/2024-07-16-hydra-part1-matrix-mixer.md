@@ -17,10 +17,6 @@ authors:
     url:
     affiliations:
       name: CMU
-  - name: Ratish Puduppully
-    url:
-    affiliations:
-      name: A*STAR
   - name: Tri Dao
     url:
     affiliations:
@@ -52,7 +48,7 @@ toc:
 
 ---
 
-[[Paper](https://arxiv.org/abs/TODO)]
+[[Paper](https://arxiv.org/abs/2407.09941)]
 [[Code](https://github.com/goombalab/hydra)]
 
 

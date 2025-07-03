@@ -17,10 +17,6 @@ authors:
     url:
     affiliations:
       name: CMU
-  - name: Ratish Puduppully
-    url:
-    affiliations:
-      name: A*STAR
   - name: Tri Dao
     url:
     affiliations:
@@ -58,7 +54,7 @@ toc:
 
 {% include figure.liquid loading="eager" path="assets/img/2024-07-16-hydra/logo_trans.png" %}
 
-[[Paper](https://arxiv.org/abs/TODO)]
+[[Paper](https://arxiv.org/abs/2407.09941)]
 [[Code](https://github.com/goombalab/hydra)]
 
 
@@ -136,9 +132,9 @@ This property of complete freedom in the diagonals of quasiseparable matrices is
 > $$\begin{equation}
 >   m_{ij} =
 >       \begin{cases}
-> \overrightarrow{\textbf{c}^{T}_{i}} \overrightarrow{\textbf{A}^{\times}_{i:j}} \overrightarrow{\textbf{b}_{j}},  & \text{if } i > j \\
+> \overrightarrow{\textbf{c}^{T}_{i}} \overrightarrow{\textbf{A}_i} \cdots \overrightarrow{\textbf{A}_{j+1}} \overrightarrow{\textbf{b}_{j}},  & \text{if } i > j \\
 > \delta_{i},         & \text{if } i = j \\
-> \overleftarrow{\textbf{c}^{T}_{j}} \overleftarrow{\textbf{A}^{\times}_{j:i}} \overleftarrow{\textbf{b}_{i}},  & \text{if } i < j\\
+> \overleftarrow{\textbf{c}^{T}_{i}} \overleftarrow{\textbf{A}_{i}} \cdots \overleftarrow{\textbf{A}_{j-1}} \overleftarrow{\textbf{b}_{j}},  & \text{if } i < j\\
 >       \end{cases},\\
 > \end{equation}
 > $$ 
