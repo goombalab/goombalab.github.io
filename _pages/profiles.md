@@ -40,13 +40,20 @@ profiles:
     google_scholar: https://scholar.google.com/citations?user=rW5dpvMAAAAJ&hl=en&oi=ao
     website: https://sukjunhwang.github.io
     github: https://github.com/sukjunhwang
-    linkedin: https://www.linkedin.com/in/sukjun-hwang-343360191
+    twitter: https://x.com/sukjun_hwang
 
   - role: phd-student
     image: /people/aviv.png
     name: Aviv Bick
     website: https://avivbick.github.io
     github: https://github.com/AvivBick
+
+  - role: phd-student
+    image: /people/isaac.jpg
+    name: Isaac Liao
+    google_scholar: https://scholar.google.com/citations?user=ktiXUnoAAAAJ&hl=en
+    website: https://iliao2345.github.io/
+    github: https://github.com/iliao2345
 
   - role: ms-student
     image: /people/ricardo.jpg

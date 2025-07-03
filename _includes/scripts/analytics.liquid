@@ -22,3 +22,6 @@
     cronitor('config', { clientKey: '{{site.cronitor_analytics}}' });
   </script>
 {% endif %}
+{% if site.enable_umami_analytics %}
+  <script defer src="https://cloud.umami.is/script.js" data-website-id="{{ site.umami_analytics }}"></script>
+{% endif %}
