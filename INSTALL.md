@@ -70,10 +70,11 @@ I followed the instructions as above, first downloading the docker app then runn
 
 when trying to run ``docker compose up``.
 
-To fix this, follow this website: https://stackoverflow.com/questions/69890412/bundler-failed-to-load-command-jekyll
+It seems like to fix this, you need to follow this website: https://stackoverflow.com/questions/69890412/bundler-failed-to-load-command-jekyll to ``bundle add webrick``.
 
-tldr: run
-``bundle add webrick`` then ``bundle exec jekyll serve`` will run the dev website.
+However, I couldn't get it to run on top of the Docker that we pull from docker-compose.yml in 15 minutes, so I gave up. I ended up just using the legacy local setup.
+
+If you run into issues with certain packages, try to pip install them. If it still doesn't work, delete the ``Gemfile.lock`` and rerun ``bundle install``.
 
 ### Build your own docker image
 
