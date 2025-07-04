@@ -40,7 +40,13 @@ toc:
       - name: SSD vs. State Space Models
       - name: SSD vs. Attention
   - name: Best of Both Worlds
+    subsections:
+      - name: The SSM and Attention Modes
+      - name: The SSD Mode
   - name: The Mamba-2 Architecture
+    subsections:
+      - name: Language Modeling 
+      - name: Associative Recall
 
 ---
 
@@ -284,7 +290,7 @@ So why do we care that there are two views of this model?
 Well, first of all, it's extremely mathematically interesting, as we'll cover in [Part II]({% post_url 2024-05-31-mamba2-part2-theory %}), and we hope will inspire future directions.
 But there are immediate practical benefits too! 
 
-### Efficiency: the SSM and Attention Modes
+### The SSM and Attention Modes
 
 The SSM \eqref{eq:ssm} and attention \eqref{eq:ssd-attention} modes represent two different ways of computing the same function,
 so let's contrast them.
@@ -296,7 +302,7 @@ On the other hand, computing this sequence transformation $y = Mx$ through equat
 because we're materializing this $\mathtt{T} \times \mathtt{T}$ matrix.
 But it can be fast in practice because it only uses matrix multiplications, which are extremely optimized on GPUs and TPUs.
 
-### Efficiency: the SSD Mode
+### The SSD Mode
 
 So if there are two equivalent ways of computing the same model, when should we use one mode or the other?
 During inference, there's no trade-off: the SSM mode is designed for fast autoregressive inference.
@@ -348,7 +354,7 @@ Our full language model results use the same protocol as Mamba, and found slight
 Fully trained models on the Pile dataset<d-cite key="pile"></d-cite> and the standard zero-shot downstream evaluations show similar trends.
 We emphasize that even when the performance is comparable, Mamba-2 is *much* faster to train than Mamba-1!
 
-### Synthetic Language Modeling: MQAR
+### Associative Recall
 
 More interestingly, we highlight the one synthetic task we tried.
 Since the original Mamba paper, which investigated synthetics such as Synthetic Copying and Induction Heads,
