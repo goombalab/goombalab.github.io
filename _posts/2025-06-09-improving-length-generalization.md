@@ -4,7 +4,7 @@ title: "Understanding and Improving Length Generalization in Recurrent Models"
 description: 
 tags:
 giscus_comments: false
-date: 2025-06-09
+date: 2025-07-07
 featured: false
 # thumbnail: assets/img/2024-07-16-hydra/sequence_mixer_trans.png
 
