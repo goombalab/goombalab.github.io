@@ -1207,11 +1207,11 @@ institution = "University of California, Irvine, School of Information and Compu
   year={2023}
 }
 
-@inproceedings{dosovitskiy2020image,
+@inproceedings{dosovitskiy2021image,
   title={An Image is Worth 16x16 Words: {T}ransformers for Image Recognition at Scale},
   author={Dosovitskiy, Alexey and Beyer, Lucas and Kolesnikov, Alexander and Weissenborn, Dirk and Zhai, Xiaohua and Unterthiner, Thomas and Dehghani, Mostafa and Minderer, Matthias and Heigold, Georg and Gelly, Sylvain and others},
   booktitle={The International Conference on Learning Representations ({ICLR})},
-  year={2020}
+  year={2021}
 }
 
 @article{tolstikhin2021mlp,
@@ -1269,6 +1269,14 @@ institution = "University of California, Irvine, School of Information and Compu
   pages={4055--4064},
   year={2018},
   organization={PMLR}
+}
+
+@inproceedings{peebles2023scalable,
+  title={Scalable Diffusion Models with Transformers},
+  author={Peebles, William and Xie, Saining},
+  booktitle={Proceedings of the IEEE/CVF international conference on computer vision},
+  pages={4195--4205},
+  year={2023}
 }
 
 @inproceedings{liu2015deep,
@@ -1636,6 +1644,22 @@ url="https://doi.org/10.1007/978-3-540-71041-7_3"
   author={Gu, Albert and Dao, Tri},
   journal={arXiv preprint arXiv:2312.00752},
   year={2023}
+}
+
+@inproceedings{gu2024mamba,
+  IDS={mamba},
+  title={Mamba: Linear-Time Sequence Modeling with Selective State Spaces},
+  author={Gu, Albert and Dao, Tri},
+  booktitle={Conference on Language Modeling (COLM)},
+  year={2024}
+}
+
+@inproceedings{dao2024transformers,
+  IDS={mamba2},
+  title={Transformers are SSMs: Generalized Models and Efficient Algorithms Through Structured State Space Duality},
+  author={Dao, Tri and Gu, Albert},
+  booktitle={Forty-first International Conference on Machine Learning (ICML)},
+  year={2024}
 }
 
 %%% S4 applications and literature
@@ -2009,12 +2033,33 @@ url="https://doi.org/10.1007/978-3-540-71041-7_3"
   year={2021}
 }
 
-@article{peng2023rwkv,
+@inproceedings{peng2023rwkv,
   IDS={rwkv},
-  title={R{W}{K}{V}: Reinventing {R}{N}{N}s for the {T}ransformer Era},
-  author={Peng, Bo and Alcaide, Eric and Anthony, Quentin and Albalak, Alon and Arcadinho, Samuel and Cao, Huanqi and Cheng, Xin and Chung, Michael and Grella, Matteo and GV, Kranthi Kiran and others},
-  journal={arXiv preprint arXiv:2305.13048},
+  title={RWKV: Reinventing RNNs for the Transformer Era},
+  author={Peng, Bo and Alcaide, Eric and Anthony, Quentin Gregory and Albalak, Alon and Arcadinho, Samuel and Biderman, Stella and Cao, Huanqi and Cheng, Xin and Chung, Michael Nguyen and Derczynski, Leon and others},
+  booktitle={The 2023 Conference on Empirical Methods in Natural Language Processing (EMNLP)},
   year={2023}
+}
+
+@inproceedings{peng2024eagle,
+  title={Eagle and Finch: RWKV with Matrix-Valued States and Dynamic Recurrence},
+  author={Peng, Bo and Goldstein, Daniel and Anthony, Quentin Gregory and Albalak, Alon and Alcaide, Eric and Biderman, Stella and Cheah, Eugene and Ferdinan, Teddy and GV, Kranthi Kiran and Hou, Haowen and others},
+  booktitle={First Conference on Language Modeling (COLM)},
+  year={2024}
+}
+
+@article{peng2025rwkv,
+  title={RWKV-7 "Goose" with Expressive Dynamic State Evolution},
+  author={Peng, Bo and Zhang, Ruichong and Goldstein, Daniel and Alcaide, Eric and Du, Xingjian and Hou, Haowen and Lin, Jiaju and Liu, Jiaxing and Lu, Janna and Merrill, William and others},
+  journal={arXiv preprint arXiv:2503.14456},
+  year={2025}
+}
+
+@inproceedings{beck2024xlstm,
+  title={xLSTM: Extended Long Short-Term Memory},
+  author={Beck, Maximilian and P{\"o}ppel, Korbinian and Spanring, Markus and Auer, Andreas and Prudnikova, Oleksandra and Kopp, Michael and Klambauer, G{\"u}nter and Brandstetter, Johannes and Hochreiter, Sepp},
+  journal={Advances in Neural Information Processing Systems ({NeurIPS})},
+  year={2024}
 }
 
 @article{hendrycks2016gaussian,
@@ -2301,6 +2346,15 @@ url="https://doi.org/10.1007/978-3-540-71041-7_3"
   year={2021}
 }
 
+% Other audio
+
+@inproceedings{gulati2020conformer,
+  title={Conformer: Convolution-augmented Transformer for Speech Recognition},
+  author={Gulati, Anmol and Qin, James and Chiu, Chung-Cheng and Parmar, Niki and Zhang, Yu and Yu, Jiahui and Han, Wei and Wang, Shibo and Zhang, Zhengdong and Wu, Yonghui and others},
+  booktitle={Proc. INTERSPEECH 2020},
+  year={2020}
+}
+
 %%% Misc (uncategorized, added to Mamba paper)
 
 @article{ba2016using,
@@ -2540,6 +2594,20 @@ url="https://doi.org/10.1007/978-3-540-71041-7_3"
   year={2024}
 }
 
+@inproceedings{yang2024parallelizing,
+  title={Parallelizing Linear Transformers with the Delta Rule over Sequence Length},
+  author={Yang, Songlin and Wang, Bailin and Zhang, Yu and Shen, Yikang and Kim, Yoon},
+  booktitle={The Thirty-eighth Annual Conference on Neural Information Processing Systems (NeurIPS)},
+  year={2024}
+}
+
+@inproceedings{yang2025gated,
+  title={Gated Delta Networks: Improving Mamba2 with Delta Rule},
+  author={Yang, Songlin and Kautz, Jan and Hatamizadeh, Ali},
+  booktitle={The International Conference on Learning Representations (ICLR)},
+  year={2025}
+}
+
 @article{shoeybi2019megatron,
   title={Megatron-{LM}: Training Multi-Billion Parameter Language Models Using Model Parallelism},
   author={Shoeybi, Mohammad and Patwary, Mostofa and Puri, Raul and LeGresley, Patrick and Casper, Jared and Catanzaro, Bryan},
@@ -2664,6 +2732,21 @@ url="https://doi.org/10.1007/978-3-540-71041-7_3"
   year={2024}
 }
 
+@article{glorioso2024zamba,
+  IDS={zamba},
+  title={Zamba: A Compact 7B SSM Hybrid Model},
+  author={Glorioso, Paolo and Anthony, Quentin and Tokpanov, Yury and Whittington, James and Pilault, Jonathan and Ibrahim, Adam and Millidge, Beren},
+  journal={arXiv preprint arXiv:2405.16712},
+  year={2024}
+}
+
+@inproceedings{ren2025samba,
+  title={Samba: Simple Hybrid State Space Models for Efficient Unlimited Context Language Modeling},
+  author={Ren, Liliang and Liu, Yang and Lu, Yadong and Liang, Chen and Chen, Weizhu and others},
+  booktitle={The Thirteenth International Conference on Learning Representations (ICLR)},
+  year={2025},
+}
+
 @inproceedings{jelassi2024repeat,
   title={Repeat After Me: Transformers Are Better Than State Space Models at Copying},
   author={Jelassi, Samy and Brandfonbrener, David and Kakade, Sham M and Malach, Eran},
@@ -2725,6 +2808,35 @@ url="https://doi.org/10.1007/978-3-540-71041-7_3"
   year={2022}
 }
 
+%%% Test Time Training/Regression
+
+@article{liu2024longhorn,
+  title={Longhorn: State Space Models are Amortized Online Learners},
+  author={Liu, Bo and Wang, Rui and Wu, Lemeng and Feng, Yihao and Stone, Peter and Liu, Qiang},
+  journal={arXiv preprint arXiv:2407.14207},
+  year={2024}
+}
+
+@article{sun2024learning,
+  title={Learning to (Learn at Test Time): {RNN}s with Expressive Hidden States},
+  author={Sun, Yu and Li, Xinhao and Dalal, Karan and Xu, Jiarui and Vikram, Arjun and Zhang, Genghan and Dubois, Yann and Chen, Xinlei and Wang, Xiaolong and Koyejo, Sanmi and others},
+  journal={arXiv preprint arXiv:2407.04620},
+  year={2024}
+}
+
+@article{wang2025test,
+  title={Test-time Regression: a Unifying Framework for Designing Sequence Models with Associative Memory},
+  author={Wang, Ke Alexander and Shi, Jiaxin and Fox, Emily B},
+  journal={arXiv preprint arXiv:2501.12352},
+  year={2025}
+}
+
+@article{von2025mesanet,
+  title={MesaNet: Sequence Modeling by Locally Optimal Test-Time Training},
+  author={von Oswald, Johannes and Scherrer, Nino and Kobayashi, Seijin and Versari, Luca and Yang, Songlin and Schlegel, Maximilian and Maile, Kaitlin and Schimpf, Yanick and Sieberling, Oliver and Meulemans, Alexander and others},
+  journal={arXiv preprint arXiv:2506.05233},
+  year={2025}
+}
 @article{team2024chameleon,
   title={Chameleon: Mixed-Modal Early-Fusion Foundation Models},
   author={Team, Chameleon},
@@ -2762,7 +2874,7 @@ url="https://doi.org/10.1007/978-3-540-71041-7_3"
   year={2024}
 }
 
-% Genomics Mamba
+%%% Genomics Mamba
 
 @inproceedings{schiff2024caduceus,
   title={Caduceus: Bi-directional Equivariant Long-Range DNA Sequence Modeling},
@@ -2771,7 +2883,7 @@ url="https://doi.org/10.1007/978-3-540-71041-7_3"
   year={2024}
 }
 
-% Graph Mamba
+%%% Graph Mamba
 
 @article{wang2024graph,
   title={Graph-Mamba: Towards Long-Range Graph Sequence Modeling with Selective State Spaces},
@@ -2787,7 +2899,7 @@ url="https://doi.org/10.1007/978-3-540-71041-7_3"
   year={2024}
 }
 
-% Formal languages
+%%% Formal languages
 @inproceedings{merrill2024illusion,
   title={The Illusion of State in State-Space Models},
   author={Merrill, William and Petty, Jackson and Sabharwal, Ashish},
@@ -2800,4 +2912,32 @@ url="https://doi.org/10.1007/978-3-540-71041-7_3"
   author={Sarrof, Yash and Veitsman, Yana and Hahn, Michael},
   journal={arXiv preprint arXiv:2405.17394},
   year={2024}
+}
+
+%%% Tokenization
+
+@inproceedings{schmidt2024tokenization,
+  title={Tokenization Is More Than Compression},
+  author={Schmidt, Craig and Reddy, Varshini and Zhang, Haoran and Alameddine, Alec and Uzan, Omri and Pinter, Yuval and Tanner, Chris},
+  booktitle={Proceedings of the 2024 Conference on Empirical Methods in Natural Language Processing},
+  pages={678--702},
+  year={2024}
+}
+
+@article{rajaraman2024analysis,
+  title={An Analysis of Tokenization: Transformers Under Markov Data},
+  author={Rajaraman, Nived and Jiao, Jiantao and Ramchandran, Kannan},
+  journal={Advances in Neural Information Processing Systems},
+  volume={37},
+  pages={62503--62556},
+  year={2024}
+}
+
+% Recent papers
+
+@inproceedings{bick2025understanding,
+  title={Understanding the Skill Gap in Recurrent Language Models: The Role of the Gather-and-Aggregate Mechanism},
+  author={Bick, Aviv and Xing, Eric and Gu, Albert},
+  booktitle={International Conference on Machine Learning (ICML)},
+  year={2025}
 }
