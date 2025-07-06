@@ -128,9 +128,12 @@ The results for Effective Remembrance suggest that the models <em>can</em> remem
 The unexplored states hypothesis indicates that length generalization can be achieved not by changing the architecture or its mechanisms, but by training the model on a more diverse set of state distributions &mdash; in particular, on the distributions that arise when rolling out the state recurrence on long sequences. To do so, we could directly train the model on longer sequences, but this might not always be possible due to GPU memory constraints or due to lack of sufficiently long training sequences. 
 </div>
 
-<div style="text-align: justify; margin-bottom: 1em;">
-In our work we explore simple interventions on the <em>initial state</em> of the recurrence $h_{-1}$. Most modern architectures assume a zero initial state in the recurrence ($h_{-1}=0$). We study four interventions on the initial state which increase the diversity of states that the model explores during training. Note that using a non-zero initial state can be interpreted as starting to process the sequence with some previous context.
-</div>
+> #### The recipe to achieve length generalization: interventions on the initial state
+>
+> <div style="text-align: justify; margin-bottom: 1em;"> Most modern architectures assume a zero initial state ($h_{-1}=0$). In our work, we consider four simple interventions on the <strong>initial state</strong> $h_{-1}$, which increase the diversity of states that the model explores during training without the need of training on longer sequences.</div>
+{: .block-tip}
+
+<!-- Note that using a non-zero initial state can be interpreted as starting to process the sequence with some previous context. -->
 
 <div style="text-align: justify; margin-bottom: 0.5em;">
 The four training interventions can be seen as sampling the initial state $h_{-1}$ from four different distributions that progressively get closer to the distribution of attainable states:
@@ -165,13 +168,15 @@ The following figures show the results of post-training the official Mamba-2 mod
 
 
 
-<div style="text-align: justify; margin-bottom: 1em;">
-Firstly, both State Passing and TBTT &mdash; which are the interventions that are closer to realistic states &mdash; allow length generalization in sequences much longer than those seen during training, which is the first important takeaway of our work: <strong>length generalization is expected to be readily achievable in recurrent models through simple training interventions</strong> (with only ~0.02% of the original pre-training budget!).
-</div>
 
-<div style="text-align: justify; margin-bottom: 1em;">
-Secondly,  <strong>we can infer properties of the distribution of the state of recurrent models looking at the performance of the interventions</strong>. The Random Noise intervention fails to length generalize in the 370m, whereas Fitted Noise works. This suggests that for the 370m model the distribution of attainable states cannot be approximated with a Gaussian with fixed variance, but it can be approximated with an IID Gaussian with fitted variance in each layer and head of the state. However, the Fitted Noise intervention fails to achieve length generalization in the 1.3b model, indicating that the state of large models probably has complex dependency relationships among its elements and thus cannot be approximated with IID values.
-</div>
+> #### Takeaway #1: SP and TBTT enable length generalization
+>
+> <div style="text-align: justify; margin-bottom: 1em;"> State Passing and TBTT &mdash; which are the interventions that are closer to realistic states &mdash; allow length generalization in sequences much longer than those seen during training. Thus, <strong>length generalization is expected to be readily achievable in recurrent models through simple training interventions</strong> (with only ~0.02% of the original pre-training budget!).</div>{: .block-tip}
+
+> #### Takeaway #2: Properties of the state of recurrent models
+>
+> <div style="text-align: justify; margin-bottom: 1em;"> <strong>We can infer properties of the distribution of the state of recurrent models looking at the performance of the interventions</strong>. The Random Noise intervention fails to length generalize in the 370m, whereas Fitted Noise works. This suggests that for the 370m model the distribution of attainable states cannot be approximated with a Gaussian with fixed variance, but it can be approximated with an IID Gaussian with fitted variance in each layer and head of the state. However, the Fitted Noise intervention fails to achieve length generalization in the 1.3b model, indicating that the state of large models probably has complex dependency relationships among its elements and thus cannot be approximated with IID values.</div>
+
 
 <div style="text-align: justify; margin-bottom: 1em;">
 Additionally, the interventions also fix the increasing state norm behavior we showed before, by making the model output states with similar norm at all timesteps: 
