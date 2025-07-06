@@ -6,7 +6,7 @@ tags:
 giscus_comments: false
 date: 2025-07-06
 featured: false
-thumbnail: assets/img/2025-06-11-length-generalization/thumbnail4.png
+thumbnail: assets/img/2025-07-06-length-generalization/thumbnail4.png
 
 
 authors:
@@ -65,7 +65,7 @@ Indeed, we show the performance of the official Mamba-2 checkpoints <d-cite key=
 <div style="max-width: 500px; margin: 0 auto; text-align: center;">
 
 
-{% include figure.liquid loading="eager" path="assets/img/2025-06-11-length-generalization/mamba2_poswise_reduced2.png" %}
+{% include figure.liquid loading="eager" path="assets/img/2025-07-06-length-generalization/mamba2_poswise_reduced2.png" %}
 
 </div>
 
@@ -105,7 +105,7 @@ Similarly, the output at time $t$ only depends on the state $h_t$ and the curren
 In our work we show that <strong>the distribution of the state $h_t$ changes over time</strong>. Therefore, even if $g$ and $f$ work correctly up to some $T$, other $h_t$ with $t>T$ might be significantly different, and thus the model fails to produce the correct output. Indeed, in the following figure we show how the norm of the state of Mamba-2 <d-cite key="mamba2"></d-cite> increases significantly over time:
 </div>
 <div style="max-width: 400px; margin: 0 auto; text-align: center;">
-{% include figure.liquid loading="eager" path="assets/img/2025-06-11-length-generalization/statemetrics_base.png" width="0.1" %}
+{% include figure.liquid loading="eager" path="assets/img/2025-07-06-length-generalization/statemetrics_base.png" width="0.1" %}
 </div>
 <div style="text-align: justify; margin-bottom: 1em;">
 This explains why recurrent models fail to length generalize: when processing sequences longer than those seen during training, they encounter states $h_t$ that have not been explored during training, and thus they have not learnt to process them. Based on this insight, we propose the <strong>unexplored states hypothesis</strong> to explain the failure to length generalize:
@@ -162,9 +162,9 @@ For simplicity, we implement SP by using the final state of the previous batch o
 The following figures show the results of post-training the official Mamba-2 models for 100 steps (~0.02% of pre-training budget) with each intervention:
 </div>
 
-{% include figure.liquid loading="eager" path="assets/img/2025-06-11-length-generalization/interventions_2.png" %}
+{% include figure.liquid loading="eager" path="assets/img/2025-07-06-length-generalization/interventions_2.png" %}
 
-{% include figure.liquid loading="eager" path="assets/img/2025-06-11-length-generalization/interventions_1.png" %}
+{% include figure.liquid loading="eager" path="assets/img/2025-07-06-length-generalization/interventions_1.png" %}
 
 
 
@@ -185,7 +185,7 @@ The following figures show the results of post-training the official Mamba-2 mod
 Additionally, the interventions also fix the increasing state norm behavior we showed before, by making the model output states with similar norm at all timesteps: 
 </div>
 <div style="max-width: 400px; margin: 0 auto; text-align: center;">
-{% include figure.liquid loading="eager" path="assets/img/2025-06-11-length-generalization/statemetrics_full.png" %}
+{% include figure.liquid loading="eager" path="assets/img/2025-07-06-length-generalization/statemetrics_full.png" %}
 </div>
 {% details SP in prior works  %}
 <p id="fn1">
@@ -203,19 +203,19 @@ We have seen that the interventions enable length <em>robustness</em> (i.e. not 
 <strong>BABILong</strong><d-cite key="babilong"></d-cite>. BABILong is a challenging benchmark which tests both the common sense understanding of a model as well as its ability to capture long range dependencies in text. In the figure below it can be observed that <strong>State Passing enhances the length generalization of the model in both the few-shot and finetuned settings</strong> (we recall that the model is trained and finetuned on sequences of length 2048). Therefore, State Passing is not only useful in fixing the diverging perplexity of established language models, but also in enhancing their ability to solve long context reasoning tasks.
 </div>
 
-{% include figure.liquid loading="eager" path="assets/img/2025-06-11-length-generalization/babilong.png" %}
+{% include figure.liquid loading="eager" path="assets/img/2025-07-06-length-generalization/babilong.png" %}
 
 <div style="text-align: justify; margin-bottom: 1em;">
 <strong>Passkey retrieval</strong><d-cite key="landmark_attention_mohtashami2023randomaccess"></d-cite>. The passkey retrieval task requires the model to retrieve a 5-digit passkey inserted at a given depth of a long context. In the figure below we show the performance of the Mamba-2 370m and 780m official checkpoints in three settings: zero shot, regular finetuning, and finetuning with fitted noise (the finetuning is done for 1000 steps, $\sim0.2\%$ of pretraining buget). The models finetuned with fitted noise are capable of exploiting relationships between tokens that are much more than 2048 positions apart (the training context length). In particular, <strong>the 780m model can solve the passkey perfectly for sequences of length 256k</strong>.
 </div>
 
 
-{% include figure.liquid loading="eager" path="assets/img/2025-06-11-length-generalization/passkey.png" %}
+{% include figure.liquid loading="eager" path="assets/img/2025-07-06-length-generalization/passkey.png" %}
 <div style="text-align: justify; margin-bottom: 1em;">
 <strong>Synthetic Copying</strong><d-cite key="transformers-better-copying-pmlr-v235-jelassi24a"></d-cite>. The synthetic copying task  consists in copying an arbitrary sequence of tokens. In the table below we show that using State Passing during training greatly improves the validation performance in sequences more than three times longer. Thus, <strong>state passing helps the model length generalize, solving long context tasks that are harder than those seen during training</strong>. 
 </div>
 
-{% include figure.liquid loading="eager" path="assets/img/2025-06-11-length-generalization/synthetic_copying.png" %}
+{% include figure.liquid loading="eager" path="assets/img/2025-07-06-length-generalization/synthetic_copying.png" %}
 
 ## A Deeper Look into How Recurrent Models Process Context
 <div style="text-align: justify; margin-bottom: 1em;">
@@ -243,7 +243,7 @@ since removing them from the context changes the prediction significantly.
 The following figure shows $\text{EffRem}_T(t)$ for varying $t$ and $T=8192$ (four times the training context) for two Mamba-2 models:
 </div>
 <div style="max-width: 500px; margin: 0 auto; text-align: center;">
-{% include figure.liquid loading="eager" path="assets/img/2025-06-11-length-generalization/mamba2-effrem-reduced.png" %}
+{% include figure.liquid loading="eager" path="assets/img/2025-07-06-length-generalization/mamba2-effrem-reduced.png" %}
 </div>
 
 > #### State Passing fixes Effective Remembrance
