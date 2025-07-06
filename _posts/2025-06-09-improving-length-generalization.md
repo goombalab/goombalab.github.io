@@ -142,11 +142,18 @@ The four training interventions can be seen as sampling the initial state $h_{-1
 2. <strong>Fitted Noise</strong>: During training, we record the mean and standard deviation of the final states of the sequences across all layers and heads. Then, we initialize the state with an IID Gaussian distribution with mean and standard deviation fitted to the ones seen during training (using a different mean / standard deviation for each layer and head).
 </div>
 <div style="text-align: justify; margin-bottom: 0.5em;">
-3. <strong>State Passing</strong>: We use the final state of a previous (unrelated) sequence as the initial state. These states are obtained by rolling the state recurrence on a given sequence (similar to what happens in validation when processing long sequences), and thus this intervention samples <em>attainable</em> states.
+3. <strong>State Passing (SP)</strong><sup id="fnref1"><a href="#fn1">1</a></sup>: We use the final state of a previous (unrelated) sequence as the initial state. These states are obtained by rolling the state recurrence on a given sequence (similar to what happens in validation when processing long sequences), and thus this intervention samples <em>attainable</em> states.
 </div>
 <div style="text-align: justify; margin-bottom: 0.5em;">
 4. <strong>Truncated Backpropagation Through Time (TBTT)</strong> <d-cite key="TBTT_1990"></d-cite> <d-cite key="TBTT_sutskever"></d-cite>: In this case, we split a long sequence into smaller chunks, and use the final state of each chunk as the initial state of the next one. This is equivalent to processing the whole sequence, yet stopping the gradient propagation between chunks.
 </div>
+
+{% details Difference between SP and TBTT  %}
+For simplicity, we implement SP by using the final state of the previous batch of sequences as the initial state of the new one. Thus, in practice the only difference between SP and TBTT is that TBTT requires carefully setting up the dataloader so that the sequences of the previous batch correspond to the prior parts of the sequences in the new batch.
+{% enddetails %}
+
+
+
 
 <div style="text-align: justify; margin-bottom: 1em;">
 The following figures show the results of post-training the official Mamba-2 models for 100 steps (~0.02% of pre-training budget) with each intervention:
@@ -172,6 +179,13 @@ Additionally, the interventions also fix the increasing state norm behavior we s
 <div style="max-width: 400px; margin: 0 auto; text-align: center;">
 {% include figure.liquid loading="eager" path="assets/img/2025-06-11-length-generalization/statemetrics_full.png" %}
 </div>
+{% details SP in prior works  %}
+<p id="fn1">
+  <sup>1</sup> Prior works have used the State Passing technique <d-cite key="longssm-wang2024longssmlengthextensionstatespace"></d-cite><d-cite key="end_to_end_bansal2022end"></d-cite>, yet it was applied to different recurrent architectures (e.g. time-invariant ones) or to tasks different to text modeling. To the best of our knowledge, we are the first to show that this technicuqe used as a training intervention can greatly improve the length generalization of several recurrent models, and that it is as effective as TBTT in text modeling.
+  <a href="#fnref1">↩</a>
+</p>
+{% enddetails %}
+
 ## Performance on Long Context Tasks
 <div style="text-align: justify; margin-bottom: 1em;">
 We have seen that the interventions enable length <em>robustness</em> (i.e. not having decreased peformance after the training context $T$), but it is not clear whether they enable length <em>generalization</em> (i.e. solving tasks that require exploiting relationships between tokens that are separated by more than $T$ positions). One may wonder whether the interventions enable length robustness by simply preventing the model from reasoning beyond the training context length &mdash; similar to sliding window attention, which can't reason over tokens separated by more than the sliding window &mdash; in which case the models would have constant performance for all evaluation contexts $t > T$, but could not solve tasks that require long context reasoning. In our work we show that <strong>the interventions do enable length generalization</strong> by showing results on three long context tasks.
