@@ -33,7 +33,7 @@ toc:
     #   - name: Example Child Subsection 1
     #   - name: Example Child Subsection 2
   - name: Existing Recurrent Models Still Fall Short
-  - name: Why Do Recurrent Models Fail to Length Generalize? The *Unexplored States Hypothesis* 
+  - name: Why Do Recurrent Models Fail to Length Generalize? The Unexplored States Hypothesis
   - name: Interventions to Enable Length Generalization
   - name: Performance on Long Context Tasks
   - name: A Deeper Look into How Recurrent Models Process Context
@@ -142,7 +142,7 @@ The four training interventions can be seen as sampling the initial state $h_{-1
 2. <strong>Fitted Noise</strong>: During training, we record the mean and standard deviation of the final states of the sequences across all layers and heads. Then, we initialize the state with an IID Gaussian distribution with mean and standard deviation fitted to the ones seen during training (using a different mean / standard deviation for each layer and head).
 </div>
 <div style="text-align: justify; margin-bottom: 0.5em;">
-3. <strong>State Passing</strong>: We use the final state of a previous (unrelated) sequence as the initial state. These states are obtained by rolling the state recurrence on a given sequence (similar to what happens in validation when processing long sequences), and thus this intervention samples *attainable* states.
+3. <strong>State Passing</strong>: We use the final state of a previous (unrelated) sequence as the initial state. These states are obtained by rolling the state recurrence on a given sequence (similar to what happens in validation when processing long sequences), and thus this intervention samples <em>attainable</em> states.
 </div>
 <div style="text-align: justify; margin-bottom: 0.5em;">
 4. <strong>Truncated Backpropagation Through Time (TBTT)</strong> <d-cite key="TBTT_1990"></d-cite> <d-cite key="TBTT_sutskever"></d-cite>: In this case, we split a long sequence into smaller chunks, and use the final state of each chunk as the initial state of the next one. This is equivalent to processing the whole sequence, yet stopping the gradient propagation between chunks.
@@ -174,7 +174,7 @@ Additionally, the interventions also fix the increasing state norm behavior we s
 </div>
 ## Performance on Long Context Tasks
 <div style="text-align: justify; margin-bottom: 1em;">
-We have seen that the interventions enable length <em>robustness</em> (i.e. not having decreased peformance after the training context $T$), but it is not clear whether they enable length *generalization* (i.e. solving tasks that require exploiting relationships between tokens that are separated by more than $T$ positions). One may wonder whether the interventions enable length robustness by simply preventing the model from reasoning beyond the training context length &mdash; similar to sliding window attention, which can't reason over tokens separated by more than the sliding window &mdash; in which case the models would have constant performance for all evaluation contexts $t > T$, but could not solve tasks that require long context reasoning. In our work we show that <strong>the interventions do enable length generalization</strong> by showing results on three long context tasks.
+We have seen that the interventions enable length <em>robustness</em> (i.e. not having decreased peformance after the training context $T$), but it is not clear whether they enable length <em>generalization</em> (i.e. solving tasks that require exploiting relationships between tokens that are separated by more than $T$ positions). One may wonder whether the interventions enable length robustness by simply preventing the model from reasoning beyond the training context length &mdash; similar to sliding window attention, which can't reason over tokens separated by more than the sliding window &mdash; in which case the models would have constant performance for all evaluation contexts $t > T$, but could not solve tasks that require long context reasoning. In our work we show that <strong>the interventions do enable length generalization</strong> by showing results on three long context tasks.
 </div>
 
 <div style="text-align: justify; margin-bottom: 1em;">
