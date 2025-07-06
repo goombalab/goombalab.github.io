@@ -6,7 +6,7 @@ tags:
 giscus_comments: false
 date: 2025-07-01
 featured: false
-thumbnail: assets/img/2024-05-31-mamba-2/mamba-2-V3-transparent.png
+thumbnail: assets/img/2025-07-09-tradeoffs/meme.jpg
 
 authors:
   - name: Albert Gu
@@ -204,7 +204,7 @@ The reason is because they have very different *types* of memory.
 Going back to the analogy, I wouldn't say that there is a clear winner comparing, say, my own memory vs. my research notes. They're both just different: my notes lets me refer back to specific details I may have forgotten, but my brain remembers a much longer history of fuzzy context.
 Transformers and SSMs probably have similar qualitative differences that are difficult to measure.
 
-I'm very curious, for example, if large-scale SSMs (if trained properly with modern [length extrapolation techniques]) would overcome the finite context problem that some chatbot users have complained about.
+I'm very curious, for example, if large-scale SSMs (if trained properly with modern [length extrapolation techniques](https://goombalab.github.io/blog/2025/improving-length-generalization/) <d-cite key="buitrago2025understanding"></d-cite>) would overcome the finite context problem that some chatbot users have complained about.
 Maintaining a continual conversation with an assistant is much more like human conversations and relationships:
 what matters is a long, persistent *summary* of the context, remembering the *shape and flow* of the interactions without needing to recall every specific detail. No one needs a scratchpad to have a relationship with their friend. This is exactly where the more brain-like nature of SSMs is more suitable than the database-like nature of Transformers, which instead may be better suited for AI tasks requiring precision and retrieval.
 {% enddetails %}
@@ -293,7 +293,7 @@ Despite the edge cases -- which are gradually being understood and patched out -
 It would be *nice* to get rid of them, but it's not worth a dedicated effort.
 
 
-I, on the other hand, deeply believe that we should get rid of tokenization. I think that the consequences will extend far beyond the surface-level implications. Besides fixing the edge cases, removing tokenization simply **adheres closer to the spirit of deep learning**.
+I, on the other hand, **deeply believe that we should get rid of tokenization**. I think that the consequences will extend far beyond the surface-level implications. Besides fixing the edge cases, removing tokenization simply **adheres closer to the spirit of deep learning**.
 
 > We should care about removing tokenization, not (just) for the practical reasons, but for the philosophical and intangible reasons.
 
@@ -323,7 +323,7 @@ There are a number of implications here that most LLM researchers I've talked to
 The first thing to note is that, perhaps not surprisingly, the SSM performs *much* better than the FLOP-matched Transformer. Most people expect this because byte sequences are much longer than BPE-token sequences, and the quadratic complexity of Transformers kicks in.
 
 But as I said earlier, the weakness of Transformers is not (just) about efficiency, but about modeling power.
-And what's notable about this plot (in particular, comparing against global attention) is that **when matching for *data* instead of compute, allowing the Transformer to use many more FLOPs, the SSM still outperforms it substantially**!
+And what's notable about this plot (in particular, focusing on global attention) is that **when matching for *data* instead of compute, allowing the Transformer to use many more FLOPs, the SSM still outperforms it significantly**!
 
 For contrast: if we compared these models on the *exact same data, but tokenized*<d-footnote>This experiment used sequences of 8k characters, which would be roughly 2k tokens long.</d-footnote>, their perplexity curves would look approximately the same (or the Transformer would be slightly better).
 So keeping the *same models* and the *same data*, but simply untokenizing the inputs, simultaneously **lets the Transformer use much more compute** but also **decreases its performance relative to the SSM**.
@@ -532,14 +532,27 @@ Indeed, I think there's a popular viewpoint that Transformers are simply a vehic
 {% include figure.liquid loading="eager" path="assets/img/2025-07-09-tradeoffs/scaling.png" %}
 
 And I think this is a great depiction of the goal of architecture research.
-We're simply looking for the black box that performs this conversion in the best way possible.
+We're simply looking for **the black box that performs this conversion in the best way possible**.
 From this perspective, there is only one central question:
 
 > Is my model using its compute wisely?
 
 In other words, we want every FLOP to count. And as is hopefully clear after this post (at least, I've convinced myself!), Transformers are far from optimal.
 
-Don't get me wrong: despite being known as a leader of the Transformer-alternatives direction, I think Transformers are amazing and attention is truly a fundamental modeling primitive.
+{% details Aside: Does it actually matter? %}
+There's another layer to the picture that I haven't touched on, which is the practical efficiency of models.
+As my friend [Tri](https://tridao.me/) says, what we actually care about is "dollars-to-capabilities", which can be factored into (1) "dollars-to-FLOPs" and (2) "FLOPs-to-capabilities".
+One might need to balance these two, for example, by accepting a suboptimal architecture for (2) in return for much more efficient (1).
+And some might say that Transformers have optimized the combination of these two.
+
+I still care primarily about question (2), partly because I personally find it more intellectually interesting, but also because I truly believe there are substantial advances to be made that change the balance even factoring in (1).
+
+A second higher-level question touching on whether it actually matters is: do we need to improve on anything to get to AGI/ASI?
+The answer here might be no -- tokenized Transformers may very well represent a viable path -- but I think that finding improvements may either get us there faster or lead to more intelligence in the end.
+{% enddetails %}
+
+
+Don't get me wrong: despite being known as a leader of the Transformer-alternatives direction, I think Transformers are amazing and *attention is truly a fundamental modeling primitive*.
 But I also think it's clear that they, by themselves, are not the final solution.
 We still have work to do.
 
