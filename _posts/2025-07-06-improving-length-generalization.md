@@ -166,18 +166,24 @@ The following figures show the results of post-training the official Mamba-2 mod
 
 {% include figure.liquid loading="eager" path="assets/img/2025-07-06-length-generalization/interventions_1.png" %}
 
+### Takeaway #1: SP and TBTT enable length generalization
 
+State Passing and TBTT -- which are the interventions that are closer to realistic states -- allow length generalization in sequences much longer than those seen during training.
+Thus:
 
-
-> #### Takeaway #1: SP and TBTT enable length generalization
->
-> <div style="text-align: justify; margin-bottom: 1em;"> State Passing and TBTT &mdash; which are the interventions that are closer to realistic states &mdash; allow length generalization in sequences much longer than those seen during training. Thus, <strong>length generalization is expected to be readily achievable in recurrent models through simple training interventions</strong> (with only ~0.02% of the original pre-training budget!).</div>
+> #### Takeaway
+> **Length generalization** is expected to be **readily achievable in recurrent models** through **simple training interventions**.
 {: .block-tip}
 
-> #### Takeaway #2: Properties of the state of recurrent models
->
-> <div style="text-align: justify; margin-bottom: 1em;"> <strong>We can infer properties of the distribution of the state of recurrent models looking at the performance of the interventions</strong>. The Random Noise intervention fails to length generalize in the 370m, whereas Fitted Noise works. This suggests that for the 370m model the distribution of attainable states cannot be approximated with a Gaussian with fixed variance, but it can be approximated with an IID Gaussian with fitted variance in each layer and head of the state. However, the Fitted Noise intervention fails to achieve length generalization in the 1.3b model, indicating that the state of large models probably has complex dependency relationships among its elements and thus cannot be approximated with IID values.</div>
+Note that our results were achieved *with only ~0.02% of the original pre-training budget*!
+
+### Takeaway #2: Properties of the state of recurrent models
+
+> #### Takeaway
+> We can infer properties of the **distribution of the state** of recurrent models by looking at the **performance of the interventions**.
 {: .block-tip}
+
+The Random Noise intervention fails to length generalize in the 370m, whereas Fitted Noise works. This suggests that for the 370m model the distribution of attainable states cannot be approximated with a Gaussian with fixed variance, but it can be approximated with an IID Gaussian with fitted variance in each layer and head of the state. However, the Fitted Noise intervention fails to achieve length generalization in the 1.3b model, indicating that the state of large models probably has complex dependency relationships among its elements and thus cannot be approximated with IID values.
 
 
 
@@ -246,11 +252,14 @@ The following figure shows $\text{EffRem}_T(t)$ for varying $t$ and $T=8192$ (fo
 {% include figure.liquid loading="eager" path="assets/img/2025-07-06-length-generalization/mamba2-effrem-reduced.png" %}
 </div>
 
-> #### State Passing fixes Effective Remembrance
->
-> <div style="text-align: justify; margin-bottom: 1em;"> 
-Models that fail to length generalize have very high $\text{EffRem}_T(t)$ for small $t$, meaning that the models are disproportionately impacted by early elements of the sequence. <strong>We hypothesize that when a model is always trained with a zero initial state, it uses the first few tokens it sees to rapidly differentiate the state, which in turn causes overfitting to these tokens</strong>. This effect is fixed with State Passing, showing that this intervention helps the models process the context in the intended way.
+### State Passing fixes Effective Remembrance
+Models that fail to length generalize have very high $\text{EffRem}_T(t)$ for small $t$, meaning that the models are disproportionately impacted by early elements of the sequence.
+
+> #### Intuition
+> We hypothesize that when a model is always trained with a zero initial state, it uses the first few tokens it sees to rapidly differentiate the state, which in turn causes overfitting to these tokens.
 {: .block-tip}
+
+This effect is fixed with State Passing, showing that this intervention helps the models process the context in the intended way.
 
 
 <!-- Lastly, we note that when models fail to length generalize, it is not that the state cannot remember all information from the sequence; rather, in a sense it is so expressive that early elements can completely change its prediction (which is not desirable, as the prediction should mostly focus on the recent context).  Thus, the intuition that the model fails to length generalize because it is not expressive enough to take into account is not correct. The failure to length generalization is related to the models overfitting to early part of the sequences, rather than not being expressive enough. -->
