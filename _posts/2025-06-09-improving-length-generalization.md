@@ -249,7 +249,7 @@ The following figure shows $\text{EffRem}_T(t)$ for varying $t$ and $T=8192$ (fo
 > #### State Passing fixes Effective Remembrance
 >
 > <div style="text-align: justify; margin-bottom: 1em;"> 
-Models that fail to length generalize have very high $\text{EffRem}_T(t)$ for small $t$, meaning that the models are disproportionately impacted by early elements of the sequence. <strong>We hypothesize that when models are always trained with a zero initial state, it uses the first few tokens it sees to rapidly differentiate the state, which in turn causes overfitting to these tokens</strong>. This effect is fixed with State Passing, showing that this intervention helps the models process the context in the intended way.
+Models that fail to length generalize have very high $\text{EffRem}_T(t)$ for small $t$, meaning that the models are disproportionately impacted by early elements of the sequence. <strong>We hypothesize that when a model is always trained with a zero initial state, it uses the first few tokens it sees to rapidly differentiate the state, which in turn causes overfitting to these tokens</strong>. This effect is fixed with State Passing, showing that this intervention helps the models process the context in the intended way.
 {: .block-tip}
 
 
