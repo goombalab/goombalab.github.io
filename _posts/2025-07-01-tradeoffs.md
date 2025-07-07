@@ -209,10 +209,6 @@ Maintaining a continual conversation with an assistant is much more like human c
 what matters is a long, persistent *summary* of the context, remembering the *shape and flow* of the interactions without needing to recall every specific detail. No one needs a scratchpad to have a relationship with their friend. This is exactly where the more brain-like nature of SSMs is more suitable than the database-like nature of Transformers, which instead may be better suited for AI tasks requiring precision and retrieval.
 {% enddetails %}
 
-> #### TODO
-> Add reference to Ricardo's paper
-{: .block-danger }
-
 
 
 {% include figure.liquid loading="eager" path="assets/img/2025-07-09-tradeoffs/intelligence_hybrid.png" %}
