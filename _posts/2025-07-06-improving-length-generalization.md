@@ -174,7 +174,7 @@ State Passing and TBTT -- which are the interventions that are closer to realist
 Thus:
 
 > #### Takeaway
-> Length generalization is expected to be **readily achievable in recurrent models** through **simple training interventions**.
+> <div style="text-align: justify; margin-bottom: 0.5em;"> Length generalization is expected to be <strong>readily achievable in recurrent models</strong> through <strong>simple training interventions</strong>.</div>
 {: .block-tip}
 
 Note that our results were achieved *with only ~0.02% of the original pre-training budget*!
@@ -182,10 +182,12 @@ Note that our results were achieved *with only ~0.02% of the original pre-traini
 ### Takeaway #2: Properties of the state of recurrent models
 
 > #### Takeaway
-> We can infer properties of the **distribution of the state** of recurrent models by looking at the **performance of the interventions**.
+> <div style="text-align: justify; margin-bottom: 0.5em;"> We can infer properties of the <strong>distribution of the state</strong> of recurrent models by looking at the <strong>performance of the interventions</strong></div>.
 {: .block-tip}
 
+<div style="text-align: justify; margin-bottom: 1em;"> 
 The Random Noise intervention fails to length generalize in the 370m, whereas Fitted Noise works. This suggests that for the 370m model the distribution of attainable states cannot be approximated with a Gaussian with fixed variance, but it can be approximated with an IID Gaussian with fitted variance in each layer and head of the state. However, the Fitted Noise intervention fails to achieve length generalization in the 1.3b model, indicating that the state of large models probably has complex dependency relationships among its elements and thus cannot be approximated with IID values.
+</div>
 
 
 
@@ -218,7 +220,7 @@ We have seen that the interventions enable length <em>robustness</em> (i.e. not 
 </div>
 
 
-{% include figure.liquid loading="eager" path="assets/img/2025-07-06-length-generalization/passkey.png" %}
+{% include figure.liquid loading="eager" path="assets/img/2025-07-06-length-generalization/passkey_2.png" %}
 
 {% details Choice of intervention for passkey retrieval %}
 <p id="fn2"> <sup>2</sup> Contrary to typical language modeling datasets, the distribution of tokens in the passkey task is not stationary (in other words, there is not a well defined behavior for what the model should do after revealing the passkey). This is why we show results for the fitted noise intervention, as it does not require using the final state of a sequence (i.e., right after revealing the passkey), which might not be appropriate as the initial state.. <a href="#fnref2">↩</a> </p> 
