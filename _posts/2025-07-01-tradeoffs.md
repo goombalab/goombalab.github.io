@@ -4,7 +4,7 @@ title: On the Tradeoffs of SSMs <br> and Transformers
 description: (or - tokens are bullshit)
 tags:
 giscus_comments: false
-date: 2025-07-01
+date: 2025-07-06
 featured: false
 thumbnail: assets/img/2025-07-09-tradeoffs/meme.jpg
 
