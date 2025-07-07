@@ -111,7 +111,8 @@ In our work we show that <strong>the distribution of the state $h_t$ changes ove
 This explains why recurrent models fail to length generalize: when processing sequences longer than those seen during training, they encounter states $h_t$ that have not been explored during training, and thus they have not learnt to process them. Based on this insight, we propose the <strong>unexplored states hypothesis</strong> to explain the failure to length generalize:
 </div>
 
-> <div style="text-align: justify;"><em><strong>Unexplored States Hypothesis</strong></em>: recurrent models fail to length generalize when they are trained only on a subset of all attainable state distributions&mdash;i.e. on a subset of the states that would be attained if the state recurrence was rolled out indefinitely. When trained for long enough, the model overfits to this subset and performs poorly on long sequences because it encounters unexplored state distributions.</div>
+> #### Unexplored States Hypothesis
+> Recurrent models fail to length generalize when they are trained only on a **subset of all attainable state distributions** -- i.e. on a subset of the states that would be attained if the state recurrence was rolled out indefinitely. When trained for long enough, the model **overfits to this subset** and performs poorly on long sequences because it **encounters unexplored state distributions**.</div>
 
 <!-- At first, one might think that as the sequence position increases, the fixed-size state needs to remember information from a longer sequence and thus somehow saturates. However, in this work we show that this intuition is not correct. Indeed, if this was the case the recurrent model would struggle to "remember" elements in the sequence that are far away. In our work, we introduce Effective Remembrace to measure how much an autoregressive is effectively remembering previous tokens. Denote by $q(\cdot \| \text{context})$ the probabilities that an autoregressive sequential model outputs for an element given a context. Then, we define $\text{EffRem}_T(t) = d\(q\(\cdot \| x\[0:T\],q(\cdot \| x\[t:T\]\)\)$, where $d$ is a distance between probability distributions (e.g. Total Variation). If $\text{EffRem}_T(t)=0$, this means that the predictions using $x\[t:T\]$ and using $x\[0:T\]$ are the same, meaning that the model does not ``effectively remember'' any of the past tokens $x\[0:t-1\]$. Conversely, if $\text{EffRem}_T(t)$ is high, the model is substantially influenced by the tokens $x\[0:t-1\]$, since removing them from the context changes the prediction significantly.
 
@@ -172,7 +173,7 @@ State Passing and TBTT -- which are the interventions that are closer to realist
 Thus:
 
 > #### Takeaway
-> **Length generalization** is expected to be **readily achievable in recurrent models** through **simple training interventions**.
+> Length generalization is expected to be **readily achievable in recurrent models** through **simple training interventions**.
 {: .block-tip}
 
 Note that our results were achieved *with only ~0.02% of the original pre-training budget*!
@@ -256,7 +257,7 @@ The following figure shows $\text{EffRem}_T(t)$ for varying $t$ and $T=8192$ (fo
 Models that fail to length generalize have very high $\text{EffRem}_T(t)$ for small $t$, meaning that the models are disproportionately impacted by early elements of the sequence.
 
 > #### Intuition
-> We hypothesize that when a model is always trained with a zero initial state, it uses the first few tokens it sees to rapidly differentiate the state, which in turn causes overfitting to these tokens.
+> We hypothesize that when a model is always trained with a zero initial state, it uses the **first few tokens it sees** to rapidly differentiate the state, which in turn causes **overfitting to these tokens**.
 {: .block-tip}
 
 This effect is fixed with State Passing, showing that this intervention helps the models process the context in the intended way.
