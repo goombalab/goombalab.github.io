@@ -112,7 +112,9 @@ This explains why recurrent models fail to length generalize: when processing se
 </div>
 
 > #### Unexplored States Hypothesis
-> Recurrent models fail to length generalize when they are trained only on a **subset of all attainable state distributions** -- i.e. on a subset of the states that would be attained if the state recurrence was rolled out indefinitely. When trained for long enough, the model **overfits to this subset** and performs poorly on long sequences because it **encounters unexplored state distributions**.</div>
+> Recurrent models fail to length generalize when they are trained only on a **subset of all attainable state distributions** -- i.e. on a subset of the states that would be attained if the state recurrence was rolled out indefinitely.  
+> <br>
+> When trained for long enough, the model **overfits to this subset** and performs poorly on long sequences because it **encounters unexplored state distributions**.
 
 <!-- At first, one might think that as the sequence position increases, the fixed-size state needs to remember information from a longer sequence and thus somehow saturates. However, in this work we show that this intuition is not correct. Indeed, if this was the case the recurrent model would struggle to "remember" elements in the sequence that are far away. In our work, we introduce Effective Remembrace to measure how much an autoregressive is effectively remembering previous tokens. Denote by $q(\cdot \| \text{context})$ the probabilities that an autoregressive sequential model outputs for an element given a context. Then, we define $\text{EffRem}_T(t) = d\(q\(\cdot \| x\[0:T\],q(\cdot \| x\[t:T\]\)\)$, where $d$ is a distance between probability distributions (e.g. Total Variation). If $\text{EffRem}_T(t)=0$, this means that the predictions using $x\[t:T\]$ and using $x\[0:T\]$ are the same, meaning that the model does not ``effectively remember'' any of the past tokens $x\[0:t-1\]$. Conversely, if $\text{EffRem}_T(t)$ is high, the model is substantially influenced by the tokens $x\[0:t-1\]$, since removing them from the context changes the prediction significantly.
 
