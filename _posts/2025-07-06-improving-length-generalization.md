@@ -51,7 +51,7 @@ Linear recurrent models such as Mamba <d-cite key="mamba"></d-cite><d-cite key="
 </div>
 
 <div style="text-align: justify; margin-bottom: 1em;">
-Previously, the issue with recurrent models was their performance: on short sequences they were less capable than Transformers. But recent architecture breakthroughs have improved the performance of recurrent models and brought them on par with Transformers, to the point that they are currently used in several industry applications like audio modeling <d-cite key="goel2024sonic"></d-cite> or code completion <d-cite key="mistral2024codestral"></d-cite>. However, several recent works have found out that <em>recurrent models still fall short</em>: they might have comparable performance to Transformers, but in many cases <strong>they perform very poorly on long sequences.</strong>
+Previously, the issue with recurrent models was their performance: on short sequences they were less capable than Transformers. But recent architecture breakthroughs have improved the performance of recurrent models and brought them on par with Transformers, to the point that they are currently used in several industry applications like audio modeling <d-cite key="goel2024sonic"></d-cite> or code completion <d-cite key="mistral2024codestral"></d-cite>. However, several recent works have found out that <em>recurrent models still fall short</em>: they might have comparable performance to Transformers, <strong> but in many cases they struggle to generalize past the training length.</strong>
 </div>
 
 
@@ -77,7 +77,7 @@ This is an issue: existing recurrent models have low performance on long sequenc
 </div>
 
 <div style="text-align: justify; margin-bottom: 1em;">
-Does this mean that recurrent models are useless? Not at all! In our work, we show that <strong>length generalization is easily achievable in many recurrent models through simple training interventions</strong>. Therefore, recurrent models possess an <em>unrealised potential</em> (it is really easy to make them better!) rather than a <em>fundamental limitation</em>.
+Does this mean that recurrent models are useless? Not at all! In our work, we show that <strong>length generalization is easily achievable in recurrent models through simple training interventions: post-training for 500 steps (~0.1% of the pre-training budget) enables length generalization in up to 256k sequences!</strong> Therefore, recurrent models possess an <em>unrealised potential</em> rather than a <em>fundamental limitation</em>.
 </div>
 
 
@@ -112,9 +112,8 @@ This explains why recurrent models fail to length generalize: when processing se
 </div>
 
 > #### Unexplored States Hypothesis
-> Recurrent models fail to length generalize when they are trained only on a **subset of all attainable state distributions** -- i.e. on a subset of the states that would be attained if the state recurrence was rolled out indefinitely.  
-> <br>
-> When trained for long enough, the model **overfits to this subset** and performs poorly on long sequences because it **encounters unexplored state distributions**.
+> <div style="text-align: justify; margin-bottom: 1em;">Recurrent models fail to length generalize when they are trained only on a <strong>subset of all attainable state distributions</strong>&mdash;i.e. on a subset of the states that would be attained if the state recurrence was rolled out indefinitely.  </div>
+><div style="text-align: justify; margin-bottom: 1em;"> When trained for long enough, the models <strong>overfit to this subset</strong> and perform poorly on long sequences because they <strong>encounter unexplored state distributions</strong>. </div>
 
 <!-- At first, one might think that as the sequence position increases, the fixed-size state needs to remember information from a longer sequence and thus somehow saturates. However, in this work we show that this intuition is not correct. Indeed, if this was the case the recurrent model would struggle to "remember" elements in the sequence that are far away. In our work, we introduce Effective Remembrace to measure how much an autoregressive is effectively remembering previous tokens. Denote by $q(\cdot \| \text{context})$ the probabilities that an autoregressive sequential model outputs for an element given a context. Then, we define $\text{EffRem}_T(t) = d\(q\(\cdot \| x\[0:T\],q(\cdot \| x\[t:T\]\)\)$, where $d$ is a distance between probability distributions (e.g. Total Variation). If $\text{EffRem}_T(t)=0$, this means that the predictions using $x\[t:T\]$ and using $x\[0:T\]$ are the same, meaning that the model does not ``effectively remember'' any of the past tokens $x\[0:t-1\]$. Conversely, if $\text{EffRem}_T(t)$ is high, the model is substantially influenced by the tokens $x\[0:t-1\]$, since removing them from the context changes the prediction significantly.
 
@@ -148,7 +147,7 @@ The four training interventions can be seen as sampling the initial state $h_{-1
 2. <strong>Fitted Noise</strong>: During training, we record the mean and standard deviation of the final states of the sequences across all layers and heads. Then, we initialize the state with an IID Gaussian distribution with mean and standard deviation fitted to the ones seen during training (using a different mean / standard deviation for each layer and head).
 </div>
 <div style="text-align: justify; margin-bottom: 0.5em;">
-3. <strong>State Passing (SP)</strong><sup id="fnref1"><a href="#fn1">1</a></sup>: We use the final state of a previous (unrelated) sequence as the initial state. These states are obtained by rolling the state recurrence on a given sequence (similar to what happens in validation when processing long sequences), and thus this intervention samples <em>attainable</em> states.
+3. <strong>State Passing (SP)</strong><sup id="fnref1"><a href="#fn1">1</a></sup>: We use the final state of a previous (unrelated) sequence as the initial state. These final states are obtained by applying the state recurrence on a given sequence, <em>attaining</em> $h_T$ and using it as $h_{-1}$ for another sequence. This is similar to what happens at validation: the model doesn't stop at $T$, but rather keeps rolling the state and producing outputs from $h_T$. 
 </div>
 <div style="text-align: justify; margin-bottom: 0.5em;">
 4. <strong>Truncated Backpropagation Through Time (TBTT)</strong> <d-cite key="TBTT_1990"></d-cite> <d-cite key="TBTT_sutskever"></d-cite>: In this case, we split a long sequence into smaller chunks, and use the final state of each chunk as the initial state of the next one. This is equivalent to processing the whole sequence, yet stopping the gradient propagation between chunks.
@@ -162,7 +161,7 @@ For simplicity, we implement SP by using the final state of the previous batch o
 
 
 <div style="text-align: justify; margin-bottom: 1em;">
-The following figures show the results of post-training the official Mamba-2 models for 100 steps (~0.02% of pre-training budget) with each intervention:
+The following figures show the results of post-training the official Mamba-2 models for 500 steps (~0.1% of pre-training budget) with each intervention:
 </div>
 
 {% include figure.liquid loading="eager" path="assets/img/2025-07-06-length-generalization/interventions_2.png" %}
@@ -215,11 +214,16 @@ We have seen that the interventions enable length <em>robustness</em> (i.e. not 
 {% include figure.liquid loading="eager" path="assets/img/2025-07-06-length-generalization/babilong.png" %}
 
 <div style="text-align: justify; margin-bottom: 1em;">
-<strong>Passkey retrieval</strong><d-cite key="landmark_attention_mohtashami2023randomaccess"></d-cite>. The passkey retrieval task requires the model to retrieve a 5-digit passkey inserted at a given depth of a long context. In the figure below we show the performance of the Mamba-2 370m and 780m official checkpoints in three settings: zero shot, regular finetuning, and finetuning with fitted noise (the finetuning is done for 1000 steps, $\sim0.2\%$ of pretraining buget). The models finetuned with fitted noise are capable of exploiting relationships between tokens that are much more than 2048 positions apart (the training context length). In particular, <strong>the 780m model can solve the passkey perfectly for sequences of length 256k</strong>.
+<strong>Passkey retrieval</strong><d-cite key="landmark_attention_mohtashami2023randomaccess"></d-cite>. The passkey retrieval task requires the model to retrieve a 5-digit passkey inserted at a given depth of a long context. In the figure below we show the performance of the Mamba-2 370m and 780m official checkpoints in three settings: zero shot, regular finetuning, and finetuning with fitted noise<sup id="fnref2"><a href="#fn2">2</a></sup>. The models finetuned with fitted noise are capable of exploiting relationships between tokens that are much more than 2048 positions apart (the training context length). In particular, <strong>the 780m model can solve the passkey perfectly for sequences of length 256k</strong>.
 </div>
 
 
 {% include figure.liquid loading="eager" path="assets/img/2025-07-06-length-generalization/passkey.png" %}
+
+{% details Choice of intervention for passkey retrieval %}
+<p id="fn2"> <sup>2</sup> Contrary to typical language modeling datasets, the distribution of tokens in the passkey task is not stationary (in other words, there is not a well defined behavior for what the model should do after revealing the passkey). This is why we show results for the fitted noise intervention, as it does not require using the final state of a sequence (i.e., right after revealing the passkey), which might not be appropriate as the initial state.. <a href="#fnref2">↩</a> </p> 
+{% enddetails %}
+
 <div style="text-align: justify; margin-bottom: 1em;">
 <strong>Synthetic Copying</strong><d-cite key="transformers-better-copying-pmlr-v235-jelassi24a"></d-cite>. The synthetic copying task  consists in copying an arbitrary sequence of tokens. In the table below we show that using State Passing during training greatly improves the validation performance in sequences more than three times longer. Thus, <strong>state passing helps the model length generalize, solving long context tasks that are harder than those seen during training</strong>. 
 </div>
@@ -232,7 +236,7 @@ We have shown that the interventions on the initial state enable length robustne
 </div>
 
 <div style="text-align: justify; margin-bottom: 1em;">
-Ideally, in the case of text modeling we would like the model to pay attention to the recent context, and not focus too much on tokens that are too far away. But how can we quantify this behavior? We introduce <strong>Effective Remembrace</strong> to measure <strong>how much an autoregressive model is "effectively" remembering previous tokens</strong>. Denote by $q(\cdot \| \text{context})$ the probabilities that an autoregressive sequential model outputs for the next token given a context. Then, we define:
+Ideally, in the case of text modeling we would like the model to pay attention to the recent context, and not focus too much on tokens that are too far away. But how can we quantify this behavior? We introduce <strong>Effective Remembrance</strong> to measure <strong>how much an autoregressive model is "effectively" remembering previous tokens</strong>. Denote by $q(\cdot \| \text{context})$ the probabilities that an autoregressive sequential model outputs for the next token given a context. Then, we define:
 </div>
 <div style="text-align: center;">
  $ \text{EffRem}_T(t) = d(q(\cdot | x[0:T],q(\cdot | x[t:T])) $
@@ -249,20 +253,33 @@ since removing them from the context changes the prediction significantly.
 </div>
 
 <div style="text-align: justify; margin-bottom: 1em;">
-The following figure shows $\text{EffRem}_T(t)$ for varying $t$ and $T=8192$ (four times the training context) for two Mamba-2 models:
+The following figure shows $\text{EffRem}_T(t)$ for two official Mamba-2 checkpoints (<strong>which fail to length generalize</strong>) for varying $t$ and $T=8192$ (four times the training context):
 </div>
+
+<div style="max-width: 500px; margin: 0 auto; text-align: center;">
+{% include figure.liquid loading="eager" path="assets/img/2025-07-06-length-generalization/effrem_undesirable.png" %}
+</div>
+
+<div style="text-align: justify; margin-bottom: 1em;">
+Intuitively we would expect that while every token contributes to the model’s output, the most recent tokens should have a significantly stronger influence. However, notice how the $\text{EffRem}$ curves immediately jump up and then gradually taper off. This behavior is clearly problematic: the next-token prediction at time $t=T+1$ shouldn't change drastically depending on whether the model sees only the recent tokens  \( x[4096:T] \) or the full sequence \( x[0:T] \). In natural language, the model should primarily rely on recent context, and earlier tokens \( x[0:4096] \) shouldn't completely alter the prediction&mdash;especially not to the extent that the total variation between the two output probability distributions approaches 1. This means that the model is disproportionately influenced by tokens at the beginning of the sequence.
+</div>
+
+> #### Intuition
+> <div style="text-align: justify; margin-bottom: 1em;">We hypothesize that when a model is always trained with a zero initial state, it uses the <strong>first few tokens it sees</strong> to rapidly differentiate the state, which in turn causes <strong>overfitting to these tokens</strong>.</div>
+{: .block-tip}
+
+### State Passing fixes Effective Remembrance
+After post-training with State Passing, the $\text{EffRem}$ curves show a gradual increase, indicating that the model places minimal weight on distant tokens and places progressively more weight on recent ones. In particular, tokens in the immediate context (e.g. the previous words in a sentence) have a critical impact on the next token predictions, which is the desired behavior in text modeling.
+
 <div style="max-width: 500px; margin: 0 auto; text-align: center;">
 {% include figure.liquid loading="eager" path="assets/img/2025-07-06-length-generalization/mamba2-effrem-reduced.png" %}
 </div>
 
-### State Passing fixes Effective Remembrance
-Models that fail to length generalize have very high $\text{EffRem}_T(t)$ for small $t$, meaning that the models are disproportionately impacted by early elements of the sequence.
-
-> #### Intuition
-> We hypothesize that when a model is always trained with a zero initial state, it uses the **first few tokens it sees** to rapidly differentiate the state, which in turn causes **overfitting to these tokens**.
+> #### Takeaway
+> <div style="text-align: justify; margin-bottom: 1em;"> Through Effective Remembrance, we can check that <strong>State Passing helps the models prioritize recent context</strong> and not be needlessly disrupted by tokens that are far away in the past.
 {: .block-tip}
 
-This effect is fixed with State Passing, showing that this intervention helps the models process the context in the intended way.
+
 
 
 <!-- Lastly, we note that when models fail to length generalize, it is not that the state cannot remember all information from the sequence; rather, in a sense it is so expressive that early elements can completely change its prediction (which is not desirable, as the prediction should mostly focus on the recent context).  Thus, the intuition that the model fails to length generalize because it is not expressive enough to take into account is not correct. The failure to length generalization is related to the models overfitting to early part of the sequences, rather than not being expressive enough. -->
