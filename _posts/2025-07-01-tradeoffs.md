@@ -301,7 +301,7 @@ In this case, I think that the consequences of overcoming tokenization *will ext
 > We should care about removing tokenization, not (just) for the practical reasons, but for the aesthetic and intangible reasons.
 
 Besides fixing the edge cases, removing tokenization simply **adheres closer to the spirit of deep learning**.
-Deep learning has always been about replacing handcrafted feature engineering with powerful end-to-end neural networks that can learn patterns automatically from data. From CNNs replacing manually engineered edge detectors in computer vision, to Transformers replacing linguistic features in NLP, major advances in AI have always happened with **less data processing and more automatic learning** (as popularly espoused by [The Bitter Lesson](http://www.incompleteideas.net/IncIdeas/BitterLesson.html)).
+Deep learning has always been about replacing handcrafted feature engineering with powerful end-to-end neural networks that can learn patterns automatically from data. From CNNs replacing manually engineered edge detectors in computer vision, to Transformers replacing linguistic features in NLP, major advances in AI have always happened with **less data processing and more automatic learning** (as popularly espoused by [The Bitter Lesson](http://www.incompleteideas.net/IncIdeas/BitterLesson.html))<d-cite key="sutton2019bitter"></d-cite>.
 
 I believe that replacing tokenization with end-to-end models will have huge consequences for
 - **scaling laws**: learning better patterns from raw data always leads to more powerful models;
@@ -332,7 +332,7 @@ This might not seem surprising to many because byte sequences are much longer th
 But as I said earlier, the weakness of Transformers is not (just) about efficiency, but about modeling power.
 And what's notable about this plot (in particular, focusing on global attention) is that **when matching for *data* instead of compute, allowing the Transformer to use many more FLOPs, the SSM still outperforms it consistently**!<d-footnote>This plot is the result after we specifically tuned for the global Transformer baseline; In other settings (e.g. different combinations of network width/depth/optimizer hyperparameters), there was a much larger gap between Mamba and global attention.</d-footnote>
 
-For contrast: if we compared these models on the *exact same data, but tokenized*<d-footnote>This experiment used sequences of 8k characters, which would be roughly 2k tokens long, a standard length.</d-footnote>, their perplexity curves would look approximately the same (or the Transformer would be slightly better).
+For contrast: if we compared these models on the *exact same data, but tokenized*<d-footnote>This experiment used sequences of 8k characters, which would be roughly 2k tokens long, a standard length for LLMs where we understand the empirical performance of different backbones well.</d-footnote>, their perplexity curves would look approximately the same (or the Transformer would be slightly better), and their FLOPs would also be similar.
 So keeping the *same models* and the *same data*, but simply untokenizing the inputs, simultaneously **lets the Transformer use much more compute** but also **decreases its performance relative to the SSM**.
 
 
@@ -369,11 +369,11 @@ For example, image patches can be quite meaningful when they capture some featur
 | -------------                | -----------         |
 | Words / subword tokens       | :heavy_check_mark:  |
 | Characters                   | :x:                 |
-| DNA base-pairs               | :x:                 |
+| DNA base pairs               | :x:                 |
 | Image, video, audio patches  | :question:          |
 | Time series datapoints       | :question:          |
 
-This is why I do think that attention is indispensable for data like tokenized language, which has largely been processed to a degree of meaning.<d-footnote>Many people will nitpick about whether BPE tokens represent any meaning. For sure they don't -- which is again a major reason I think tokenization needs to go. But to some approximation they do tend to find important repeated subwords like prefixes; and moreover there are a lot of hacks built-in, such as first segmenting on whitespace so that tokens can't cross word boundaries (which is very important to its performance -- another indicator of just how broken tokenization is). So in practice, LLM vocabularies tend to contain lots of actual words, which could be considered "meaningful".</d-footnote>
+This is why I do think that attention is indispensable for data like tokenized language, which has largely been processed to a degree of meaning.<d-footnote>Many people will nitpick about whether BPE tokens represent any meaning. For sure they don't -- which is again a major reason I think tokenization needs to go. But to some approximation they do tend to find important repeated subwords like prefixes; and moreover there are a lot of hacks built-in, such as first segmenting on whitespace so that tokens can't cross word boundaries (which is very important to its performance; another indicator of just how broken tokenization is). So in practice, LLM vocabularies tend to contain lots of actual words, which could be considered "meaningful".</d-footnote>
 
 On the other hand, when the data is generally not meaningful (in the sense of requiring a model to pay attention to individual units), such as character-level language or DNA<d-footnote>I'm aware that sometimes you do need to pay attention to individual characters or base pairs, and that understanding the interactions of single base pairs is actually a big problem for machine learning on DNA. This heuristic is a deliberate oversimplification that I still think is generally useful.</d-footnote>, Transformers don't work well, and other models like SSMs hold a clear edge.
 SSMs in particular, with their compressed states, may be particularly suited for these because when data appears at resolutions that are too high to be useful, what the model needs to do is **compress the data into more meaningful abstractions**.
@@ -436,7 +436,7 @@ We should expect "the right architecture" to behave essentially identically on b
 
 {% details Aside: Convolutions for language modeling %}
 On a somewhat tangential note, I originally came up with the thought experiment in the figure above years ago, as a means to convince myself that convolutions don't work for language modeling.
-When [S4](https://arxiv.org/abs/2111.00396) was published, the community was excited about its potential on various modalities, and it spawned a wave of follow-up work on [pure convolutional language models](https://arxiv.org/abs/2302.10866).<d-cite key="gu2022efficiently"></d-cite><d-cite key="poli2023hyena"></d-cite>
+When [S4](https://arxiv.org/abs/2111.00396) was published, the community was excited about its potential on various modalities, and it spawned a wave of follow-up work on [pure convolutional language models](https://arxiv.org/abs/2302.10866) <d-cite key="gu2022efficiently"></d-cite><d-cite key="poli2023hyena"></d-cite>.
 
 But over the course of working on linear time-invariant SSMs, I quickly realized they were hopeless for language modeling.
 This example shows why: because language doesn't have an intrinsic "sampling rate", tokens can be spaced somewhat arbitrarily. 
