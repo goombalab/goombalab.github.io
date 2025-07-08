@@ -1,7 +1,7 @@
 ---
 layout: distill
 title: On the Tradeoffs of SSMs and Transformers
-description: (or - tokens are bullshit)
+description: (or - tokens are bs)
 tags:
 giscus_comments: false
 date: 2025-07-08
