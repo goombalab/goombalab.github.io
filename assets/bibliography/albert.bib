@@ -141,6 +141,28 @@
   organization={PMLR}
 }
 
+@inproceedings{chung2017hierarchical,
+  title={Hierarchical Multiscale Recurrent Neural Networks},
+  author={Chung, Junyoung and Ahn, Sungjin and Bengio, Yoshua},
+  booktitle={International Conference on Learning Representations (ICLR)},
+  year={2017}
+}
+
+@inproceedings{chang2017dilated,
+  title={Dilated Recurrent Neural Networks},
+  author={Chang, Shiyu and Zhang, Yang and Han, Wei and Yu, Mo and Guo, Xiaoxiao and Tan, Wei and Cui, Xiaodong and Witbrock, Michael and Hasegawa-Johnson, Mark A and Huang, Thomas S},
+  journal={Advances in Neural Information Processing Systems},
+  volume={30},
+  year={2017}
+}
+
+@inproceedings{shen2019ordered,
+  title={Ordered Neurons: Integrating Tree Structures into Recurrent Neural Networks},
+  author={Shen, Yikang and Tan, Shawn and Sordoni, Alessandro and Courville, Aaron},
+  booktitle={International Conference on Learning Representations (ICLR)},
+  year={2019},
+}
+
 @article{zhou2016minimal,
   title={Minimal Gated Unit for Recurrent Neural Networks},
   author={Zhou, Guo-Bing and Wu, Jianxin and Zhang, Chen-Lin and Zhou, Zhi-Hua},
@@ -205,13 +227,6 @@
   pages={1292--1300},
   year={2016},
   organization={PMLR}
-}
-
-@inproceedings{chang2017dilated,
-  title={Dilated Recurrent Neural Networks},
-  author={Chang, Shiyu and Zhang, Yang and Han, Wei and Yu, Mo and Guo, Xiaoxiao and Tan, Wei and Cui, Xiaodong and Witbrock, Michael and Hasegawa-Johnson, Mark and Huang, Thomas S},
-  booktitle = {Advances in Neural Information Processing Systems ({NeurIPS})},
-  year={2017}
 }
 
 @article{srivastava2014dropout,
@@ -1208,9 +1223,9 @@ institution = "University of California, Irvine, School of Information and Compu
 }
 
 @inproceedings{dosovitskiy2021image,
-  title={An Image is Worth 16x16 Words: {T}ransformers for Image Recognition at Scale},
+  title={An Image is Worth 16x16 Words: Transformers for Image Recognition at Scale},
   author={Dosovitskiy, Alexey and Beyer, Lucas and Kolesnikov, Alexander and Weissenborn, Dirk and Zhai, Xiaohua and Unterthiner, Thomas and Dehghani, Mostafa and Minderer, Matthias and Heigold, Georg and Gelly, Sylvain and others},
-  booktitle={The International Conference on Learning Representations ({ICLR})},
+  booktitle={The International Conference on Learning Representations (ICLR)},
   year={2021}
 }
 
@@ -1249,7 +1264,7 @@ institution = "University of California, Irvine, School of Information and Compu
 }
 
 @article{salimans2017pixelcnn++,
-  title={Pixel{C}{N}{N}++: Improving the Pixel{C}{N}{N} with Discretized Logistic Mixture Likelihood and Other Modifications},
+  title={PixelCNN++: Improving the PixelCNN with Discretized Logistic Mixture Likelihood and Other Modifications},
   author={Salimans, Tim and Karpathy, Andrej and Chen, Xi and Kingma, Diederik P},
   journal={arXiv preprint arXiv:1701.05517},
   year={2017}
@@ -1584,7 +1599,7 @@ url="https://doi.org/10.1007/978-3-540-71041-7_3"
 @inproceedings{gu2021combining,
   IDS={lssl},
   title = {Combining Recurrent, Convolutional, and Continuous-time Models with the Linear State Space Layer},
-  author = {Gu, Albert and Johnson, Isys and Goel, Karan and Saab, Khaled and Dao, Tri and Rudra, Atri and R\'{e}, Christopher},
+  author = {Gu, Albert and Johnson, Isys and Goel, Karan and Saab, Khaled and Dao, Tri and Rudra, Atri and Ré, Christopher},
   booktitle = {Advances in Neural Information Processing Systems (NeurIPS)},
   year = {2021}
 }
@@ -1714,7 +1729,7 @@ url="https://doi.org/10.1007/978-3-540-71041-7_3"
   IDS={h3},
   title={Hungry Hungry Hippos: Towards Language Modeling with State Space Models},
   author={Dao, Tri and Fu, Daniel Y and Saab, Khaled K and Thomas, Armin W and Rudra, Atri and R{\'e}, Christopher},
-  booktitle={The International Conference on Learning Representations ({ICLR})},
+  booktitle={The International Conference on Learning Representations (ICLR)},
   year={2023}
 }
 
@@ -2852,7 +2867,7 @@ url="https://doi.org/10.1007/978-3-540-71041-7_3"
 }
 
 @article{sun2024learning,
-  title={Learning to (Learn at Test Time): {RNN}s with Expressive Hidden States},
+  title={Learning to (Learn at Test Time): RNNs with Expressive Hidden States},
   author={Sun, Yu and Li, Xinhao and Dalal, Karan and Xu, Jiarui and Vikram, Arjun and Zhang, Genghan and Dubois, Yann and Chen, Xinlei and Wang, Xiaolong and Koyejo, Sanmi and others},
   journal={arXiv preprint arXiv:2407.04620},
   year={2024}
@@ -2950,6 +2965,172 @@ url="https://doi.org/10.1007/978-3-540-71041-7_3"
 
 %%% Tokenization
 
+%%% Tokenizer-free methods
+
+@inproceedings{wang2024mambabyte,
+  IDS={mambabyte},
+  title={MambaByte: Token-free Selective State Space Model},
+  author={Wang, Junxiong and Gangavarapu, Tushaar and Yan, Jing Nathan and Rush, Alexander M},
+  booktitle={First Conference on Language Modeling (COLM)},
+  year={2024}
+}
+
+@article{yu2023megabyte,
+  IDS={megabyte},
+  title={MegaByte: Predicting Million-byte Sequences with Multiscale Transformers},
+  author={Yu, Lili and Simig, D{\'a}niel and Flaherty, Colin and Aghajanyan, Armen and Zettlemoyer, Luke and Lewis, Mike},
+  journal={Advances in Neural Information Processing Systems},
+  volume={36},
+  pages={78808--78823},
+  year={2023}
+}
+
+@inproceedings{nawrot2022hierarchical,
+  title={Hierarchical Transformers Are More Efficient Language Models},
+  author={Nawrot, Piotr and Tworkowski, Szymon and Tyrolski, Micha{\l} and Kaiser, {\L}ukasz and Wu, Yuhuai and Szegedy, Christian and Michalewski, Henryk},
+  booktitle={Findings of the Association for Computational Linguistics: NAACL 2022},
+  pages={1559--1571},
+  year={2022}
+}
+
+@inproceedings{nawrot2023efficient,
+  title={Efficient Transformers with Dynamic Token Pooling},
+  author={Nawrot, Piotr and Chorowski, Jan and Lancucki, Adrian and Ponti, Edoardo Maria},
+  booktitle={Proceedings of the 61st Annual Meeting of the Association for Computational Linguistics (Volume 1: Long Papers)},
+  pages={6403--6417},
+  year={2023}
+}
+
+@article{ho2024block,
+  title={Block Transformer: Global-to-local Language Modeling for Fast Inference},
+  author={Ho, Namgyu and Bae, Sangmin and Kim, Taehyeon and Jo, Hyunjik and Kim, Yireun and Schuster, Tal and Fisch, Adam and Thorne, James and Yun, Se-Young},
+  journal={Advances in Neural Information Processing Systems},
+  volume={37},
+  pages={48740--48783},
+  year={2024}
+}
+
+@article{xue2022byt5,
+  title={Byt5: Towards a Token-Free Future with Pre-trained Byte-to-Byte Models},
+  author={Xue, Linting and Barua, Aditya and Constant, Noah and Al-Rfou, Rami and Narang, Sharan and Kale, Mihir and Roberts, Adam and Raffel, Colin},
+  journal={Transactions of the Association for Computational Linguistics},
+  volume={10},
+  pages={291--306},
+  year={2022},
+  publisher={MIT Press One Broadway, 12th Floor, Cambridge, Massachusetts 02142, USA~…}
+}
+
+@article{dai2020funnel,
+  title={Funnel-{T}ransformer: Filtering out Sequential Redundancy for Efficient Language Processing},
+  author={Dai, Zihang and Lai, Guokun and Yang, Yiming and Le, Quoc},
+  journal={Advances in Neural Information Processing Systems},
+  volume={33},
+  pages={4271--4282},
+  year={2020}
+}
+
+@article{clark2022canine,
+  title={Canine: Pre-training an Efficient Tokenization-free Encoder for Language Representation},
+  author={Clark, Jonathan H and Garrette, Dan and Turc, Iulia and Wieting, John},
+  journal={Transactions of the Association for Computational Linguistics},
+  volume={10},
+  pages={73--91},
+  year={2022},
+}
+
+@inproceedings{godey2022manta,
+  title={MANTa: Efficient Gradient-Based Tokenization for End-to-End Robust Language Modeling},
+  author={Godey, Nathan and Castagn{\'e}, Roman and De La Clergerie, {\'E}ric Villemonte and Sagot, Beno{\i}t},
+  booktitle={Findings of the Association for Computational Linguistics: EMNLP 2022},
+  pages={2859--2870},
+  year={2022}
+}
+
+@inproceedings{kallinimrt5,
+  title={MrT5: Dynamic Token Merging for Efficient Byte-level Language Models},
+  author={Kallini, Julie and Murty, Shikhar and Manning, Christopher D and Potts, Christopher and Csord{\'a}s, R{\'o}bert},
+  booktitle={The Thirteenth International Conference on Learning Representations (ICLR)},
+  year={2025}
+}
+
+@inproceedings{tay2022charformer,
+  title={Charformer: Fast Character Transformers via Gradient-based Subword Tokenization},
+  author={Tay, Yi and Tran, Vinh Q and Ruder, Sebastian and Gupta, Jai and Chung, Hyung Won and Bahri, Dara and Qin, Zhen and Baumgartner, Simon and Yu, Cong and Metzler, Donald},
+  booktitle={International Conference on Learning Representations (ICLR)},
+  year={2022}
+}
+
+@article{fleshman2023toucan,
+  title={Toucan: Token-aware Character Level Language Modeling},
+  author={Fleshman, William and Van Durme, Benjamin},
+  journal={arXiv preprint arXiv:2311.08620},
+  year={2023}
+}
+
+@article{MAGNET,
+  title={Magnet: Improving the Multilingual Fairness of Language Models with Adaptive Gradient-based Tokenization},
+  author={Ahia, Orevaoghene and Kumar, Sachin and Gonen, Hila and Hofmann, Valentin and Limisiewicz, Tomasz and Tsvetkov, Yulia and Smith, Noah A},
+  journal={Advances in Neural Information Processing Systems},
+  volume={37},
+  pages={47790--47814},
+  year={2024}
+}
+
+@article{egli2025multiscale,
+  title={Multiscale Byte Language Models--A Hierarchical Architecture for Causal Million-Length Sequence Modeling},
+  author={Egli, Eric and Manica, Matteo and Born, Jannis},
+  journal={arXiv preprint arXiv:2502.14553},
+  year={2025}
+}
+
+@inproceedings{thawani2023learn,
+  title={Learn Your Tokens: Word-Pooled Tokenization for Language Modeling},
+  author={Thawani, Avijit and Ghanekar, Saurabh and Zhu, Xiaoyuan and Pujara, Jay},
+  booktitle={Findings of the Association for Computational Linguistics: EMNLP 2023},
+  pages={9883--9893},
+  year={2023}
+}
+
+@inproceedings{sreedhar2023local,
+  title={Local Byte Fusion for Neural Machine Translation},
+  author={Sreedhar, Makesh Narsimhan and Wan, Xiangpeng and Cheng, Yu and Hu, Junjie},
+  booktitle={Proceedings of the 61st Annual Meeting of the Association for Computational Linguistics (Volume 1: Long Papers)},
+  pages={7199--7214},
+  year={2023}
+}
+
+@article{videau2025bytes,
+  IDS={aunet},
+  title={From Bytes to Ideas: Language Modeling with Autoregressive U-Nets},
+  author={Videau, Mathurin and Idrissi, Badr Youbi and Leite, Alessandro and Schoenauer, Marc and Teytaud, Olivier and Lopez-Paz, David},
+  journal={arXiv preprint arXiv:2506.14761},
+  year={2025}
+}
+
+@misc{EvaByte,
+    title = {EvaByte: Efficient Byte-level Language Models at Scale},
+    url = {https://hkunlp.github.io/blog/2025/evabyte},
+    author = {Lin Zheng and Xueliang Zhao and Guangtao Wang and Chen Wu and David Dong and Angela Wang and Mingran Wang and Yun Du and Haige Bo and Amol Sharma and Bo Li and Kejie Zhang and Changran Hu and Urmish Thakker and Lingpeng Kong},
+    year = {2025}
+}
+
+@online{sutton2019bitter,
+    title = {The Bitter Lesson is coming for Tokenization
+},
+    url = {http://www.incompleteideas.net/IncIdeas/BitterLesson.html},
+    author = {Sutton, Richard},
+    year = {2019}
+}
+
+@online{peric2025bitter,
+  title   = {The Bitter Lesson is coming for Tokenization},
+  url     = {https://lucalp.dev/bitter-lesson-tokenization-and-blt},
+  author  = {Luca Perić},
+  date    = {2025-06-24},
+  year    = {2025}
+}
+
+%%% BPE paper
 @inproceedings{sennrich2016neural,
   title={Neural Machine Translation of Rare Words with Subword Units},
   author={Sennrich, Rico and Haddow, Barry and Birch, Alexandra},
@@ -2957,6 +3138,9 @@ url="https://doi.org/10.1007/978-3-540-71041-7_3"
   pages={1715--1725},
   year={2016}
 }
+
+%%% Tokenization theory
+
 
 @inproceedings{schmidt2024tokenization,
   title={Tokenization Is More Than Compression},
@@ -2977,9 +3161,42 @@ url="https://doi.org/10.1007/978-3-540-71041-7_3"
 
 % Recent papers
 
+@inproceedings{buitrago2025understanding,
+  title={Understanding and Improving Length Generalization in Recurrent Models},
+  author={Buitrago, Ricardo and Gu, Albert},
+  booktitle={International Conference on Machine Learning (ICML)},
+  year={2025}
+}
+
 @inproceedings{bick2025understanding,
   title={Understanding the Skill Gap in Recurrent Language Models: The Role of the Gather-and-Aggregate Mechanism},
   author={Bick, Aviv and Xing, Eric and Gu, Albert},
   booktitle={International Conference on Machine Learning (ICML)},
+  year={2025}
+}
+
+@inproceedings{buitrago2025benefits,
+  title={On the Benefits of Memory for Modeling Time-Dependent PDEs},
+  author={Buitrago, Ricardo and Marwah, Tanya and Gu, Albert and Risteski, Andrej},
+  booktitle={The International Conference on Learning Representations (ICLR)},
+  year={2025}
+}
+
+%%% Misc
+
+@article{fedus2022switch,
+  title={Switch Transformers: Scaling to Trillion Parameter Models with Simple and Efficient Sparsity},
+  author={Fedus, William and Zoph, Barret and Shazeer, Noam},
+  journal={Journal of Machine Learning Research (JMLR)},
+  volume={23},
+  number={120},
+  pages={1--39},
+  year={2022}
+}
+
+@article{chen2025l,
+  title={L2M: Mutual Information Scaling Law for Long-Context Language Modeling},
+  author={Chen, Zhuo and Jin, Zhuotao and Luo, Di and Soljačić, Marin and others},
+  journal={arXiv preprint arXiv:2503.04725},
   year={2025}
 }
