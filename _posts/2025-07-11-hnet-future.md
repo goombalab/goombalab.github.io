@@ -338,6 +338,8 @@ For example, these were the conclusions found for a 2-stage H-Net (three sequenc
 - **Inner**: The innermost model has the most parameters and is essentially an standard isotropic language model operating on coarsely tokenized data. In the paper, we stuck to pure Transformers because that was our main baseline.
 However, this is completely orthogonal to the rest of the H-Net design; we did experiment a bit and did an ablation showing that general findings for LM architectures still transfer, such as that **hybrid models (we tried 3-to-1 Mamba-to-Transformer) still have noticeably better perplexity**! CITE [INCLUDE GRAPH]
 
+{% include figure.liquid loading="eager" path="assets/img/2025-07-11-hnet/hybrid.png" caption="Ablating the main network architecture of a 2-stage H-Net." %}
+
 More explicitly, I think the following is true (we didn't show ablations but ran some early tests).
 
 > H-Nets would **work just fine without attention** (only SSM layers), but **not work well at all without SSMs** (only Transformer layers).
@@ -379,5 +381,5 @@ Perhaps the most concrete answer I can give, though, can be summarized by just t
 {: .block-warning }
 
 > #### The Future
-> As we get closer to finding "the right architecture", these explicitly engineered pipelines will be subsumed by an end-to-end model. **Maybe the H-Net?**
+> As we get closer to finding "the right architecture", these explicitly engineered pipelines will be subsumed by an end-to-end model. ***Maybe the H-Net?***
 {: .block-tip }
