@@ -32,7 +32,7 @@ toc:
       - name: The three ingredients
       - name: Mamba - putting it all together
       - name: Modern recurrent models
-  - name: States, Brains, and Databases
+  - name: States, Databases, and Brains
     subsections:
       - name: Autoregressive states of sequence models
       - name: A coarse analogy
@@ -136,7 +136,7 @@ In particular, **all of these models are much more similar to each other than th
 So in the rest of this post, we're going to try to get a grasp on the higher-level tradeoffs between SSMs and Transformers.
 
 
-## States, Brains, and Databases
+## States, Databases, and Brains
 
 I claim that we can understand the trade-offs of different models better by looking at what they store in (and how they manipulate) their **autoregressive state**.
 
@@ -528,7 +528,7 @@ On the other hand, some variants of efficient attention "blur" the boundaries of
 (More abstractly, these belong to a larger family of attention variants that make *[structured approximations](https://arxiv.org/abs/2405.21060)* to the quadratic attention matrix<d-cite key="dao2024transformers"></d-cite>, any of which would have similar properties, I think.)
 Because of lacking a token-level cache, these models would not have the same weakness and would instead inherit properties much closer to SSMs.
 
-Incidentally, this is another more subtle reason why I somewhat prefer using "state space model" or "recurrent model" as a descriptive term over "linear attention".<d-footnote>(I still like the term linear attention though for interesting theoretical connections as well as the historical significance.)</d-footnote>
+Incidentally, this is another more subtle reason why I somewhat prefer using "state space model" or "recurrent model" as a descriptive term over "linear attention".<d-footnote>I still like the term linear attention though for interesting theoretical connections, as well as the historical significance.</d-footnote>
 To me, the term "attention" is *characterized* by maintaining a token-resolution state and having access to individual elements -- in other words, being able to **pay attention** to a single token.
 {% enddetails %}
 
