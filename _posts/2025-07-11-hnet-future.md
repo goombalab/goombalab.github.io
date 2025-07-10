@@ -39,12 +39,9 @@ toc:
 ---
 
 In this post, I'm going to try to convince you why H-Nets are fundamental and important.
-There was only so much content that could make it to the paper. I think there are a lot of downstream consequences and interesting technical connections that we didn't cover.
-Much of this will be based on deeper (but mostly unvalidated) intuitions I have and speculative implications about H-Nets
-For fun, I'll formulate several concrete hypotheses and predictions about the future of this research direction -- these are personal takes that aren't meant to be calibrated or taken super seriously, but does crystallize what I consider important problems for the field..
-
-If you're an LLM researcher who happened to stumble across this post but doesn't give a crap about architectures, perhaps you'll at least find the last section on [scaling laws] interesting.
-If there's one thing I hope this post can influence, it's the community awareness and protocols around this topic.
+There was only so much content that could make it to the paper, and I think there are a lot of downstream consequences and interesting technical connections that we didn't cover.
+Much of this will be based on deeper (but mostly unvalidated) intuitions I have and speculative implications about H-Nets.
+For fun, I'll formulate several concrete hypotheses and predictions about the future of this research direction -- these are personal takes that aren't meant to be calibrated or taken super seriously, but does crystallize what I consider to be important problems for the field.
 
 ## Direct Applications
 
@@ -245,13 +242,19 @@ A very important question is: is the theoretical efficiency realizable in practi
 
 #### Training
 
-[talk about training efficiency, echoing the paper]
+Training is more difficult than normal because sequences are dynamically subsampled, which causes load balance issues among other edge cases.
+Sukjun spent a while engineering our pipeline to be reasonably efficient by incorporating dynamic packing and such.
+Our current implementation is still a bit slower than isotropic models during training, but I expect to have substantial room for improvement.
+There has been a lot of work on mixture-of-experts in the last few years (MoE), and I expect a lot of general ideas will transfer to H-Nets.
 
-[compare to MoE]
+I will note one core difference to MoE though because of their different motivations:
+The sparsity in MoE is controlled by load balancing because of efficiency considerations,
+while H-Nets can't really load balance in the same way because they are motivated by data-dependent reasons (the motivation was for them to chunk on "meaningful" boundaries in the data).
+  So, I'm guessing they will be somewhat more difficult to optimize than MoE, but I don't foresee fundamental issues.
 
 #### Inference
-influence has largely been discussed in relation to speculative decoding;
-I think it's going to take some work, but don't see any fundamental barriers.
+Influence has largely been discussed in relation to speculative decoding;
+I think it's going to take some work, but don't see any fundamental barriers either.
 
 Overall, engineering for H-Nets will be a substantial but surmountable problem for their adoption at scale.
 
@@ -278,16 +281,17 @@ There have been a few recent works that investigate hierarchical structures insi
 
 While these models are elegant exercises in algorithm design and engineering, and definitely valuable contributions to the community,
 I think there might be fundamental problems long-term with building hierarchy directly into the layer.
-The root cause is the difficulty of having a dynamic or flexible hierarchy.
+The root cause is the difficulty of having a dynamic or flexible hierarchy, which also ties to hardware considerations.
 
-In NSA, for example, there is a block size hyperparameter (set to $64$ by default, I think) that governs the lower level of the hierarchy, motivated by hardware [alignment].
-This doesn't feel "right" to me for some reason. I guess it's because I think that while hardware considerations are important, they should be connected to the *model algorithm* rather than the *model definition*.
-For example, while [Mamba-2](https://arxiv.org/abs/2405.21060) also has a *block size* hyperparameter (also set to $64$ by default) related to the size of matmul tiles,
+In NSA, for example, there is a block size hyperparameter (set to $64$ by default, I think) that governs the lower level of the hierarchy, motivated by hardware alignment.
+This doesn't feel "right" to me for some reason.<d-footnote>Another appeal to aesthetics rather than fact; I've been told NSA works pretty well in practice right now!</d-footnote>
+I guess it's because I think that while hardware considerations are important, they should be connected to the *model algorithm* rather than the *model definition*.
+For example, while [Mamba-2](https://arxiv.org/abs/2405.21060) <d-cite key="dao2024transformers"></d-cite> also has a *block size* hyperparameter (also set to $64$ by default) related to the size of matmul tiles,
 this only affects its implementation/efficiency and not the definition of the model;
 in contrast, the block size parameter of NSA fundamentally changes what functions (sequence transformations) it can represent.
 
 As another example, the log-linear models are tied to a static binary-tree hierarchy.
-But a major theme of the H-Net paper is that static hierarchies are not the right structure.
+But a major theme of the H-Net paper is that static hierarchies are not the right structure!
 
 > #### The Future
 > The best way of building hierarchical models will be in the holistic architecture's **network structure** like H-Net, not in individual layers.
@@ -320,7 +324,7 @@ Hopefully someone will investigate this in the future!
 While hybrid models combining linear layers with quadratic attention have become much more popular,
 I always wondered if they were the most natural way.
 
-One nice thing about H-Nets is that they can hybridize linear and quadratic layers in a more elegant way, in my opinion.<d-footnote>In my head, another potential meaning of H-Net stands for *hybrid network*.</d-footnote>
+One nice thing about H-Nets is that they can hybridize linear and quadratic layers in a more elegant way, in my opinion. (In my head, another potential meaning of H-Net stands for **hybrid network**!)
 Linear layers go on the outside, both for efficiency *and* inductive bias reasons (as covered in [my previous post]),
 and powerful quadratic attention layers can go on the inside, operating over higher levels of abstraction where they are most suited.
 
@@ -328,11 +332,15 @@ However, figuring out the exact right combination of layers is pretty non-trivia
 We did endless ablations over the course of this project (and included many of them in the paper, but that was only a small subset),
 and it was pretty hard to come to conclusive answers.
 
-For example, these were the conclusions found for a 2-stage H-Net (three different [sequence lengths]):
+For example, these were the conclusions found for a 2-stage H-Net (three sequence lengths):
 - **Outer**: Pure Mamba layers perform best, and seem indispensable.
-- **Middle**: After the outer layers have shrunk the sequences by a reasonable length (almost $3\times$), this is much closer to tokenized language, and I wouldn't have been surprised if pure Transformer layers were fine here. But we found that Mamba was still crucial, which validates that its effect is not *just* because it's good at high resolution, but because it's doing a form of **active compression that benefits dynamic chunking**.
+- **Middle**: After the outer layers have shrunk the sequences by a reasonable length (almost $3\times$), this is much closer to tokenized language, and I wouldn't have been surprised if pure Transformer layers were fine here. But we found that Mamba was still crucial, which validates that its effect is not *just* because it's good at high resolution, but because it's doing a form of **active compression that benefits dynamic chunking**. [LINK TO PREVIOUS POST]
 - **Inner**: The innermost model has the most parameters and is essentially an standard isotropic language model operating on coarsely tokenized data. In the paper, we stuck to pure Transformers because that was our main baseline.
 However, this is completely orthogonal to the rest of the H-Net design; we did experiment a bit and did an ablation showing that general findings for LM architectures still transfer, such as that **hybrid models (we tried 3-to-1 Mamba-to-Transformer) still have noticeably better perplexity**! CITE [INCLUDE GRAPH]
+
+More explicitly, I think the following is true (we didn't show ablations but ran some early tests).
+
+> H-Nets would **work just fine without attention** (only SSM layers), but **not work well at all without SSMs** (only Transformer layers).
 
 At the very least, moving toward such hierarchical models will necessitate expanding the space of primitives used; I'm pretty sure standard attention is not sufficient.
 
@@ -349,12 +357,6 @@ I have to emphasize again that creating the H-Net was a [fiendishly difficult de
 I wouldn't be too surprised if someone came out next week with a simplification of our routing mechanism that was better (well, I'd pretty surprised actually -- but I do expect it to happen at some point).
 At any rate, there are so many new axes of variation, knobs to turn, and completely new directions to explore.
 Things are just getting started!
-
-> #### The Future
-> Linear sequence models such as **state space models will become core primitives** of language models, if only for acting as the byte-level interface.  
-> <br>
-> In turn, research papers on such models should start **incorporating byte-level language modeling** as a standard evaluation.
-{: .block-tip }
 
 
 ## Closing
@@ -377,156 +379,5 @@ Perhaps the most concrete answer I can give, though, can be summarized by just t
 {: .block-warning }
 
 > #### The Future
-> As we get closer to finding "the right architecture", these explicitly engineered pipelines will be subsumed by an end-to-end model. *Maybe the H-Net?*
+> As we get closer to finding "the right architecture", these explicitly engineered pipelines will be subsumed by an end-to-end model. **Maybe the H-Net?**
 {: .block-tip }
-
-## Scaling Laws are Broken (Because of Tokens)
-
-Now I'm going to change topic away from the H-Net specifically, and talk about byte-level models more generally, and about scaling laws.
-
-Even if you don't care about architectures, you should care about scaling laws.
-
-
-In academia and startup world, we don't care much about scaling laws because they're far too expensive and I don't think they're necessary to do genuine innovation (hopefully this paper is a case in point!)
-So I haven't really given any beyond-superficial thought to them except in the last three days.
-I'm sure my intuition isn't great, and I'll say some wrong things here. But here we go anyways.
-
-
-[
-### Scaling Laws Depend on the Tokenizer
-Everyone talks about scaling laws. Not that many people talk about tokenizers.
-
-And there's an embarrassingly obvious fact that took me a long time to realize:
-**the scaling law depends heavily on the tokenizer**.
-]
-
-This is completely obvious in hindsight.
-
-
-### Evolution of Scaling Laws
-
-Fitting scaling laws usually consists of two separate stages
-1. **Compute to loss**: for every compute budget, sweep the model vs. data size and find the one providing optimal loss. Then fit a curve to determine the compute vs. loss trend.
-2. **Loss to downstreams**: then, fit a curve to predict downstream performance of the model.
-
-The first step is generally considered more important. 
-Conventional, this scaling law is usually stated as any pairwise power law relationship between data budget, model size, compute budget, or loss, that leads to optimal performance.
-(Since $\text{compute} = \text{model size} \times \text{dataset size}$, two of these determine the third.)
-
-
-For example, from the original [scaling laws paper](https://arxiv.org/abs/2001.08361) CITE
-> The performance penalty depends predictably on the ratio $N^{0.74}/D$, meaning that every time we increase the model size 8x, we only need to increase the data by roughly 5x to avoid a penalty.
-
-These initial scaling law results liked to express how dataset size and parameter count should grow together.
-Perhaps the most well-known one of these was [Chinchilla](https://arxiv.org/abs/2203.15556), which said
-> One notable conclusion in Kaplan et al. (2020) is that large models should not be trained to their lowest possible loss to be compute optimal. Whilst we reach the same conclusion, we estimate that large models should be trained for many more training tokens than recommended by the authors. Specifically, given a $10\times$ increase computational budget, they suggests that the size of the model should increase $5.5\times$ while the number of training tokens should only increase $1.8\times$. Instead, we find that model size and the number of training tokens should be scaled in equal proportions.
-
-This paper was particularly memorable because of its simple-to-remember recommendation: scale model and dataset size together.
-It showed a constant that said that your dataset size (in tokens) should be roughly $20\times$ your model size (in parameters).
-Both of these takeaways seem to be thrown around like gospel, and I remember internalizing them as well.
-
-What's striking now is the phrasing of these results as a form of truth.
-The Chinchilla paper barely mentions the tokenizer at all, and definitely not in the context that implies it affects their recommendations.
-
-I don't know if it's just me, but I remember hearing plenty of sentiments along the lines of "Kaplan et al. pioneered the scaling laws but didn't calculate them as accurately as Chinchilla"
-
-...
-
-Is it possible that the different formulas that everyone comes up with is not due to improved models or more careful protocols for calculating the scaling laws, but simply orthogonal changes. 
-
-### Bending Scaling Laws
-
-I'm sure all the big labs that actually do serious pre-training are aware of this. I just find it interesting that it never seems to be made super explicit in the papers.
-And speaking of which, if it's obvious that scaling laws are a function of (model, data, *and* tokenizer) -- why are there so many results on scaling laws of models and data but none on the tokenizer?
-
-> Compared to Llama 2, we made several key improvements. Llama 3 uses a tokenizer with a vocabulary of 128K tokens that encodes language much more efficiently, which leads to substantially improved model performance.
-
-Llama 3 even explicitly mentioned that their new tokenizer was very important, and ran serious model/data scaling laws in the paper, but none for the tokenizer. Puzzling.
-
-### Warping Scaling Laws
-
-It's intuitively true to me that tokenizers should also warp scaling laws.
-- First of all, they directly affect the meaning of the data, which seems to be the one factor that most strongly affects scaling laws.
-- Second, by taking the extreme case<d-footnote>I find this to be a very useful principle for reasoning in general</d-footnote>, we know that the setting of byte-level modeling (the simplest possible tokenizer) seems to display very different behavior for different architectures which otherwise scale similarly using standard tokenizers (see my previous post on [MambaByte vs LlamaByte]).
-
-### Tokenized models can't compare their perplexities
-
-Why does no one do this?
-Well, it seems to me that the community has a general gaping blind spot around tokenizers.
-There are some concrete reasons why, I think.
-
-Maybe the most direct "mechanical" Reason is that changing the tokenizer directly changes the 
-
-before talking about scaling laws, let's first mention a problem.
-
-Everyone uses negative log likelilood / perplexity as the most important summary metric of the performance of their models.
-But these are calculated with respect to *tokens*, a completely arbitrary, non-standardized, abstract unit.
-this makes losses difficult between.
-
-
-Why exactly does every paper still report their scaling laws with "loss", A quantity that depends completely on the arbitrary vocabulary produced by the arbitrary tokenizer that they use?
-
-
-
-[find paper from COLM 2024 about comparing models across tokenizers]
-
-[losses: allow losses to be compared across models]
-
-
-### BPB isn't even calculated correctly for tokenized models
-
-But wait, it gets even worse.
-
-1. All LLM papers should report bits per byte instead of token perplexities.
-
-2. Scaling laws should be calculated in terms of bytes of data consumed to make them independent of the tokenizer.
-
-
-
-But wait! Are the claims in the H-Net paper accurate?
-
-[we discovered the results of very very late into the project (in fact, literally just a few days before releasing the paper), after everything was already done and written up.
-And these results are pretty unknown and the implications are subtle, I think.
-So I wouldn't have felt bad putting out the H-Net paper anyways.
-
-but I hate over-claiming, so I wanted to make sure I actually believed our results and could put them out in good faith.
-
-and I think the interpretation of the BPB plot as the *Realizable sampling BPB*
-rather than the *Compression rate BPB* is a pretty reasonable metric for our use case, which is, of course, focused on language models as a *generative* model that can perform fast auto-regressive sampling.
-
-But I don't really know what the correct interpretation is or what the right thing to do is.
-Hopefully, the community becomes much more cognizant of this topic, perhaps through this post, and figures out a consensus.
-
-
-> #### The Future... I hope?
-> The community will start normalizing LLM losses/perplexities in terms of **bits-per-byte**. All scaling laws will use these more meaningful quantities.  
-> <br>
-> *Please 🙏*
-{: .block-danger }
-
-> #### The Future... I hope?
-> The community will start normalizing LLM losses/perplexities in terms of **bits-per-byte** or related quantities, instead of token-centric notions.  
-> <br>
-> All **scaling laws** will use these more meaningful quantities.  
-> <br>
-> ***Please!** 🙏*
-{: .block-danger }
-
-
-Ultimately, I think that **all evaluations should reason about byte-level models**,
-- whether explicit: end-to-end in one model, like H-Nets
-- or implicit: multi-stage pipeline, like tokenized LMs + a [token-to-byte algorithm]
-
-
-### Do H-Nets Scale Better?
-
-Fundamentally, such end-to-end models just *have* to be more versatile and more powerful.
-They will learn faster from data and scale better with compute.
-
-> #### The Future
-> H-Nets, or some improvement to them, will **warp the scaling laws**.
-{: .block-tip }
-
-### Acknowledgements
-
-Thanks to Tri Dao for feedback and suggestions on this post.
