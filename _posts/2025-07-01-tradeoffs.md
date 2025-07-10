@@ -250,7 +250,7 @@ But there is some more nuance to it.
 > #### Reality
 >
 > Attention is most effective on  
-> **pre-compressed data** at the "***right level of abstraction***"
+> **pre-compressed data** at the ***"right level of abstraction"***
 {: .block-tip }
 
 I claim instead that in order to use a Transformer effectively, the *data has to be substantially processed*.
@@ -295,7 +295,8 @@ It would be *nice* to get rid of them, but it's not worth a dedicated effort.
 
 
 I, on the other hand, **deeply believe that we should get rid of tokenization**.
-I'm driven by aesthetics much more than the average person, I'd guess, and it's because I think that they are rooted in intuition and intangible reasons that usually lead to deeper consequences down the line, even if we can't predict them.<d-footnote>Another example of this is essentially all my work on RNNs/SSMs, which only became useful after years of work, which stemmed from an aesthetic conviction that recurrence is elegant and fundamental.<d/footnote>
+I'm driven by aesthetics much more than the average person, I'd guess, and it's because I think that they are rooted in intuition and intangible reasons that usually lead to deeper consequences down the line, even if we can't predict them.
+Indeed, an example is all the work I'm now known for on RNNs/SSMs, which only became useful after years of work, which stemmed from an aesthetic conviction that recurrence is elegant and fundamental.
 In this case, I think that the consequences of overcoming tokenization *will extend far beyond the surface-level implications*.
 
 > We should care about removing tokenization, not (just) for the practical reasons, but for the aesthetic and intangible reasons.
@@ -324,18 +325,18 @@ So here's a plot from our upcoming paper where we carefully ran standard archite
 
 {% include figure.liquid loading="eager" path="assets/img/2025-07-08-tradeoffs/bpb_curve.png" caption="Byte-level models trained on FineWeb-Edu (context length 8192). Sliding window attention (width=1024) is FLOP matched to Mamba, while global attention uses $2\times$ the FLOPs." %}
 
-There are a number of implications here that most LLM researchers I've talked to find surprising.
+There are a number of implications here that most LLM researchers seem to find surprising.
 
 The first thing to note is that the SSM performs *much* better than the FLOP-matched Transformer.
 This might not seem that surprising because byte sequences are much longer than BPE-token sequences, and the quadratic complexity of Transformers kicks in.
 
-But as I said earlier, the weakness of Transformers is not (just) about efficiency, but about modeling power.
+But as I said earlier, the weakness of Transformers is not just about efficiency, but about modeling power.
 And what's notable about this plot (in particular, focusing on global attention) is that **when matching for *data* instead of compute, allowing the Transformer to use many more FLOPs, the SSM still outperforms it consistently**!<d-footnote>This plot is the result after we specifically tuned for the global Transformer baseline; in other settings (e.g. different combinations of network width/depth/optimizer hyperparameters), there was a much larger gap between Mamba and global attention.</d-footnote>
 
 For contrast: if we compared these models on the *exact same data, but tokenized*<d-footnote>This experiment used sequences of 8k characters, which would be roughly 2k tokens long, a standard length for LLMs where we understand the empirical performance of different backbones well.</d-footnote>, their perplexity curves would look approximately the same (or the Transformer would be slightly better), and their FLOPs would also be similar.
 So keeping the *same models* and the *same data*, but simply untokenizing the inputs, simultaneously **lets the Transformer use much more compute** but also **decreases its performance relative to the SSM**.
 
-As one consequence: I'll go out on a limb and say that perhaps one of the reasons that tokenization has been so difficult to remove has been the over-reliance on Transformers.
+[//]: # As one consequence: I'll go out on a limb and say that perhaps one of the reasons that tokenization has been so difficult to remove has been the over-reliance on Transformers.
 
 
 {% include figure.liquid loading="eager" path="assets/img/2025-07-08-tradeoffs/dna_scaling.png" %}
@@ -349,7 +350,7 @@ Once again, this is a "tokenization-free" language with high-resolution input an
 ### A heuristic explanation
 
 A useful model of what's happening is to turn back to the autoregressive state.
-In a nutshell, because Transformers have an explicit cache of all prior tokens, they have an **inductive bias to pay attention to individual tokens**.<d-footnote>To be precise, though, while the first layer sees individual tokens, token boundaries then get blurred in later layers as each sequence position can represent some combination of all tokens before it. This is meant to be an intuitive heuristic that I believe is useful, not a mechanistic explanation.</d-footnote>
+In a nutshell, because Transformers have an explicit cache of all prior tokens, they have an **inductive bias to pay attention to individual tokens**.<d-footnote>To be precise, though, while the first layer sees individual tokens, token boundaries then get blurred in later layers as each sequence position can represent some combination of all tokens before it. This is meant to be an intuitive heuristic, not a mechanistic explanation.</d-footnote>
 Or, perhaps more succinctly:
 
 > The **inductive bias** of soft attention is **hard attention**.
@@ -360,7 +361,7 @@ Here are some useful heuristics for when attention is naturally suited to the ta
 
 These questions point at the following idea: **is each individual token semantically meaningful?**
 For example, when reading language, we pay attention to units at the level of words (or subwords like prefixes/suffixes), which have *meaning*.
-But on the other hand, when this doesn't hold -- for example, it's rare that we'd ever want to pay attention to an individual *character* when reading -- the performance of attention suffers.<d-footnote>A slightly different explanation that some would propose is that attention simply gets confused by distractors in general, which is exacerbated when the data is too high-resolution, like at the character level. This explanation is also useful and I think actually points to the same underlying principle as mine.</d-footnote><d-footnote>On a related note, another researcher hypothesized that SSMs may be less prone to hallucination than Transformers; it hasn't been fleshed out, but if true would make sense from this intuition.</d-footnote>
+But on the other hand, when this doesn't hold -- for example, it's rare that we'd ever want to pay attention to an individual *character* when reading -- the performance of attention suffers.<d-footnote>A slightly different explanation that some would propose is that attention simply gets confused by distractors in general, which is exacerbated when the data is too high-resolution, like at the character level. This explanation is also useful and I think actually points to the same underlying principle as mine.</d-footnote><d-footnote>On a related note, another researcher hypothesized (and has preliminary evidence) that SSMs may be less prone to hallucination than Transformers. It hasn't been fully fleshed out, but if true would make sense from this intuition.</d-footnote>
 
 
 What's interesting is thinking about many other types of data which lie somewhere in between.
@@ -454,7 +455,7 @@ On the other hand, convolutions exhibit strong inductive bias exactly when there
 So through these discussions and examples, hopefully I've made a case for my original claim, which I'll repeat here:
 
 > Attention is most effective on  
-> **pre-compressed data** at the "***<span style="color:red">right level of abstraction</span>***"
+> **pre-compressed data** at the ***<span style="color:red">"right level of abstraction"</span>***
 
 This is, of course, an oversimplification of the picture --
 and I wouldn't even know how to try to formally define a "level of abstraction" --
@@ -527,7 +528,7 @@ On the other hand, some variants of efficient attention "blur" the boundaries of
 (More abstractly, these belong to a larger family of attention variants that make *[structured approximations](https://arxiv.org/abs/2405.21060)* to the quadratic attention matrix<d-cite key="dao2024transformers"></d-cite>, any of which would have similar properties, I think.)
 Because of lacking a token-level cache, these models would not have the same weakness and would instead inherit properties much closer to SSMs.
 
-Incidentally, this is another more subtle reason why I somewhat prefer using "state space model" or "recurrent model" as a descriptive term over "linear attention".
+Incidentally, this is another more subtle reason why I somewhat prefer using "state space model" or "recurrent model" as a descriptive term over "linear attention".<d-footnote>(I still like the term linear attention though for interesting theoretical connections as well as the historical significance.)</d-footnote>
 To me, the term "attention" is *characterized* by maintaining a token-resolution state and having access to individual elements -- in other words, being able to **pay attention** to a single token.
 {% enddetails %}
 
@@ -578,6 +579,9 @@ But it's also setting up for the next major architecture advancement...
 ### Acknowledgements
 
 Thanks to Tri Dao and Luca Perić for feedback on this post.
+
+
+The MambaByte vs. LlamaByte plot is from Sukjun Hwang from his upcoming paper.
 
 ### Cite this post
 
