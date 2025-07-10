@@ -1,10 +1,10 @@
 ---
 layout: distill
-title: H-Net - The Future
+title: H-Nets - The Future
 description:
 tags:
 giscus_comments: false
-date: 2025-07-06
+date: 2025-07-10
 featured: false
 thumbnail: assets/img/2024-05-31-mamba-2/mamba-2-V3-transparent.png
 
