@@ -120,7 +120,7 @@ In particular, multimodal streams with temporal mismatch (e.g. text and audio) a
 Learned chunking mechanisms provide a path to fuse multimodal streams "ticking" at different rates, unlocking native *multi-channel* multimodal models operating at a higher abstraction level.
 
 > #### The Future
-> H-Nets will unlock multi-channel multimodal models with temporal fusion.
+> H-Nets will unlock **multi-channel multimodal models** with temporal fusion.
 {: .block-tip }
 
 
@@ -136,7 +136,7 @@ It's currently not known to what extent they can successfully do this right now 
 but if possible, it should just allow for stronger models that are more capable of reasoning intelligently.
 
 > #### The Future
-> H-Nets will have increased **language modeling** and **reasoning abilities**.
+> H-Nets will have increased **language modeling** and **reasoning** abilities.
 {: .block-tip }
 
 We didn't formally run out true scaling laws in the paper, which would require sweeping over many more model sizes and compute horizons.
@@ -233,6 +233,9 @@ The H-Net structure is exactly the way to smooth out those redundancies,
 **baking (something akin to) the speculative decoding process directly into the model**,
 while **leveraging parameters and compute** better and **training everything end-to-end**.
 In other words, the structure of the H-Net preserves the same characteristics of the *inference-optimized* standard LM, but with a better *training objective*.<d-footnote>Just to unpack a bit more: intuitively, the reason this should lead to a stronger model is because the main network (analogous to the target verification model in specdec) is trained directly on *chunk-level* modeling, the way they would be used at inference, instead of the specdec pipeline of being trained on a more granular (*token-level*) objective and being used in a different way at inference.</d-footnote>
+
+Thus, what I predict is that with optimized inference implementations for HNets, then targeting a given inference budget/metrics, and H-Net would be a stronger model than our current standards LLMs.
+
 
 ### Engineering Challenges
 
@@ -384,9 +387,9 @@ They will learn faster from data and scale better with compute.
 > H-Nets, or some improvement to them, will **warp the scaling laws**.
 {: .block-tip }
 
-## Scaling Laws are Horribly, Horribly Broken
+## Scaling Laws are Completely Broken (Because of Tokens)
 
-Now I'm going to [change tack] away from the H-Net specifically, and talk about byte-level models more generally, and about scaling laws.
+Now I'm going to change topic away from the H-Net specifically, and talk about byte-level models more generally, and about scaling laws.
 
 Even if you don't care about architectures, you should care about scaling laws.
 
@@ -400,6 +403,10 @@ And there's an embarrassingly obvious fact that took me a long time to realize:
 
 This is completely obvious in hindsight.
 
+Conventional scaling laws are usually stated as any pairwise power law relationship between data budget, model size, compute budget, or loss that leads to optimal performance.
+(Since $\text{compute} = \text{model size} \times \text{dataset size}$, two of these determine the third.)
+
+Fitting scaling laws usually consists of two steps: first, determine the optimal scaling of 
 
 > The performance penalty depends predictably on the ratio $N^{0.74}/D$, meaning that every time we increase the model size 8x, we only need to increase the data by roughly 5x to avoid a penalty.
 
@@ -421,13 +428,28 @@ And speaking of which, if it's obvious that scaling laws are a function of (mode
 
 Llama 3 even explicitly mentioned that their new tokenizer was very important, and ran serious model/data scaling laws in the paper, but none for the tokenizer. Puzzling.
 
+### Warping Scaling Laws
+
+It's intuitively true to me that tokenizers should also warp scaling laws.
+- First of all, they directly affect the meaning of the data, which seems to be the one factor that most strongly affects scaling laws.
+- Second, by taking the extreme case<d-footnote>I find this to be a very useful principle for reasoning in general</d-footnote>, we know that the setting of byte-level modeling (the simplest possible tokenizer) seems to display very different behavior for different architectures which otherwise scale similarly using standard tokenizers (see my previous post on [MambaByte vs LlamaByte]).
+
 ### Tokenized models can't compare their perplexities
+
+Why does no one do this?
+Well, it seems to me that the community has a general gaping blind spot around tokenizers.
+There are some concrete reasons why, I think.
+
+Maybe the most direct "mechanical" Reason is that changing the tokenizer directly changes the 
 
 before talking about scaling laws, let's first mention a problem.
 
 Everyone uses negative log likelilood / perplexity as the most important summary metric of the performance of their models.
 But these are calculated with respect to *tokens*, a completely arbitrary, non-standardized, abstract unit.
 this makes losses difficult between.
+
+
+Why exactly does every paper still report their scaling laws with "loss", A quantity that depends completely on the arbitrary vocabulary produced by the arbitrary tokenizer that they use?
 
 
 
@@ -479,3 +501,10 @@ Hopefully, the community becomes much more cognizant of this topic, perhaps thro
 Ultimately, I think that **all evaluations should reason about byte-level models**,
 - whether explicit: end-to-end in one model, like H-Nets
 - or implicit: multi-stage pipeline, like tokenized LMs + a [token-to-byte algorithm]
+
+
+### Do H-Nets Scale Better?
+
+### Acknowledgements
+
+Thanks to Tri Dao for feedback and suggestions on this post.
