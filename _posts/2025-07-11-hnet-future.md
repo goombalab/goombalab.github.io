@@ -344,8 +344,9 @@ At the very least, moving toward such hierarchical models will necessitate expan
 
 ### It's the Wild West
 
-I have to emphasize again that creating the H-Net was a [fiendishly difficult design problem], and we still don't completely understand how a lot of things work.
-I wouldn't be surprised at all if someone came out next week with a simplification of our routing mechanism that was better (well, I'd pretty surprised actually -- but I do expect it to happen at some point).
+
+I have to emphasize again that creating the H-Net was a [fiendishly difficult design problem]({% post_url 2025-07-11-hnet-past %}#a-world-of-improvements), and we still don't completely understand how a lot of things work.
+I wouldn't be too surprised if someone came out next week with a simplification of our routing mechanism that was better (well, I'd pretty surprised actually -- but I do expect it to happen at some point).
 At any rate, there are so many new axes of variation, knobs to turn, and completely new directions to explore.
 Things are just getting started!
 
@@ -355,7 +356,6 @@ Things are just getting started!
 > In turn, research papers on such models should start **incorporating byte-level language modeling** as a standard evaluation.
 {: .block-tip }
 
-[[I hope we experience] a renaissance for architecture research!]
 
 ## Closing
 
@@ -372,46 +372,60 @@ Perhaps the most concrete answer I can give, though, can be summarized by just t
 
 > #### Observation
 > Existing LLM **pipelines** are already **implicitly hierarchical**, such as  
-> (1) the core modeling (tokenizer -- language model) pipeline  
-> (2) the speculative decoding (draft model -- verification model) pipeline
+> (1) the core modeling pipeline (tokenizer -- language model)  
+> (2) the speculative decoding pipeline (draft model -- verification model)
 {: .block-warning }
 
 > #### The Future
 > As we get closer to finding "the right architecture", these explicitly engineered pipelines will be subsumed by an end-to-end model. *Maybe the H-Net?*
 {: .block-tip }
 
-Fundamentally, such end-to-end models just *have* to be more versatile and more powerful.
-They will learn faster from data and scale better with compute.
-
-> #### The Future
-> H-Nets, or some improvement to them, will **warp the scaling laws**.
-{: .block-tip }
-
-## Scaling Laws are Completely Broken (Because of Tokens)
+## Scaling Laws are Broken (Because of Tokens)
 
 Now I'm going to change topic away from the H-Net specifically, and talk about byte-level models more generally, and about scaling laws.
 
 Even if you don't care about architectures, you should care about scaling laws.
 
 
-### Scaling Laws Depend on the Tokenizer
+In academia and startup world, we don't care much about scaling laws because they're far too expensive and I don't think they're necessary to do genuine innovation (hopefully this paper is a case in point!)
+So I haven't really given any beyond-superficial thought to them except in the last three days.
+I'm sure my intuition isn't great, and I'll say some wrong things here. But here we go anyways.
 
+
+[
+### Scaling Laws Depend on the Tokenizer
 Everyone talks about scaling laws. Not that many people talk about tokenizers.
 
 And there's an embarrassingly obvious fact that took me a long time to realize:
 **the scaling law depends heavily on the tokenizer**.
+]
 
 This is completely obvious in hindsight.
 
-Conventional scaling laws are usually stated as any pairwise power law relationship between data budget, model size, compute budget, or loss that leads to optimal performance.
+
+### Evolution of Scaling Laws
+
+Fitting scaling laws usually consists of two separate stages
+1. **Compute to loss**: for every compute budget, sweep the model vs. data size and find the one providing optimal loss. Then fit a curve to determine the compute vs. loss trend.
+2. **Loss to downstreams**: then, fit a curve to predict downstream performance of the model.
+
+The first step is generally considered more important. 
+Conventional, this scaling law is usually stated as any pairwise power law relationship between data budget, model size, compute budget, or loss, that leads to optimal performance.
 (Since $\text{compute} = \text{model size} \times \text{dataset size}$, two of these determine the third.)
 
-Fitting scaling laws usually consists of two steps: first, determine the optimal scaling of 
 
+For example, from the original [scaling laws paper](https://arxiv.org/abs/2001.08361) CITE
 > The performance penalty depends predictably on the ratio $N^{0.74}/D$, meaning that every time we increase the model size 8x, we only need to increase the data by roughly 5x to avoid a penalty.
 
+These initial scaling law results liked to express how dataset size and parameter count should grow together.
+Perhaps the most well-known one of these was [Chinchilla](https://arxiv.org/abs/2203.15556), which said
 > One notable conclusion in Kaplan et al. (2020) is that large models should not be trained to their lowest possible loss to be compute optimal. Whilst we reach the same conclusion, we estimate that large models should be trained for many more training tokens than recommended by the authors. Specifically, given a $10\times$ increase computational budget, they suggests that the size of the model should increase $5.5\times$ while the number of training tokens should only increase $1.8\times$. Instead, we find that model size and the number of training tokens should be scaled in equal proportions.
 
+This paper was particularly memorable because of its simple-to-remember recommendation: scale model and dataset size together.
+It showed a constant that said that your dataset size (in tokens) should be roughly $20\times$ your model size (in parameters).
+Both of these takeaways seem to be thrown around like gospel, and I remember internalizing them as well.
+
+What's striking now is the phrasing of these results as a form of truth.
 The Chinchilla paper barely mentions the tokenizer at all, and definitely not in the context that implies it affects their recommendations.
 
 I don't know if it's just me, but I remember hearing plenty of sentiments along the lines of "Kaplan et al. pioneered the scaling laws but didn't calculate them as accurately as Chinchilla"
@@ -420,6 +434,7 @@ I don't know if it's just me, but I remember hearing plenty of sentiments along 
 
 Is it possible that the different formulas that everyone comes up with is not due to improved models or more careful protocols for calculating the scaling laws, but simply orthogonal changes. 
 
+### Bending Scaling Laws
 
 I'm sure all the big labs that actually do serious pre-training are aware of this. I just find it interesting that it never seems to be made super explicit in the papers.
 And speaking of which, if it's obvious that scaling laws are a function of (model, data, *and* tokenizer) -- why are there so many results on scaling laws of models and data but none on the tokenizer?
@@ -504,6 +519,13 @@ Ultimately, I think that **all evaluations should reason about byte-level models
 
 
 ### Do H-Nets Scale Better?
+
+Fundamentally, such end-to-end models just *have* to be more versatile and more powerful.
+They will learn faster from data and scale better with compute.
+
+> #### The Future
+> H-Nets, or some improvement to them, will **warp the scaling laws**.
+{: .block-tip }
 
 ### Acknowledgements
 
