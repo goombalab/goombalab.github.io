@@ -295,7 +295,7 @@ It would be *nice* to get rid of them, but it's not worth a dedicated effort.
 
 
 I, on the other hand, **deeply believe that we should get rid of tokenization**.
-I'm driven by aesthetics much more than the average person, I'd guess, and it's because I think that they are rooted in intuition and intangible reasons that usually lead to deeper consequences down the line, even if we can't predict them.
+I'm driven by aesthetics much more than the average person, I'd guess, and it's because I think that they are rooted in intuition and intangible reasons that usually lead to deeper consequences down the line, even if we can't predict them.<d-footnote>Another example of this is essentially all my work on RNNs/SSMs, which only became useful after years of work, which stemmed from an aesthetic conviction that recurrence is elegant and fundamental.<d/footnote>
 In this case, I think that the consequences of overcoming tokenization *will extend far beyond the surface-level implications*.
 
 > We should care about removing tokenization, not (just) for the practical reasons, but for the aesthetic and intangible reasons.
@@ -308,7 +308,7 @@ I believe that replacing tokenization with end-to-end models will have huge cons
 - **multilingual and multimodal**: tokenization is notoriously hard or impossible for certain languages and other types of sequential data;
 - **reasoning**: because models can learn more semantically meaningful patterns from the data, and reason over higher levels of abstraction;
 
-and much more, including probably a lot of implications I haven't foreseen yet.
+and much more, some of which I see and some of which I haven't thought of yet.
 
 (As I was writing this post up, Luca Perić released a parallel blog post focused specifically on tokenization and tokenizer-free architectures.
 [Check it out](https://lucalp.dev/bitter-lesson-tokenization-and-blt/)!)
@@ -327,13 +327,15 @@ So here's a plot from our upcoming paper where we carefully ran standard archite
 There are a number of implications here that most LLM researchers I've talked to find surprising.
 
 The first thing to note is that the SSM performs *much* better than the FLOP-matched Transformer.
-This might not seem surprising to many because byte sequences are much longer than BPE-token sequences, and the quadratic complexity of Transformers kicks in.
+This might not seem that surprising because byte sequences are much longer than BPE-token sequences, and the quadratic complexity of Transformers kicks in.
 
 But as I said earlier, the weakness of Transformers is not (just) about efficiency, but about modeling power.
-And what's notable about this plot (in particular, focusing on global attention) is that **when matching for *data* instead of compute, allowing the Transformer to use many more FLOPs, the SSM still outperforms it consistently**!<d-footnote>This plot is the result after we specifically tuned for the global Transformer baseline; In other settings (e.g. different combinations of network width/depth/optimizer hyperparameters), there was a much larger gap between Mamba and global attention.</d-footnote>
+And what's notable about this plot (in particular, focusing on global attention) is that **when matching for *data* instead of compute, allowing the Transformer to use many more FLOPs, the SSM still outperforms it consistently**!<d-footnote>This plot is the result after we specifically tuned for the global Transformer baseline; in other settings (e.g. different combinations of network width/depth/optimizer hyperparameters), there was a much larger gap between Mamba and global attention.</d-footnote>
 
 For contrast: if we compared these models on the *exact same data, but tokenized*<d-footnote>This experiment used sequences of 8k characters, which would be roughly 2k tokens long, a standard length for LLMs where we understand the empirical performance of different backbones well.</d-footnote>, their perplexity curves would look approximately the same (or the Transformer would be slightly better), and their FLOPs would also be similar.
 So keeping the *same models* and the *same data*, but simply untokenizing the inputs, simultaneously **lets the Transformer use much more compute** but also **decreases its performance relative to the SSM**.
+
+As one consequence: I'll go out on a limb and say that perhaps one of the reasons that tokenization has been so difficult to remove has been the over-reliance on Transformers.
 
 
 {% include figure.liquid loading="eager" path="assets/img/2025-07-08-tradeoffs/dna_scaling.png" %}
