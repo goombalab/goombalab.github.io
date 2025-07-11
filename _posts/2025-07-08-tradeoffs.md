@@ -467,6 +467,7 @@ Let's finally return to the main topic for this blog post.
 
 ### State space models
 
+{: #compression-bug-feature}
 
 The trade-offs of SSMs are pretty clear from thinking intuitively about its autoregressive state.
 
