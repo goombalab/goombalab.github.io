@@ -186,7 +186,7 @@ At a superficial level, I expect that the quality gains of H-Nets would directly
 
 {% include figure.liquid loading="eager" path="assets/img/2025-07-11-hnet/efficiency_quality.png" caption="I realized this figure probably contains zero information content, but <br> since I already drew it for some reason I'm not gonna waste it." %}
 
-But there can often be more nuance to this with architecture research because of qualitative differences between models.<d-footnote>For instance, the efficiency ↔  quality tradeoff of Mamba vs. Transformers isn't actually so clear-cut, as discussed in my previous blog post on the tradeoffs of SSMs and Transformers).</d-footnote>
+But there can often be more nuance to this with architecture research because of qualitative differences between models.<d-footnote>For instance, the efficiency ↔  quality tradeoff of Mamba vs. Transformers isn't actually so clear-cut, as discussed in my previous blog post on the tradeoffs of SSMs and Transformers.</d-footnote>
 What people want to know is whether there are **qualitative structural characteristics** in the architecture that directly relate to its efficiency.
 (This is what made SSMs so appealing, I suppose, as these characteristics -- the constant state size -- are very intuitive.)
 
