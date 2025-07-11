@@ -4,7 +4,7 @@ title: H-Nets - the Future
 description:
 tags:
 giscus_comments: false
-date: 2025-07-10
+date: 2025-07-11
 featured: false
 thumbnail: assets/img/2025-07-11-hnet/efficiency_quality.png
 
@@ -195,7 +195,7 @@ This topic is a lot more subtle for H-Nets, but there are a few intriguing conne
 
 ### Speculative decoding
 
-Let's think about **speculative decoding (specdec)**, which is by now a universally used technique for LLM inference.
+Let's think about **speculative decoding (specdec)**, which is by now a universally used technique for LLM inference <d-cite key="leviathan2023fast"></d-cite><d-cite key="chen2023accelerating"></d-cite><d-cite key="xia2023speculative"></d-cite>.
 
 {% include figure.liquid loading="eager" path="assets/img/2025-07-11-hnet/speculative.png" caption="The speculative decoding process of stepping a small model on every token and a large model on every few tokens strongly resembles the H-Net decoding process. [<a href='https://arxiv.org/abs/2203.16487'>Source</a>]" %}
 
@@ -252,7 +252,7 @@ The way to think about this is that *the very fact that standard LLMs can be spe
 
 The H-Net structure is exactly the way to smooth out those redundancies,
 baking (something akin to) the speculative decoding process directly into the model,
-while **leveraging parameters and compute** better and **training everything end-to-end**.
+while **leveraging parameters and compute** more effectively and **training everything end-to-end**.
 In other words, the structure of the H-Net preserves the same characteristics of the *inference-optimized* standard LM, but with a better *training objective*.<d-footnote>Just to unpack a bit more: intuitively, the reason this should lead to a stronger model is because the main network (analogous to the target verification model in specdec) is trained directly on *chunk-level* modeling, the way they would be used at inference, instead of the specdec pipeline of being trained on a more granular (*token-level*) objective and being used in a different way at inference.</d-footnote>
 
 Thus, what I predict is that with optimized inference implementations for H-Nets,
@@ -311,8 +311,8 @@ In NSA, for example, there is a *block size* hyperparameter (set to $64$ by defa
 This doesn't feel "right" to me for some reason.<d-footnote>Another appeal to aesthetics for the future rather than the current state of the world; I've been told NSA works pretty well in practice right now!</d-footnote>
 I guess it's because I think that while hardware considerations are important, they should be connected to the *model algorithm* rather than the *model definition*.
 For example, while [Mamba-2](https://arxiv.org/abs/2405.21060) <d-cite key="dao2024transformers"></d-cite> also has a block size hyperparameter (also set to $64$ by default) related to the size of matrix multiplication tiles,
-this only affects its implementation/efficiency and not the definition of the model.
-In contrast, the block size parameter of NSA fundamentally changes what functions (sequence transformations) it can represent.
+this only affects its implementation/efficiency and not the *definition* of the model.
+In contrast, the block size hyperparameter of NSA fundamentally changes what functions (sequence transformations) it can represent.
 
 {% include figure.liquid loading="eager" path="assets/img/2025-07-11-hnet/psm.png" caption="Concurrent works propose other types of hierarchical sequence models with logarithmically-scaling state sizes." %}
 
@@ -371,7 +371,7 @@ More explicitly, I think the following is true (we didn't show ablations but ran
 
 > H-Nets would **work reasonably well without attention** (only SSM layers), but **not at all without SSMs** (only Transformer layers).
 
-At the very least, moving toward such hierarchical models will necessitate expanding the space of primitives used; I'm pretty sure standard attention is not sufficient.
+At the very least, moving toward such hierarchical models will necessitate expanding the space of primitives used; I'm pretty sure [standard attention is not sufficient]({% post_url 2025-07-08-tradeoffs %}).
 
 > #### Hypothesis
 > Linear sequence models such as **state space models will become core primitives** of language models, if only for acting as the byte-level interface.
