@@ -49,7 +49,7 @@ toc:
 
 This post is part of a two-part series.
 1. [H-Nets: the Past]({% post_url 2025-07-11-hnet-past %})
-2. H-Nets: the Future
+2. **H-Nets: the Future**
 
 In this post, I'm going to try to convince you why H-Nets are fundamental and important.
 There was only so much content that could make it to the paper, and I think there are a lot of downstream consequences and interesting technical connections that we didn't cover.
@@ -184,7 +184,7 @@ But of course, what really matters is the *interaction* between efficiency and q
 This is generally monotone, leading to an entire Pareto frontier of performance tradeoffs.
 At a superficial level, I expect that the quality gains of H-Nets would directly translate to efficiency gains as well.
 
-{% include figure.liquid loading="eager" path="assets/img/2025-07-11-hnet/efficiency_quality.png" caption="I realized this figure probably contains zero information content, but <br> since I already drew it for some reason I'm not gonna waste it." %}
+{% include figure.liquid loading="eager" path="assets/img/2025-07-11-hnet/efficiency_quality.png" caption="I realized this figure probably contains zero information content, <br> but since I already drew it for some reason I'm not gonna waste it." %}
 
 But there can often be more nuance to this with architecture research because of qualitative differences between models.<d-footnote>For instance, the efficiency ↔  quality tradeoff of Mamba vs. Transformers isn't actually so clear-cut, as discussed in my previous blog post on the tradeoffs of SSMs and Transformers.</d-footnote>
 What people want to know is whether there are **qualitative structural characteristics** in the architecture that directly relate to its efficiency.
@@ -213,7 +213,7 @@ But this is incredibly similar to the decoding process of an H-Net!
 
 #### Speculative decoding + H-Net is redundant
 One can take this a step further and ask: what happens if we combine speculative decoding to try to speed up an H-Net?
-In the *ideal* case of speculative decoding, what might happen is:
+In an *idealized* case of speculative decoding, what might happen is:
 1. The small model (an auxiliary draft model) takes a few steps, say $k$, and proposes a number of tokens.
 2. The large model (H-Net) does a forward pass on these $k$ tokens. Suppose that $k$ lines up with the next chunk: then this amounts to
     - $1$ parallel pass (over $k$ tokens) of the H-Net's encoder/decoder networks, and
@@ -253,7 +253,7 @@ The way to think about this is that *the very fact that standard LLMs can be spe
 The H-Net structure is exactly the way to smooth out those redundancies,
 baking (something akin to) the speculative decoding process directly into the model,
 while **leveraging parameters and compute** more effectively and **training everything end-to-end**.
-In other words, the structure of the H-Net preserves the same characteristics of the *inference-optimized* standard LM, but with a better *training objective*.<d-footnote>Just to unpack a bit more: intuitively, the reason this should lead to a stronger model is because the main network (analogous to the target verification model in specdec) is trained directly on *chunk-level* modeling, the way they would be used at inference, instead of the specdec pipeline of being trained on a more granular (*token-level*) objective and being used in a different way at inference.</d-footnote>
+In other words, the structure of the H-Net preserves the same characteristics of the *inference-optimized* standard LM, but with a better *training objective*.<d-footnote>Just to unpack a bit more: intuitively, the reason this should lead to a stronger model is because the main network (analogous to the target verification model in specdec) is trained directly on *chunk-level* modeling, the way they would be used at inference. On the other hand, the verification model of the specdec pipeline is trained on a more granular (*token-level*) objective and being used in a different way at inference.</d-footnote>
 
 Thus, what I predict is that with optimized inference implementations for H-Nets,
 then for any target inference budget, an H-Net would be a stronger model than our current standard LLMs.
@@ -300,7 +300,7 @@ Here are a couple of such considerations.
 As I described in [my own journey through sequence models]({% post_url 2025-07-11-hnet-past %}#hierarchical-rnns), hierarchy is far from new.
 
 There have been a few recent works that investigate hierarchical structures inside novel sequence model layers (i.e. variants of attention or SSMs). For example:
-- [Native Sparse Attention (NSA)](https://arxiv.org/abs/2502.11089) <d-cite key="yuan2025native"></d-cite> is a recent sparse attention model that performs a 2-stage process of aggregating information inside local blocks.
+- [Native Sparse Attention (NSA)](https://arxiv.org/abs/2502.11089) <d-cite key="yuan2025native"></d-cite> is a recent sparse attention model that performs a 2-stage process of aggregating information inside local blocks and then retrieving them.
 - [Log-linear attention](https://arxiv.org/abs/2506.04761) <d-cite key="guo2025log"></d-cite> and [prefix scannable models (PSM)](https://arxiv.org/abs/2506.10918) <d-cite key="yau2025sequential"></d-cite> introduce new hierarchical layers that generalize modern recurrent models using a binary tree of hierarchies, improving their expressivity by increasing the constant size state to logarithmic (in sequence length).
 
 While these models are elegant exercises in algorithm design and engineering, and definitely valuable contributions to the community,
@@ -308,15 +308,15 @@ I personally think there might be problems long-term with building hierarchy dir
 The root cause is the difficulty of having a dynamic or flexible hierarchy, which also ties to hardware considerations.
 
 In NSA, for example, there is a *block size* hyperparameter (set to $64$ by default, I think) that governs the lower level of the hierarchy, motivated by hardware alignment.
-This doesn't feel "right" to me for some reason.<d-footnote>Another appeal to aesthetics for the future rather than the current state of the world; I've been told NSA works pretty well in practice right now!</d-footnote>
-I guess it's because I think that while hardware considerations are important, they should be connected to the *model algorithm* rather than the *model definition*.
+This doesn't feel "right" to me for some reason.<d-footnote>Another appeal to aesthetics of the future rather than the current state of the world; I've been told NSA works pretty well in practice right now!</d-footnote>
+I guess it's because I feel that while hardware considerations are important, they should be connected to the *model algorithm* rather than the *model definition*.
 For example, while [Mamba-2](https://arxiv.org/abs/2405.21060) <d-cite key="dao2024transformers"></d-cite> also has a block size hyperparameter (also set to $64$ by default) related to the size of matrix multiplication tiles,
 this only affects its implementation/efficiency and not the *definition* of the model.
 In contrast, the block size hyperparameter of NSA fundamentally changes what functions (sequence transformations) it can represent.
 
 {% include figure.liquid loading="eager" path="assets/img/2025-07-11-hnet/psm.png" caption="Concurrent works propose other types of hierarchical sequence models with logarithmically-scaling state sizes." %}
 
-As another example, the log-linear models are tied to a static binary-tree hierarchy.
+As another example, the log-linear models are tied to a static binary tree hierarchy.
 But a major theme of the H-Net paper is that static hierarchies are not the right structure!
 
 > #### Hypothesis
@@ -324,7 +324,7 @@ But a major theme of the H-Net paper is that static hierarchies are not the righ
 {: .block-tip }
 
 A future direction of H-Nets is to see how far the hierarchy can extend.
-For example, one can build a binary tree-like architecture with repeated downsampling by a factor of roughly 2 (a controllable parameter in the H-Net), which leads to the same holistic properties as log-linear layers -- linear-scaling computation in sequence length with logarithmic-scaling state size -- but with a dynamic hierarchy.
+For example, one can build a binary-tree-like architecture with repeated downsampling by a factor of roughly 2 (a controllable parameter in the H-Net), which leads to the same holistic properties as log-linear layers -- linear-scaling computation in sequence length with logarithmic-scaling state size -- but with a *dynamic hierarchy*.
 By carefully balancing the depth/widths of sub-networks as well, one can actually get very fine control over the scaling of both compute and state size, potentially targeting **polynomial-scaling state sizes** which is [hypothesized to be optimal for language modeling](http://arxiv.org/abs/2503.04725v1) <d-cite key="chen2025l"></d-cite>.
 I'm quite interested in exploring this, let me know if you want to collaborate!
 
@@ -361,7 +361,7 @@ and it was pretty hard to come to conclusive answers.
 
 For example, these were the conclusions found for a 2-stage H-Net (three sequence lengths):
 - **Outer**: Pure Mamba layers perform best, and seem indispensable.
-- **Middle**: After the outer layers have shrunk the sequences by a reasonable length (almost $3\times$), this is much closer to tokenized language, and I wouldn't have been surprised if pure Transformer layers were fine here. But we found that Mamba was still crucial, which validates that its effect is not *just* because it's good at high resolution, but because it's doing a form of [**active compression that benefits dynamic chunking**]({% post_url 2025-07-11-hnet-past %}#ssms-as-compressive-models).
+- **Middle**: After the outer layers have shrunk the sequences by a reasonable length (almost $3\times$), this is much closer to tokenized language, and I wouldn't have been surprised if pure Transformer layers were fine here. But we found that Mamba was still important, which validates that its effect is not *just* because it's good at high resolution, but because it's doing a form of [active compression that benefits dynamic chunking]({% post_url 2025-07-11-hnet-past %}#ssms-as-compressive-models).
 - **Inner**: The innermost model has the most parameters and is essentially a standard isotropic language model operating on coarsely tokenized data (but with better "tokens" that are dynamic and learned from data!). In the paper, we stuck to pure Transformers because that was our main baseline.
 However, this is completely orthogonal to the rest of the H-Net design; we did experiment a bit and did an ablation showing that general findings for LM architectures still transfer, such as that **hybrid main networks** (we tried 3-to-1 Mamba-to-Transformer) **still have noticeably better perplexity** <d-cite key="waleffe2024empirical"></d-cite>!
 

@@ -582,7 +582,7 @@ But it's also setting up for the next major architecture advancement...
 Thanks to Tri Dao and Luca Perić for feedback on this post.
 
 
-The MambaByte vs. LlamaByte plot is from Sukjun Hwang from his upcoming paper.
+The MambaByte vs. LlamaByte plot is from Sukjun Hwang from his H-Net paper ([blog]({% post_url 2025-07-11-hnet-past %})).
 
 ### Cite this post
 
