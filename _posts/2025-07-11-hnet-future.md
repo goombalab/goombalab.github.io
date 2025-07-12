@@ -42,7 +42,7 @@ toc:
       - name: Hierarchical sequence models
       - name: Long context
       - name: Hybrid models
-      - name: It's the wild west
+      - name: It's the wild west!
   - name: Closing
 ---
 
@@ -51,8 +51,8 @@ This post is part of a two-part series.
 1. [H-Nets: the Past]({% post_url 2025-07-11-hnet-past %})
 2. **H-Nets: the Future**
 
-Paper: [https://arxiv.org/abs/2507.07955](https://arxiv.org/abs/2507.07955)
-Code: [https://github.com/goombalab/hnet](https://github.com/goombalab/hnet)
+[[Paper](https://arxiv.org/abs/2507.07955)]
+[[Code](https://github.com/goombalab/hnet)]
 
 
 In this post, I'm going to try to convince you why H-Nets are fundamental and important.
@@ -352,7 +352,7 @@ Hopefully someone will investigate this in the future!
 
 ### Hybrid models
 
-While hybrid models combining linear layers with quadratic attention have become much more popular,
+While hybrid models combining linear layers with quadratic attention have become [much more popular]({% post_url 2025-07-08-tradeoffs %}#a-coarse-analogy),
 I always wondered if the simple interleaving strategies were the most natural way.
 
 One nice thing about H-Nets is that they can hybridize linear and quadratic layers in a more elegant way, in my opinion. (In my head, another potential meaning of H-Net stands for **hybrid network**!)
@@ -383,7 +383,7 @@ At the very least, moving toward such hierarchical models will necessitate expan
 
 In turn, research papers on such models should start **incorporating byte-level language modeling** as a standard evaluation.
 
-### It's the wild west
+### It's the wild west!
 
 
 I have to emphasize again that creating the H-Net was a [fiendishly difficult design problem]({% post_url 2025-07-11-hnet-past %}#a-world-of-improvements), and we still don't completely understand how a lot of things work.
