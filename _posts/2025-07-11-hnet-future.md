@@ -51,6 +51,10 @@ This post is part of a two-part series.
 1. [H-Nets: the Past]({% post_url 2025-07-11-hnet-past %})
 2. **H-Nets: the Future**
 
+Paper: [https://arxiv.org/abs/2507.07955](https://arxiv.org/abs/2507.07955)
+Code: [https://github.com/goombalab/hnet](https://github.com/goombalab/hnet)
+
+
 In this post, I'm going to try to convince you why H-Nets are fundamental and important.
 There was only so much content that could make it to the paper, and I think there are a lot of downstream consequences and interesting technical connections that we didn't cover.
 Much of this will be based on deeper (but mostly unvalidated) intuitions I have and speculative implications about H-Nets.
