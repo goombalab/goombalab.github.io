@@ -109,7 +109,7 @@ I think this most directly validates the power of hierarchical modeling, as the 
 On data that isn't pre-compressed by tokenizers,
 applying an end-to-end model that tries to learn hierarchical patterns from data seems like a free win!<d-footnote>I actually suspect that DNA modeling could benefit empirically from a BPE tokenizer just like other languages.
 I'm not quite sure why I haven't seen anyone use this; it will certainly still lead to a valid DNA language model.
-I guess it just seems too weird to the biologists? Well, another point against tokenizers.</d-footnote>
+I guess it just seems too weird to the biologists? Well, another point against tokenizers.<br><br>Edit: It has been pointed out to me by Nate Tippens and Krithik Ramesh that <a href="https://arxiv.org/abs/2306.15006">DNABERT-2</a> does do this!</d-footnote>
 
 I'll also mention that we didn't spend too much time on DNA and never tried iterating the H-Net to 2-stages.
 It might just get better for free, just like for language?
