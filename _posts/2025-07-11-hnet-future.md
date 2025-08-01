@@ -367,13 +367,15 @@ For example, these were the conclusions found for a 2-stage H-Net (three sequenc
 - **Outer**: Pure Mamba layers perform best, and seem indispensable.
 - **Middle**: After the outer layers have shrunk the sequences by a reasonable length (almost $3\times$), this is much closer to tokenized language, and I wouldn't have been surprised if pure Transformer layers were fine here. But we found that Mamba was still important, which validates that its effect is not *just* because it's good at high resolution, but because it's doing a form of [active compression that benefits dynamic chunking]({% post_url 2025-07-11-hnet-past %}#ssms-as-compressive-models).
 - **Inner**: The innermost model has the most parameters and is essentially a standard isotropic language model operating on coarsely tokenized data (but with better "tokens" that are dynamic and learned from data!). In the paper, we stuck to pure Transformers because that was our main baseline.
-However, this is completely orthogonal to the rest of the H-Net design; we did experiment a bit and did an ablation showing that general findings for LM architectures still transfer, such as that **hybrid main networks** (we tried 3-to-1 Mamba-to-Transformer) **still have noticeably better perplexity** <d-cite key="waleffe2024empirical"></d-cite>!
+However, this is completely orthogonal to the rest of the H-Net design; we did experiment a bit and did an ablation showing that general findings for LM architectures still transfer, such as that **hybrid main networks** (we tried 3-to-1 Mamba-to-Transformer) **still have somewhat better perplexity** <d-cite key="waleffe2024empirical"></d-cite>!
 
 {% include figure.liquid loading="eager" path="assets/img/2025-07-11-hnet/hybrid.png" caption="Ablating the main network architecture of a 2-stage H-Net." %}
 
+<!--
 More explicitly, I think the following is true (we didn't show ablations but ran some early tests).
 
 > H-Nets would **work reasonably well without attention** (only SSM layers), but **not at all without SSMs** (only Transformer layers).
+-->
 
 At the very least, moving toward such hierarchical models will necessitate expanding the space of primitives used; I'm pretty sure [standard attention is not sufficient]({% post_url 2025-07-08-tradeoffs %}).
 
