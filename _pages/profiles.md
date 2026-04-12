@@ -45,8 +45,10 @@ profiles:
   - role: phd-student
     image: /people/aviv.png
     name: Aviv Bick
-    website: https://avivbick.github.io
+    google_scholar: https://scholar.google.com/citations?user=8QCKpT0AAAAJ&hl=en
     github: https://github.com/AvivBick
+    website: https://avivbick.github.io
+    twitter: https://x.com/avivbick
 
   - role: phd-student
     image: /people/isaac.jpg
