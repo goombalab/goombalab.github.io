@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SWA: Sliding Window Attention Cache</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <style>
+        :root {
+            --blue-glow: rgba(59, 130, 246, 0.3);
+            --red-glow: rgba(239, 68, 68, 0.3);
+            --purple-glow: rgba(168, 85, 247, 0.3);
+        }
+
+        body {
+            background-color: transparent;
+            color: #0f172a;
+        }
+
+        .matrix-grid {
+            display: grid;
+            grid-template-rows: repeat(8, 1fr);
+            gap: 2px;
+            width: 100%;
+            height: 100%;
+        }
+
+        .matrix-row {
+            display: grid;
+            grid-template-columns: repeat(8, 1fr);
+            gap: 2px;
+            width: 100%;
+            height: 100%;
+        }
+
+        .cell {
+            border-radius: 2px;
+            background-color: #f1f5f9;
+            box-shadow: inset 0 0 0 1px rgba(0,0,0,0.05);
+            transition: background-color 0.4s ease, transform 0.3s ease;
+            width: 100%;
+            height: 100%;
+        }
+
+        /* Adjusted scaling to ensure it always fits horizontally */
+        .container-size {
+            width: 110px;
+            height: 110px;
+        }
+
+        @media (min-width: 640px) {
+            .container-size {
+                width: 140px;
+                height: 140px;
+            }
+        }
+
+        @media (min-width: 1024px) {
+            .container-size {
+                width: 175px;
+                height: 175px;
+            }
+        }
+
+        .matrix-glow {
+            box-shadow: 0 0 40px var(--glow-color, var(--purple-glow));
+            border-color: var(--border-color, rgba(168, 85, 247, 0.6)) !important;
+            transform: scale(1.02);
+            transition: all 0.4s ease;
+        }
+
+        #input-outer, #cache-outer {
+            transition: all 0.4s ease;
+        }
+
+        .equation-box {
+            background: rgba(248, 250, 252, 0.8);
+            backdrop-filter: blur(4px);
+            border: 1px solid rgba(203, 213, 225, 0.8);
+            white-space: nowrap;
+            min-height: 2.2rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .matrix-header {
+            height: 40px;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+            align-items: center;
+            padding-bottom: 0.4rem;
+            text-align: center;
+        }
+
+        .pointer-arrow {
+            width: 0;
+            height: 0;
+            border-top: 6px solid transparent;
+            border-bottom: 6px solid transparent;
+            border-left: 10px solid #f87171;
+            position: absolute;
+            left: -16px;
+            transform: translateY(-50%);
+            transition: top 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        .pulse-text {
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.5; transform: scale(0.95); }
+        }
+    </style>
+</head>
+<body class="flex flex-col items-center py-1 px-2 overflow-hidden relative">
+
+    <!-- Header & Context -->
+    <!-- <div class="mb-4 md:mb-6 text-center max-w-2xl shrink-0">
+        <h1 class="text-xl md:text-3xl font-bold tracking-tight text-slate-900 mb-1">SWA Matrix Update</h1>
+        <p class="text-slate-600 text-[10px] md:text-sm">
+            Recurrence: A single row of the Input Matrix replaces the same row in the KV State.
+        </p>
+    </div> -->
+
+    <div style="width:100%;text-align:center;padding:0.6rem 0 0.1rem;"><span style="font-size:1.15rem;font-weight:800;letter-spacing:0.12em;text-transform:uppercase;color:#1e293b;">SWA</span></div>
+
+    <!-- Main Stage: Forced flex-row so it never stacks vertically -->
+    <div id="main-stage" class="flex flex-row items-center justify-center w-full max-w-5xl gap-2 sm:gap-6 md:gap-12 relative px-1 md:px-4">
+        
+        <!-- LEFT: KV Cache Matrix -->
+        <div class="flex flex-col items-center shrink-0">
+            <div class="matrix-header">
+                <span class="text-[8px] md:text-[10px] font-black uppercase tracking-widest text-purple-600 mb-1">KV Cache Matrix</span>
+                <span class="text-sm md:text-lg font-mono text-purple-800">\( S_{t-1} \)</span>
+            </div>
+
+            <div id="cache-outer" class="relative p-1.5 md:p-3 bg-white rounded-xl border-2 border-slate-200 shadow-xl">
+                <div id="row-pointer" class="pointer-arrow scale-75 md:scale-100 origin-right"></div>
+                <div class="container-size">
+                    <div id="cache-grid" class="matrix-grid">
+                        <!-- Rows generated by JS -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- <div class="mt-3 md:mt-6 equation-box px-2 py-1 md:px-3 md:py-1.5 rounded-lg text-[8px] md:text-xs font-mono text-slate-700 w-full">
+                Index: \( t \mod W = \) <span id="idx-display" class="text-red-500 font-bold ml-1">0</span>
+            </div> -->
+        </div>
+
+        <!-- CENTER: Flow Indicator (Now visible on all screens) -->
+        <div class="flex flex-col items-center justify-center grow pt-12 px-2">
+            <div class="h-0.5 w-full min-w-[20px] max-w-[80px] bg-slate-300 relative">
+                <div class="absolute -top-6 md:-top-8 left-1/2 -translate-x-1/2 whitespace-nowrap">
+                    <span class="text-[7px] md:text-[9px] font-bold text-slate-500 uppercase tracking-tighter pulse-text">Update</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- RIGHT: Input Matrix -->
+        <div class="flex flex-col items-center shrink-0">
+            <div class="matrix-header">
+                <div class="flex flex-wrap justify-center items-center gap-1 md:gap-2 mb-1">
+                    <span class="text-[8px] md:text-[10px] font-black uppercase tracking-widest text-blue-600">INPUT</span>
+                    <span id="token-id" class="text-[8px] md:text-[10px] font-mono bg-blue-100 px-1.5 py-0.5 rounded border border-blue-200 text-blue-700">t=1</span>
+                </div>
+                <span class="text-sm md:text-lg font-mono text-blue-800">\( U_t \)</span>
+            </div>
+            
+            <div id="input-outer" class="relative p-1.5 md:p-3 bg-white rounded-xl border-2 border-blue-100 shadow-xl">
+                <div class="container-size">
+                    <div id="input-grid" class="matrix-grid">
+                        <!-- Rows generated by JS -->
+                    </div>
+                </div>
+            </div>
+            
+            <!-- <div class="mt-3 md:mt-6 equation-box px-2 py-1 md:px-3 md:py-1.5 rounded-lg text-[8px] md:text-xs font-mono text-blue-800 w-full">
+                Row \(t\): New Info
+            </div> -->
+        </div>
+    </div>
+
+    <!-- Flying row for animation -->
+    <div id="flying-row" class="matrix-row fixed top-0 left-0 pointer-events-none opacity-0 z-[100]" style="transition: transform 0.8s cubic-bezier(0.65, 0, 0.35, 1), opacity 0.3s ease;">
+        <!-- Cells generated by JS -->
+    </div>
+
+    <span id="status-text" style="display:none"></span>
+
+
+    <script>
+        const windowSize = 8;
+        const vectorDim = 8;
+        let inputRows = [];
+        let cacheRows = [];
+        let currentIndex = 0;
+        let tokenCount = 1;
+
+        const inputGrid = document.getElementById('input-grid');
+        const cacheGrid = document.getElementById('cache-grid');
+        const flyingRow = document.getElementById('flying-row');
+        const cacheOuter = document.getElementById('cache-outer');
+        const inputOuter = document.getElementById('input-outer');
+        const rowPointer = document.getElementById('row-pointer');
+        const statusText = document.getElementById('status-text');
+        const idxDisplay = document.getElementById('idx-display');
+        const tokenIdLabel = document.getElementById('token-id');
+
+        function init() {
+            for (let i = 0; i < windowSize; i++) {
+                // Generate Input Rows
+                const iRow = document.createElement('div');
+                iRow.className = 'matrix-row';
+                for (let j = 0; j < vectorDim; j++) {
+                    const cell = document.createElement('div');
+                    cell.className = 'cell';
+                    cell.style.backgroundColor = `hsl(220, 20%, 94%)`; // Light baseline
+                    iRow.appendChild(cell);
+                }
+                inputGrid.appendChild(iRow);
+                inputRows.push(iRow);
+
+                // Generate Cache Rows
+                const cRow = document.createElement('div');
+                cRow.className = 'matrix-row';
+                for (let j = 0; j < vectorDim; j++) {
+                    const cell = document.createElement('div');
+                    cell.className = 'cell';
+                    cRow.appendChild(cell);
+                }
+                cacheGrid.appendChild(cRow);
+                cacheRows.push(cRow);
+            }
+
+            // Generate Flying Row
+            for (let j = 0; j < vectorDim; j++) {
+                const cell = document.createElement('div');
+                cell.className = 'cell';
+                flyingRow.appendChild(cell);
+            }
+            
+            // Wait for render to position pointer
+            setTimeout(() => updatePointer(0), 100);
+        }
+
+        function updatePointer(idx) {
+            const rowElement = cacheRows[idx];
+            if (rowElement) {
+                // Calculate position relative to the cache-grid container
+                const offsetTop = rowElement.offsetTop;
+                const height = rowElement.offsetHeight;
+                rowPointer.style.top = `${offsetTop + (height / 2)}px`;
+            }
+        }
+
+        let moveResolve = null;
+        function waitForMove() { return new Promise(r => { moveResolve = r; }); }
+
+        async function playCycle() {
+            const currentHue = (tokenCount * 137.5) % 360;
+            const targetIdx = currentIndex % windowSize;
+
+            // Clear all input rows
+            inputRows.forEach(row => {
+                row.querySelectorAll('.cell').forEach(cell => {
+                    cell.style.backgroundColor = 'hsl(220, 20%, 94%)';
+                });
+            });
+            if (tokenIdLabel) tokenIdLabel.innerText = `t=${tokenCount}`;
+
+            // ── Setup: light up target input row ──
+            const iRow = inputRows[targetIdx];
+            const iCells = iRow.querySelectorAll('.cell');
+            const colors = [];
+            iCells.forEach(cell => {
+                const l = 30 + Math.random() * 30;
+                const color = `hsl(${currentHue}, 70%, ${l}%)`;
+                cell.style.backgroundColor = color;
+                colors.push(color);
+            });
+            inputOuter.style.borderColor = `hsla(${currentHue}, 70%, 50%, 0.4)`;
+            await new Promise(r => setTimeout(r, 550));
+
+            // ── Setup: clear target cache row ──
+            updatePointer(targetIdx);
+            const cRow = cacheRows[targetIdx];
+            const cCells = cRow.querySelectorAll('.cell');
+            cCells.forEach(cell => {
+                cell.style.backgroundColor = '#f1f5f9';
+                cell.style.transform = 'scale(0.85)';
+            });
+            await new Promise(r => setTimeout(r, 450)); // total ~1000ms
+
+            // ── PAUSE — wait for parent's sync-move ──
+            await waitForMove();
+
+            // ── MOVE — same duration as SSM & Raven ──
+            const iRect = iRow.getBoundingClientRect();
+            const cRect = cRow.getBoundingClientRect();
+            flyingRow.style.width = `${iRect.width}px`;
+            flyingRow.style.height = `${iRect.height}px`;
+            flyingRow.style.transform = `translate(${iRect.left}px, ${iRect.top}px)`;
+            const fCells = flyingRow.querySelectorAll('.cell');
+            fCells.forEach((cell, i) => { cell.style.backgroundColor = colors[i]; });
+            flyingRow.style.transition = 'none';
+            void flyingRow.offsetWidth;
+            flyingRow.style.transition = 'transform 1s cubic-bezier(0.65, 0, 0.35, 1), opacity 0.3s ease';
+            flyingRow.style.opacity = '1';
+            flyingRow.style.transform = `translate(${cRect.left}px, ${cRect.top}px)`;
+            await new Promise(r => setTimeout(r, 1050));
+
+            // ── Commit ──
+            cacheOuter.style.setProperty('--glow-color', `hsla(${currentHue}, 70%, 50%, 0.4)`);
+            cacheOuter.style.setProperty('--border-color', `hsla(${currentHue}, 70%, 50%, 0.6)`);
+            cacheOuter.classList.add('matrix-glow');
+            cCells.forEach((cell, i) => {
+                cell.style.backgroundColor = colors[i];
+                cell.style.transform = 'scale(1)';
+            });
+            flyingRow.style.opacity = '0';
+            inputOuter.style.borderColor = 'rgba(59, 130, 246, 0.2)';
+            await new Promise(r => setTimeout(r, 900));
+
+            cacheOuter.classList.remove('matrix-glow');
+            await new Promise(r => setTimeout(r, 400));
+
+            currentIndex++;
+            tokenCount++;
+            window.parent.postMessage({type:'cycle-done', src:'swa'}, '*');
+        }
+
+        window.addEventListener('message', e => {
+            if (!e.data) return;
+            if (e.data.type === 'sync-play') playCycle();
+            if (e.data.type === 'sync-move' && moveResolve) { moveResolve(); moveResolve = null; }
+        });
+
+        window.onload = () => {
+            init();
+            window.parent.postMessage({type:'cycle-ready', src:'swa'}, '*');
+        };
+
+        window.onresize = () => {
+            updatePointer(currentIndex % windowSize);
+        };
+    </script>
+</body>
+</html>

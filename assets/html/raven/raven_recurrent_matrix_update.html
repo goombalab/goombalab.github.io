@@ -1,0 +1,437 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Raven: Sparse Memory Routing Update</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <style>
+        :root {
+            --orange-glow: rgba(249, 115, 22, 0.4);
+            --red-glow: rgba(239, 68, 68, 0.3);
+            --amber-glow: rgba(245, 158, 11, 0.3);
+        }
+
+        *, *::before, *::after {
+            box-sizing: border-box;
+        }
+
+        body {
+            background-color: transparent; 
+            color: #0f172a; 
+            margin: 0;
+            padding: 0;
+            overflow-x: hidden;
+        }
+
+        .matrix-grid {
+            display: grid;
+            grid-template-rows: repeat(8, 1fr);
+            gap: 2px;
+            width: 100%;
+            height: 100%;
+        }
+
+        .matrix-row {
+            display: grid;
+            grid-template-columns: repeat(8, 1fr);
+            gap: 2px;
+            width: 100%;
+            height: 100%;
+            border-radius: 4px;
+            border: 2px solid transparent;
+            transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+        }
+
+        .matrix-row.active {
+            border-color: var(--route-color, #f97316);
+            box-shadow: 0 0 15px var(--route-glow, var(--orange-glow));
+            transform: scale(1.03) translateX(4px);
+            z-index: 10;
+        }
+        
+        .matrix-row.active::before {
+            content: '';
+            position: absolute;
+            left: -12px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 0;
+            height: 0;
+            border-top: 4px solid transparent;
+            border-bottom: 4px solid transparent;
+            /* Changed border-right to border-left so it points into the row (>) */
+            border-left: 8px solid var(--route-color, #f97316);
+            opacity: 1;
+            transition: opacity 0.3s;
+        }
+
+        .matrix-row.inactive {
+            opacity: 0.3;
+            filter: grayscale(40%);
+            transform: scale(0.98);
+        }
+
+        .cell {
+            border-radius: 2px;
+            background-color: #f1f5f9;
+            box-shadow: inset 0 0 0 1px rgba(0,0,0,0.05);
+            transition: background-color 0.8s ease;
+            width: 100%;
+            height: 100%;
+        }
+
+        .container-size {
+            width: 110px;
+            height: 110px;
+        }
+
+        @media (min-width: 640px) {
+            .container-size {
+                width: 140px;
+                height: 140px;
+            }
+        }
+
+        @media (min-width: 1024px) {
+            .container-size {
+                width: 175px;
+                height: 175px;
+            }
+        }
+
+        .pulse-text {
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.5; transform: scale(0.95); }
+        }
+
+        .matrix-header {
+            height: 40px;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+            align-items: center;
+            padding-bottom: 0.4rem;
+            text-align: center;
+        }
+
+        /* Router Node Styles */
+        .router-node {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            background: #fff;
+            border: 3px solid #cbd5e1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 1.2rem;
+            color: #64748b;
+            transition: all 0.4s ease;
+            position: relative;
+            z-index: 20;
+        }
+
+        .router-node.computing {
+            border-color: var(--route-color, #f97316);
+            color: var(--route-color, #f97316);
+            box-shadow: 0 0 20px var(--route-glow, var(--orange-glow));
+            transform: scale(1.1);
+        }
+
+        .router-node.computing::after {
+            content: '';
+            position: absolute;
+            inset: -6px;
+            border-radius: 50%;
+            border: 2px dashed var(--route-color, #f97316);
+            animation: spin 3s linear infinite;
+        }
+
+        @keyframes spin {
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Forget Gate Overlay specifically for rows */
+        .row-forget-overlay {
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(to right, rgba(255,255,255,0.7), rgba(241,245,249,0.2));
+            opacity: 0;
+            transition: opacity 0.6s ease;
+            pointer-events: none;
+            border-radius: 4px;
+        }
+
+        .row-forget-overlay.active {
+            opacity: 1;
+        }
+
+        /* #input-wrapper transitions set purely inline at runtime for exact sync */
+
+    </style>
+</head>
+<body class="flex flex-col items-center py-1 px-2 overflow-hidden relative">
+
+    <div style="width:100%;text-align:center;padding:0.6rem 0 0.1rem;"><span style="font-size:1.15rem;font-weight:800;letter-spacing:0.12em;text-transform:uppercase;color:#1e293b;">Raven (RSM)</span></div>
+
+    <div id="main-stage" class="flex flex-row items-center justify-center w-full max-w-5xl gap-2 sm:gap-4 md:gap-8 relative px-1 md:px-4">
+        
+        <!-- LEFT: Raven Memory Slots -->
+        <div class="flex flex-col items-center shrink-0">
+            <div class="matrix-header">
+                <span class="text-[8px] md:text-[10px] font-black uppercase tracking-widest text-orange-600 mb-1">Fixed Memory Slots</span>
+                <span class="text-sm md:text-lg font-mono text-orange-800">\( S_{t-1} \)</span>
+            </div>
+
+            <div id="memory-outer" class="relative p-1.5 md:p-3 bg-white rounded-xl border-2 border-slate-200 shadow-xl transition-all duration-700">
+                <div class="container-size relative">
+                    <div id="memory-grid" class="matrix-grid">
+                        <!-- Rows generated by JS -->
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- CENTER: Sparse Router -->
+        <div class="flex flex-col items-center justify-center grow pt-12 px-2 relative">
+            <div id="router-line-left" class="absolute h-0.5 w-[45%] bg-slate-300 left-0 top-[60%] transition-colors duration-300"></div>
+            <div id="router-line-right" class="absolute h-0.5 w-[45%] bg-slate-300 right-0 top-[60%] transition-colors duration-300"></div>
+            
+            <div class="absolute top-[60%] left-1/2 -translate-x-1/2 -translate-y-1/2 flex flex-col items-center">
+                <span class="text-[7px] md:text-[9px] font-bold text-slate-500 uppercase tracking-tighter mb-2" id="router-text">Router</span>
+                <div id="router-node" class="router-node">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-git-branch"><line x1="6" x2="6" y1="3" y2="15"/><circle cx="18" cy="6" r="3"/><circle cx="6" cy="18" r="3"/><path d="M18 9a9 9 0 0 1-9 9"/></svg>
+                </div>
+            </div>
+        </div>
+
+        <!-- RIGHT: Projected Input -->
+        <div class="flex flex-col items-center shrink-0">
+            <div class="matrix-header">
+                <div class="flex flex-wrap justify-center items-center gap-1 md:gap-2 mb-1">
+                    <span class="text-[8px] md:text-[10px] font-black uppercase tracking-widest text-blue-600" id="input-label-text">New Token</span>
+                    <span id="token-id" class="text-[8px] md:text-[10px] font-mono bg-blue-100 px-1.5 py-0.5 rounded border border-blue-200 text-blue-700">t=1</span>
+                </div>
+                <span class="text-sm md:text-lg font-mono text-blue-800" id="equation-input-text">\( x_t \)</span>
+            </div>
+            
+            <div id="input-wrapper" class="relative p-1.5 md:p-3 bg-white rounded-xl border-2 border-blue-100 shadow-xl opacity-0">
+                <div class="container-size">
+                    <div id="input-grid" class="matrix-grid">
+                        <!-- Rows generated by JS -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bottom Status & Equation -->
+    <span id="status-text" style="display:none"></span>
+
+
+    <script>
+        const windowSize = 8;
+        const vectorDim = 8;
+        let memoryRows = [];
+        let inputRows = [];
+        let tokenCount = 1;
+
+        const memoryGrid = document.getElementById('memory-grid');
+        const inputGrid = document.getElementById('input-grid');
+        const inputWrapper = document.getElementById('input-wrapper');
+        const statusText = document.getElementById('status-text');
+        const tokenIdLabel = document.getElementById('token-id');
+        const routerNode = document.getElementById('router-node');
+        const routerText = document.getElementById('router-text');
+        
+        // Setup grids
+        function init() {
+            for (let i = 0; i < windowSize; i++) {
+                // Init Memory Rows
+                const mRow = document.createElement('div');
+                mRow.className = 'matrix-row';
+                
+                // Overlay for localized decay
+                const decayOverlay = document.createElement('div');
+                decayOverlay.className = 'row-forget-overlay';
+                mRow.appendChild(decayOverlay);
+
+                for (let j = 0; j < vectorDim; j++) {
+                    const cell = document.createElement('div');
+                    cell.className = 'cell';
+                    
+                    // Give initial random faded state colors
+                    const initialHue = Math.floor(Math.random() * 360);
+                    cell.style.backgroundColor = `hsl(${initialHue}, 20%, 90%)`;
+                    mRow.appendChild(cell);
+                }
+                memoryGrid.appendChild(mRow);
+                memoryRows.push(mRow);
+
+                // Init Input Rows
+                const iRow = document.createElement('div');
+                iRow.className = 'matrix-row';
+                for (let j = 0; j < vectorDim; j++) {
+                    const cell = document.createElement('div');
+                    cell.className = 'cell';
+                    cell.style.backgroundColor = '#f1f5f9';
+                    iRow.appendChild(cell);
+                }
+                inputGrid.appendChild(iRow);
+                inputRows.push(iRow);
+            }
+        }
+
+        // Shuffle array to pick random slots
+        function getRandomIndices(count, max) {
+            const arr = Array.from({length: max}, (_, i) => i);
+            for (let i = arr.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [arr[i], arr[j]] = [arr[j], arr[i]];
+            }
+            return arr.slice(0, count).sort();
+        }
+
+        function refreshInput(hue) {
+            const colorStr = `hsl(${hue}, 80%, 45%)`;
+            const glowStr = `hsla(${hue}, 80%, 50%, 0.4)`;
+            
+            // Set CSS variables for routing color scheme
+            document.documentElement.style.setProperty('--route-color', colorStr);
+            document.documentElement.style.setProperty('--route-glow', glowStr);
+
+            tokenIdLabel.innerText = `t=${tokenCount}`;
+            tokenIdLabel.style.color = colorStr;
+            tokenIdLabel.style.borderColor = glowStr;
+            tokenIdLabel.style.backgroundColor = `hsla(${hue}, 80%, 50%, 0.05)`;
+
+            // Light up right matrix to represent the new token
+            inputRows.forEach(row => {
+                const cells = row.querySelectorAll('.cell');
+                cells.forEach(cell => {
+                    const lightness = 45 + Math.random() * 25; 
+                    cell.style.backgroundColor = `hsl(${hue}, 70%, ${lightness}%)`;
+                });
+            });
+        }
+
+        function getOffsets() {
+            const memRect = document.getElementById('memory-outer').getBoundingClientRect();
+            const inpRect = inputWrapper.getBoundingClientRect();
+            return {
+                x: memRect.left - inpRect.left,
+                y: memRect.top - inpRect.top
+            };
+        }
+
+        let moveResolve = null;
+        function waitForMove() { return new Promise(r => { moveResolve = r; }); }
+
+        async function playCycle() {
+            const baseHue = (tokenCount * 45) % 360;
+            const currentHue = (baseHue > 60 && baseHue < 300) ? (baseHue % 40) + 10 : baseHue;
+
+            // Reset matrix states
+            memoryRows.forEach(row => {
+                row.classList.remove('active', 'inactive');
+                row.querySelector('.row-forget-overlay').classList.remove('active');
+            });
+            inputRows.forEach(row => row.classList.remove('inactive'));
+
+            // ── Reset: snap to start with NO transition ──
+            inputWrapper.style.transition = 'none';
+            inputWrapper.style.transform = 'translate(0, 0)';
+            inputWrapper.style.opacity = '0';
+            void inputWrapper.offsetWidth; // force reflow
+
+            // ── Setup: fade in ──
+            inputWrapper.style.transition = 'opacity 0.28s ease';
+            refreshInput(currentHue);
+            inputWrapper.style.opacity = '1';
+            inputWrapper.style.transform = 'scale(1.02)';
+            await new Promise(r => setTimeout(r, 280));
+            inputWrapper.style.transform = 'scale(1)';
+
+            // ── Setup: router + row selection ──
+            routerNode.classList.add('computing');
+            routerText.style.color = `hsl(${currentHue}, 80%, 45%)`;
+            document.getElementById('router-line-right').style.backgroundColor = `hsl(${currentHue}, 80%, 45%)`;
+            const numSelected = Math.random() > 0.5 ? 2 : 3;
+            const selectedIndices = getRandomIndices(numSelected, windowSize);
+            document.getElementById('router-line-left').style.backgroundColor = `hsl(${currentHue}, 80%, 45%)`;
+            memoryRows.forEach((row, idx) => {
+                row.classList.add(selectedIndices.includes(idx) ? 'active' : 'inactive');
+            });
+            inputRows.forEach((row, idx) => {
+                if (!selectedIndices.includes(idx)) {
+                    row.classList.add('inactive');
+                    row.querySelectorAll('.cell').forEach(cell => cell.style.backgroundColor = '#f1f5f9');
+                }
+            });
+            selectedIndices.forEach(idx => {
+                memoryRows[idx].querySelector('.row-forget-overlay').classList.add('active');
+            });
+            await new Promise(r => setTimeout(r, 720)); // total ~1000ms
+
+            // ── PAUSE — wait for parent's sync-move ──
+            await waitForMove();
+
+            // ── MOVE — same easing/duration as SSM & SWA ──
+            const offsets = getOffsets();
+            inputWrapper.style.transition = 'transform 1s cubic-bezier(0.65, 0, 0.35, 1)';
+            inputWrapper.style.transform = `translate(${offsets.x}px, ${offsets.y}px)`;
+            await new Promise(r => setTimeout(r, 1050));
+
+            // ── Commit ──
+            selectedIndices.forEach(idx => {
+                const memCells = memoryRows[idx].querySelectorAll('.cell');
+                const inpCells = inputRows[idx].querySelectorAll('.cell');
+                memoryRows[idx].querySelector('.row-forget-overlay').classList.remove('active');
+                memCells.forEach((cell, cIdx) => {
+                    if (Math.random() > 0.2) cell.style.backgroundColor = inpCells[cIdx].style.backgroundColor;
+                });
+            });
+            inputWrapper.style.transition = 'none';
+            inputWrapper.style.opacity = '0';
+            routerNode.classList.remove('computing');
+            routerText.style.color = "#64748b";
+            document.getElementById('router-line-left').style.backgroundColor = "#cbd5e1";
+            document.getElementById('router-line-right').style.backgroundColor = "#cbd5e1";
+            await new Promise(r => setTimeout(r, 900));
+
+            memoryRows.forEach(row => row.classList.remove('active', 'inactive'));
+            await new Promise(r => setTimeout(r, 400));
+
+            tokenCount++;
+            window.parent.postMessage({type:'cycle-done', src:'raven'}, '*');
+        }
+
+        window.addEventListener('message', e => {
+            if (!e.data) return;
+            if (e.data.type === 'sync-play') playCycle();
+            if (e.data.type === 'sync-move' && moveResolve) { moveResolve(); moveResolve = null; }
+        });
+
+        window.onload = () => {
+            init();
+            window.parent.postMessage({type:'cycle-ready', src:'raven'}, '*');
+        };
+
+        window.onresize = () => {
+            inputWrapper.classList.add('no-transition');
+            inputWrapper.style.transform = 'translate(0, 0)';
+            inputWrapper.style.opacity = "0";
+            void inputWrapper.offsetWidth;
+            inputWrapper.classList.remove('no-transition');
+        };
+    </script>
+</body>
+</html>

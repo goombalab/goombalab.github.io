@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SSM Recurrent Matrix Update</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <style>
+        :root {
+            --blue-glow: rgba(59, 130, 246, 0.3);
+            --purple-glow: rgba(168, 85, 247, 0.3);
+        }
+
+        *, *::before, *::after {
+            box-sizing: border-box;
+        }
+
+        body {
+            background-color: transparent; 
+            color: #0f172a; 
+            margin: 0;
+            padding: 0;
+            overflow-x: hidden; /* Prevents any accidental scrollbars */
+        }
+
+        .matrix-cell {
+            transition: background-color 1.2s cubic-bezier(0.4, 0, 0.2, 1), transform 0.4s ease;
+            border-radius: 2px;
+            background-color: #f1f5f9;
+            box-shadow: inset 0 0 0 1px rgba(0,0,0,0.05);
+        }
+
+        /* #input-wrapper transitions set purely inline at runtime for exact sync */
+
+        .no-transition {
+            transition: none !important;
+        }
+
+        .forget-overlay {
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(to bottom, rgba(241, 245, 249, 0.1), rgba(255, 255, 255, 0.8));
+            opacity: 0;
+            transition: opacity 0.8s ease;
+            z-index: 10;
+            pointer-events: none;
+        }
+
+        .forget-overlay.active {
+            opacity: 1;
+        }
+        
+        .matrix-glow {
+            box-shadow: 0 0 40px var(--glow-color, var(--purple-glow));
+            border-color: var(--border-color, rgba(168, 85, 247, 0.6)) !important;
+            transform: scale(1.02);
+            transition: all 0.4s ease;
+        }
+
+        .matrix-grid {
+            display: grid;
+            grid-template-columns: repeat(8, 1fr);
+            grid-template-rows: repeat(8, 1fr);
+            gap: 1px;
+            width: 100%;
+            height: 100%;
+        }
+
+        .container-size {
+            width: 110px;
+            height: 110px;
+        }
+
+        @media (min-width: 640px) {
+            .container-size {
+                width: 140px;
+                height: 140px;
+            }
+        }
+
+        @media (min-width: 1024px) {
+            .container-size {
+                width: 175px;
+                height: 175px;
+            }
+        }
+
+        @media (min-width: 768px) {
+            .matrix-grid {
+                gap: 2px;
+            }
+        }
+
+        .pulse-text {
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.5; transform: scale(0.95); }
+        }
+
+        .equation-box {
+            background: rgba(248, 250, 252, 0.8);
+            backdrop-filter: blur(4px);
+            border: 1px solid rgba(203, 213, 225, 0.8);
+            text-align: center;
+            min-height: 2.2rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            line-height: 1.2;
+        }
+
+        .matrix-header {
+            height: 40px;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+            align-items: center;
+            padding-bottom: 0.4rem;
+            text-align: center;
+        }
+
+        .matrix-outer-card {
+            background-color: #ffffff;
+            border-radius: 0.75rem;
+            border: 2px solid #e2e8f0;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+        }
+    </style>
+</head>
+<body class="flex flex-col items-center py-1 px-2 overflow-hidden relative">
+
+    <!-- Header & Context -->
+    <!-- <div class="mb-2 text-center w-full px-4 shrink-0">
+        <h1 class="text-xl md:text-2xl font-bold tracking-tight text-slate-900 mb-1">SSM Matrix Update</h1>
+        <p class="text-slate-600 text-[10px] md:text-xs">
+            Recurrence: \( S_t = \bar{A} S_{t-1} + \bar{B} x_t \). 
+        </p>
+    </div> -->
+
+    <div style="width:100%;text-align:center;padding:0.6rem 0 0.1rem;"><span style="font-size:1.15rem;font-weight:800;letter-spacing:0.12em;text-transform:uppercase;color:#1e293b;">SSM</span></div>
+
+    <!-- Main Stage: Completely fluid horizontal layout -->
+    <div id="main-stage" class="flex flex-row items-center justify-center w-full max-w-5xl gap-2 sm:gap-6 md:gap-12 relative px-1 md:px-4">
+        
+        <!-- LEFT: SSM State (S) -->
+        <div class="flex flex-col items-center shrink-0">
+            <div class="matrix-header">
+                <span class="text-[8px] md:text-[10px] font-black uppercase tracking-widest text-purple-600 mb-1">SSM State</span>
+                <span class="text-sm md:text-lg font-mono text-purple-800">\( S_{t-1} \)</span>
+            </div>
+            
+            <div id="memory-outer" class="relative p-1.5 md:p-3 bg-white rounded-xl border-2 border-slate-200 shadow-xl transition-all duration-700">
+                <div class="container-size relative">
+                    <div id="memory-container" class="matrix-grid">
+                        <!-- Cells generated by JS -->
+                    </div>
+                    <div id="forget-gate" class="forget-overlay rounded-lg"></div>
+                </div>
+            </div>
+            
+            <!-- <div class="mt-2 md:mt-4 equation-box px-2 py-1 rounded-lg text-[8px] md:text-xs font-mono text-slate-700 w-full">
+                Decay: \( \bar{A} \cdot S_{t-1} \)
+            </div> -->
+        </div>
+
+        <!-- CENTER: Flow Indicator -->
+        <div class="flex flex-col items-center justify-center grow pt-12 px-2">
+            <div class="h-0.5 w-full min-w-[20px] max-w-[80px] bg-slate-300 relative">
+                <div class="absolute -top-6 md:-top-8 left-1/2 -translate-x-1/2 whitespace-nowrap">
+                    <span class="text-[7px] md:text-[9px] font-bold text-slate-500 uppercase tracking-tighter pulse-text">Update</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- RIGHT: Current Input Contribution -->
+        <div class="flex flex-col items-center shrink-0">
+            <div class="matrix-header">
+                <div class="flex flex-wrap justify-center items-center gap-1 md:gap-2 mb-1">
+                    <span class="text-[8px] md:text-[10px] font-black uppercase tracking-widest text-blue-600" id="input-label-text">Input</span>
+                    <span id="token-id" class="text-[8px] md:text-[10px] font-mono bg-blue-100 px-1.5 py-0.5 rounded border border-blue-200 text-blue-700">t=1</span>
+                </div>
+                <span class="text-sm md:text-lg font-mono text-blue-800" id="equation-input-text">\( U_t \)</span>
+            </div>
+
+            <div id="input-wrapper" class="relative p-1.5 md:p-3 bg-white rounded-xl border-2 border-blue-100 shadow-xl opacity-0">
+                <div class="container-size relative">
+                    <div id="input-container" class="matrix-grid">
+                        <!-- Cells generated by JS -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- <div class="mt-2 md:mt-4 equation-box px-2 py-1 rounded-lg text-[8px] md:text-xs font-mono text-blue-800 w-full">
+                New Info
+            </div> -->
+        </div>
+
+    </div>
+
+    <span id="status-text" style="display:none"></span>
+
+    <script>
+        const matrixSize = 8;
+        const totalCells = matrixSize * matrixSize;
+        const memoryContainer = document.getElementById('memory-container');
+        const inputContainer = document.getElementById('input-container');
+        const inputWrapper = document.getElementById('input-wrapper');
+        const forgetGate = document.getElementById('forget-gate');
+        const memoryOuter = document.getElementById('memory-outer');
+        const tokenIdLabel = document.getElementById('token-id');
+        const statusText = document.getElementById('status-text');
+        const inputLabel = document.getElementById('input-label-text');
+        const equationInput = document.getElementById('equation-input-text');
+
+        let stateCells = [];
+        let inputCells = [];
+        let tokenCount = 1;
+
+        function init() {
+            for (let i = 0; i < totalCells; i++) {
+                const sCell = document.createElement('div');
+                sCell.className = 'matrix-cell w-full h-full';
+                sCell.style.backgroundColor = `hsl(210, 20%, 94%)`;
+                memoryContainer.appendChild(sCell);
+                stateCells.push(sCell);
+
+                const iCell = document.createElement('div');
+                iCell.className = 'matrix-cell w-full h-full';
+                inputContainer.appendChild(iCell);
+                inputCells.push(iCell);
+            }
+        }
+
+        function refreshInput(hue) {
+            inputCells.forEach(cell => {
+                const lightness = 40 + Math.random() * 30; 
+                cell.style.backgroundColor = `hsl(${hue}, 70%, ${lightness}%)`;
+            });
+            
+            const colorStr = `hsl(${hue}, 70%, 45%)`;
+            inputLabel.style.color = colorStr;
+            equationInput.style.color = colorStr;
+            inputWrapper.style.borderColor = `hsla(${hue}, 70%, 50%, 0.4)`;
+            tokenIdLabel.innerText = `t=${tokenCount}`;
+            tokenIdLabel.style.borderColor = `hsla(${hue}, 70%, 50%, 0.3)`;
+            tokenIdLabel.style.backgroundColor = `hsla(${hue}, 70%, 50%, 0.05)`;
+            tokenIdLabel.style.color = colorStr;
+        }
+
+        function getOffsets() {
+            const memRect = memoryOuter.getBoundingClientRect();
+            const inpRect = inputWrapper.getBoundingClientRect();
+            return {
+                x: memRect.left - inpRect.left,
+                y: memRect.top - inpRect.top
+            };
+        }
+
+        let moveResolve = null;
+        function waitForMove() { return new Promise(r => { moveResolve = r; }); }
+
+        async function playCycle() {
+            const currentHue = (tokenCount * 137.5) % 360;
+
+            // ── Reset: snap to start position with NO transition ──
+            inputWrapper.style.transition = 'none';
+            inputWrapper.style.transform = 'translate(0, 0)';
+            inputWrapper.style.opacity = '0';
+            void inputWrapper.offsetWidth; // force reflow
+
+            // ── Setup: fade in ──
+            inputWrapper.style.transition = 'opacity 0.35s ease';
+            refreshInput(currentHue);
+            inputWrapper.style.opacity = '1';
+            inputWrapper.style.transform = 'scale(1.02)';
+            await new Promise(r => setTimeout(r, 350));
+            inputWrapper.style.transform = 'scale(1)';
+
+            // ── Setup: decay ──
+            forgetGate.classList.add('active');
+            await new Promise(r => setTimeout(r, 650)); // total ~1000ms
+
+            // ── PAUSE — wait for parent's sync-move ──
+            await waitForMove();
+
+            // ── MOVE — same easing/duration as SWA & Raven ──
+            const offsets = getOffsets();
+            inputWrapper.style.transition = 'transform 1s cubic-bezier(0.65, 0, 0.35, 1)';
+            inputWrapper.style.transform = `translate(${offsets.x}px, ${offsets.y}px)`;
+            await new Promise(r => setTimeout(r, 1050));
+
+            // ── Commit ──
+            memoryOuter.style.setProperty('--glow-color', `hsla(${currentHue}, 70%, 50%, 0.4)`);
+            memoryOuter.style.setProperty('--border-color', `hsla(${currentHue}, 70%, 50%, 0.6)`);
+            memoryOuter.classList.add('matrix-glow');
+            forgetGate.classList.remove('active');
+            inputWrapper.style.transition = 'none';
+            inputWrapper.style.opacity = '0';
+            stateCells.forEach(cell => {
+                if (Math.random() > 0.35) {
+                    const l = 60 + Math.random() * 25;
+                    cell.style.backgroundColor = `hsl(${currentHue}, 60%, ${l}%)`;
+                }
+            });
+            await new Promise(r => setTimeout(r, 900));
+
+            memoryOuter.classList.remove('matrix-glow');
+            await new Promise(r => setTimeout(r, 400));
+
+            tokenCount++;
+            window.parent.postMessage({type:'cycle-done', src:'ssm'}, '*');
+        }
+
+        window.addEventListener('message', e => {
+            if (!e.data) return;
+            if (e.data.type === 'sync-play') playCycle();
+            if (e.data.type === 'sync-move' && moveResolve) { moveResolve(); moveResolve = null; }
+        });
+
+        window.onload = () => {
+            init();
+            window.parent.postMessage({type:'cycle-ready', src:'ssm'}, '*');
+        };
+
+        window.onresize = () => {
+            inputWrapper.classList.add('no-transition');
+            inputWrapper.style.transform = 'translate(0, 0)';
+            inputWrapper.style.opacity = "0";
+            void inputWrapper.offsetWidth;
+            inputWrapper.classList.remove('no-transition');
+        };
+    </script>
+
+    
+</body>
+</html>

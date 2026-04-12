@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Effective Context (T_eff) Visualization</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <style>
+        body {
+            background-color: transparent;
+            color: #0f172a; /* Slate 900 */
+            font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            margin: 0;
+            padding: 0 0.5rem 0.25rem;
+            display: flex;
+            justify-content: center;
+        }
+
+        .viz-container {
+            background: transparent;
+            border-radius: 0;
+            border: 0;
+            box-shadow: none;
+            padding: 0.25rem 1rem 0.25rem 0.25rem;
+            width: 100%;
+            max-width: 1200px; 
+            overflow-x: auto; /* Allows scrolling on very tiny screens without breaking horizontal layout */
+        }
+
+        .layout-grid {
+            --y-axis-gutter: 52px;
+        }
+
+        .chart-wrapper {
+            position: relative;
+            width: 100%;
+            min-width: 0;
+        }
+
+        svg {
+            width: 100%;
+            height: auto;
+            overflow: visible;
+        }
+
+        /* SVG text styling to match Tailwind */
+        .svg-text {
+            font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            font-size: 13px;
+            fill: #475569; /* slate-600 */
+        }
+
+        .axis-line {
+            stroke: #0f172a; /* slate-900 */
+            stroke-width: 3;
+            stroke-linecap: square;
+        }
+
+        .grid-line {
+            stroke: #cbd5e1; /* slate-300 */
+            stroke-width: 1;
+            stroke-dasharray: 3 3;
+        }
+
+        .y-label-container {
+            transform: rotate(-90deg);
+            transform-origin: center;
+            font-weight: 600;
+            color: #0f172a;
+            font-size: 1.1rem;
+            white-space: nowrap;
+        }
+
+        /* Legend styling */
+        .legend-bar {
+            background: linear-gradient(to right, #ecfdf5 0%, #eff6ff 50%, #fff1f2 100%);
+            border: 1px solid #e2e8f0;
+        }
+
+        .chart-grid {
+            display: grid;
+            grid-template-columns: var(--y-axis-gutter) minmax(0, 1fr);
+            align-items: stretch;
+            width: 100%;
+        }
+
+        .y-label-cell {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .charts-row {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 0;
+            align-items: center;
+            width: 100%;
+        }
+
+        .legend-grid {
+            margin-top: 0.25rem;
+            width: 100%;
+            display: grid;
+            grid-template-columns: var(--y-axis-gutter) minmax(0, 1fr);
+            align-items: center;
+        }
+
+        .legend-row {
+            display: flex;
+            align-items: center;
+            gap: 0;
+        }
+
+        .legend-item {
+            flex: 1 1 0;
+            text-align: center;
+        }
+
+        .legend-item:not(:last-child) {
+            border-right: 1px solid rgba(148, 163, 184, 0.6);
+        }
+
+        @media (max-width: 900px) {
+            .layout-grid {
+                --y-axis-gutter: 38px;
+            }
+            .y-label-container {
+                font-size: 1rem;
+            }
+            .svg-text {
+                font-size: 11px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="viz-container">
+        
+        <div class="w-full layout-grid">
+            <!-- Keep a 3-column horizontal layout while allowing responsive shrinking -->
+            <div class="chart-grid">
+                
+                <!-- Left Y-Axis Label (MathJax) -->
+                <div class="y-label-cell">
+                    <div class="y-label-container">
+                        \( T_{\text{eff}} \)
+                    </div>
+                </div>
+
+                <div class="charts-row">
+                    <!-- Chart 1: SSM -->
+                    <div class="chart-wrapper" id="chart-ssm"></div>
+
+                    <!-- Chart 2: Raven (RSM) -->
+                    <div class="chart-wrapper" id="chart-raven"></div>
+
+                    <!-- Chart 3: SWA -->
+                    <div class="chart-wrapper" id="chart-swa"></div>
+                </div>
+            </div>
+
+            <!-- Bottom Legend -->
+            <div class="legend-grid">
+                <div aria-hidden="true"></div>
+                <div class="legend-row legend-bar rounded-full py-2">
+                    <div class="legend-item font-bold text-emerald-700 tracking-wide text-xs md:text-sm">
+                        SSM
+                    </div>
+                    <div class="legend-item font-bold italic text-blue-700 tracking-wide text-xs md:text-sm">
+                        Raven (RSM)
+                    </div>
+                    <div class="legend-item font-bold text-rose-700 tracking-wide text-xs md:text-sm">
+                        SWA
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        // --- Configuration for SVG Generation ---
+        const SVG_WIDTH = 350;
+        const SVG_HEIGHT = 260;
+        const MARGIN = { top: 20, right: 15, bottom: 40, left: 55 };
+        const PLOT_WIDTH = SVG_WIDTH - MARGIN.left - MARGIN.right;
+        const PLOT_HEIGHT = SVG_HEIGHT - MARGIN.top - MARGIN.bottom;
+        
+        const X_MAX = 128;
+        const X_TICKS = [0, 32, 64, 96, 128];
+        const Y_TICKS_STD = [0.0, 0.2, 0.4, 0.6, 0.8, 1.0];
+        const Y_TICKS_SWA = [0.00, 0.01, 0.02, 0.03, 0.04, 0.05];
+
+        // Coordinate scaling functions
+        function scaleX(val) { return MARGIN.left + (val / X_MAX) * PLOT_WIDTH; }
+        function scaleY(val, maxVal = 1.0) { return MARGIN.top + PLOT_HEIGHT - (val / maxVal) * PLOT_HEIGHT; }
+
+        // Helper to generate base SVG with axes and grid
+        function createBaseChart(yTicks, yMax) {
+            let svg = `<svg viewBox="0 0 ${SVG_WIDTH} ${SVG_HEIGHT}" xmlns="http://www.w3.org/2000/svg">`;
+            
+            const gradX1 = scaleX(0);
+            const gradX2 = scaleX(X_MAX);
+
+            // Definitions (Gradients)
+            // Using userSpaceOnUse ensures the gradient stretches across the entire chart 
+            svg += `
+                <defs>
+                    <linearGradient id="raven-gradient" gradientUnits="userSpaceOnUse" x1="${gradX1}" y1="0" x2="${gradX2}" y2="0">
+                        <stop offset="0%" stop-color="#4ade80" />   <!-- Match SSM Green -->
+                        <stop offset="45%" stop-color="#3b82f6" />  <!-- Vibrant Blue -->
+                        <stop offset="85%" stop-color="#fb7185" />  <!-- Match SWA Red -->
+                    </linearGradient>
+                </defs>
+            `;
+
+            // Horizontal Grid Lines & Y-axis Labels
+            yTicks.forEach(tick => {
+                const yPos = scaleY(tick, yMax);
+                // Grid line (skip baseline)
+                if (tick !== 0) {
+                    svg += `<line x1="${MARGIN.left}" y1="${yPos}" x2="${MARGIN.left + PLOT_WIDTH}" y2="${yPos}" class="grid-line" />`;
+                }
+                // Label
+                const label = (yMax === 1.0) ? tick.toFixed(1) : tick.toFixed(2);
+                svg += `<text x="${MARGIN.left - 8}" y="${yPos + 4}" text-anchor="end" class="svg-text">${label}</text>`;
+            });
+
+            // X-axis Labels & Tick marks
+            X_TICKS.forEach(tick => {
+                const xPos = scaleX(tick);
+                svg += `<text x="${xPos}" y="${MARGIN.top + PLOT_HEIGHT + 20}" text-anchor="middle" class="svg-text">${tick}</text>`;
+                svg += `<line x1="${xPos}" y1="${MARGIN.top + PLOT_HEIGHT}" x2="${xPos}" y2="${MARGIN.top + PLOT_HEIGHT + 5}" class="axis-line" stroke-width="2" />`;
+            });
+
+            return svg;
+        }
+
+        // Helper to close SVG and add main axes
+        function closeChart(svg) {
+            // X Axis Line
+            svg += `<line x1="${MARGIN.left}" y1="${MARGIN.top + PLOT_HEIGHT}" x2="${MARGIN.left + PLOT_WIDTH}" y2="${MARGIN.top + PLOT_HEIGHT}" class="axis-line" />`;
+            // Y Axis Line
+            svg += `<line x1="${MARGIN.left}" y1="${MARGIN.top}" x2="${MARGIN.left}" y2="${MARGIN.top + PLOT_HEIGHT}" class="axis-line" />`;
+            svg += `</svg>`;
+            return svg;
+        }
+
+        // --- Generate Chart 1: SSM ---
+        function renderSSM() {
+            let svg = createBaseChart(Y_TICKS_STD, 1.0);
+            
+            const x0 = scaleX(0);
+            const y0 = scaleY(1.0);
+            const w = PLOT_WIDTH;
+            const h = PLOT_HEIGHT;
+
+            // Green fill rectangle
+            svg += `<rect x="${x0}" y="${y0}" width="${w}" height="${h}" fill="#86efac" fill-opacity="0.8" stroke="#22c55e" stroke-width="2" />`;
+            
+            document.getElementById('chart-ssm').innerHTML = closeChart(svg);
+        }
+
+        // --- Generate Chart 2: Raven ---
+        function renderRaven() {
+            let svg = createBaseChart(Y_TICKS_STD, 1.0);
+            
+            const numBars = 128;
+            const barWidth = PLOT_WIDTH / numBars;
+            let pathData = `M ${scaleX(0)} ${scaleY(0.85)}`;
+
+            // Generate "stepped/noisy" exponential decay bars
+            let barsSvg = `<g fill="url(#raven-gradient)">`;
+            for (let i = 0; i < numBars; i++) {
+                // Base exponential decay + a small baseline so the tail remains visible
+                let val = 0.82 * Math.exp(-i / 32) + 0.03;
+                
+                // Add a deterministic pseudo-random jitter to mimic the original chart's discrete steps
+                let jitter = (Math.sin(i * 13.5) * 0.05) * Math.exp(-i / 30);
+                let barVal = Math.max(0, val + jitter);
+                
+                const x = scaleX(i);
+                const y = scaleY(barVal);
+                const h = PLOT_HEIGHT - (y - MARGIN.top);
+
+                barsSvg += `<rect x="${x}" y="${y}" width="${barWidth * 1.1}" height="${h}" opacity="0.85" />`;
+                
+                // Track path for the smooth line
+                if (i > 0) {
+                    pathData += ` L ${scaleX(i)} ${scaleY(val)}`;
+                }
+            }
+            barsSvg += `</g>`;
+            svg += barsSvg;
+
+            // Overlay the smooth trend line using the SAME gradient so it turns red at the end
+            svg += `<path d="${pathData}" fill="none" stroke="url(#raven-gradient)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" />`;
+
+            document.getElementById('chart-raven').innerHTML = closeChart(svg);
+        }
+
+        // --- Generate Chart 3: SWA ---
+        function renderSWA() {
+            let svg = createBaseChart(Y_TICKS_SWA, 0.05);
+            
+            // SWA stays constant at ~0.015 (which is 30% of the 0.05 axis)
+            const swaValue = 0.0155; 
+            
+            const x0 = scaleX(0);
+            const y0 = scaleY(swaValue, 0.05);
+            const w = PLOT_WIDTH;
+            const h = PLOT_HEIGHT - (y0 - MARGIN.top);
+
+            // Red fill rectangle
+            svg += `<rect x="${x0}" y="${y0}" width="${w}" height="${h}" fill="#fca5a5" fill-opacity="0.8" stroke="#e11d48" stroke-width="2" />`;
+            
+            document.getElementById('chart-swa').innerHTML = closeChart(svg);
+        }
+
+        // Initialize all charts
+        window.onload = () => {
+            renderSSM();
+            renderRaven();
+            renderSWA();
+        };
+    </script>
+</body>
+</html>
