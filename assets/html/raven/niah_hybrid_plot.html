@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>NIAH Hybrid Results</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-annotation@3.0.1/dist/chartjs-plugin-annotation.min.js"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: Georgia, 'Times New Roman', serif;
+      background: transparent;
+      padding: 1rem 1.25rem 0.75rem;
+      color: #1e293b;
+    }
+    .row {
+      display: flex;
+      gap: 1.5rem;
+      align-items: stretch;
+    }
+    .panel {
+      flex: 1;
+      min-width: 0;
+      position: relative;
+    }
+    .chart-box {
+      position: relative;
+      height: 400px;
+    }
+    .footer-note {
+      text-align: center;
+      font-size: 0.71rem;
+      color: #94a3b8;
+      margin-top: 0.55rem;
+      font-style: italic;
+      letter-spacing: 0.015em;
+    }
+  </style>
+</head>
+<body>
+  <div class="row">
+    <div class="panel">
+      <div class="chart-box"><canvas id="canvas-niah2"></canvas></div>
+    </div>
+    <div class="panel">
+      <div class="chart-box"><canvas id="canvas-niah3"></canvas></div>
+    </div>
+  </div>
+  <p class="footer-note">Dashed line marks the training context length &middot; Hover any point for exact accuracy</p>
+
+  <script>
+    const colorMap = {
+      "GDN":      "green",
+      "Mamba-2":  "orange",
+      "SWA-RoPE": "red",
+      "Raven":    "dodgerblue",
+    };
+
+    const RAW = {
+      "niah2": {
+        labels: ["2k", "4k", "8k", "16k", "32k", "64k"],
+        models: {
+          "GDN":      [100, 100, 99, 2.2, 0, 0],
+          "Mamba-2":  [100, 100, 5.6, 0, 0, 0],
+          "SWA-RoPE": [100, 100, 98.4, 3, 0, 0],
+          "Raven":    [100, 100, 100, 99.8, 84.6, 80.8],
+        },
+      },
+      "niah3": {
+        labels: ["2k", "4k", "8k", "16k", "32k"],
+        models: {
+          "GDN":      [96.8, 93.8, 76.2, 0, 0],
+          "Mamba-2":  [88.8, 87.4, 5.8, 0, 0],
+          "SWA-RoPE": [67.8, 36, 17.6, 6.2, 0],
+          "Raven":    [97.2, 93.6, 85.4, 59.2, 36.8],
+        },
+      },
+    };
+
+    function buildDatasets(models) {
+      return Object.entries(models).map(([name, vals]) => {
+        const isRaven = name === "Raven";
+        return {
+          label:            name,
+          data:             vals,
+          borderColor:      colorMap[name] || "#999",
+          backgroundColor:  colorMap[name] || "#999",
+          borderWidth:      2.5,
+          pointRadius:      6,
+          pointHoverRadius: 11,
+          pointBorderWidth: 1.5,
+          pointBorderColor: "#fff",
+          tension:          0.12,
+          order:            isRaven ? 0 : 1,
+        };
+      });
+    }
+
+    function makeOptions(title) {
+      return {
+        responsive: true,
+        maintainAspectRatio: false,
+        animation: { duration: 400 },
+        interaction: { mode: 'point', intersect: true },
+        plugins: {
+          title: {
+            display: true,
+            text: title,
+            font: { family: "Georgia, serif", size: 13.5, weight: "bold" },
+            color: "#1e293b",
+            padding: { bottom: 12 },
+          },
+          legend: {
+            display: true,
+            position: 'bottom',
+            labels: {
+              font:          { family: "Georgia, serif", size: 11.5 },
+              color:         "#334155",
+              usePointStyle: true,
+              pointStyle:    'circle',
+              padding:       14,
+              boxWidth:      9,
+            },
+          },
+          tooltip: {
+            enabled: true,
+            backgroundColor: "#0f172a",
+            titleColor:      "#f1f5f9",
+            bodyColor:       "#94a3b8",
+            borderColor:     "rgba(255,255,255,0.08)",
+            borderWidth:     1,
+            padding:         { x: 12, y: 9 },
+            cornerRadius:    9,
+            titleFont: { family: "Georgia, serif", size: 13, weight: "bold" },
+            bodyFont:  { family: "Georgia, serif", size: 13 },
+            callbacks: {
+              title: (items) => items[0].dataset.label,
+              label: (item)  => `  ${item.parsed.y.toFixed(1)}%  at ${item.label}`,
+              labelColor: (item) => ({
+                borderColor:     colorMap[item.dataset.label] || "#94a3b8",
+                backgroundColor: colorMap[item.dataset.label] || "#94a3b8",
+                borderWidth: 2,
+                borderRadius: 3,
+              }),
+            },
+            displayColors: true,
+          },
+          annotation: {
+            annotations: {
+              trainingCtx: {
+                type:        'line',
+                xMin:        1,
+                xMax:        1,
+                borderColor: 'rgba(30,30,30,0.5)',
+                borderWidth: 1.8,
+                borderDash:  [7, 5],
+                label: {
+                  display:         true,
+                  content:         'Training context',
+                  position:        'start',
+                  yAdjust:         -12,
+                  font:            { family: "Georgia, serif", size: 9.5, style: "italic" },
+                  color:           "#475569",
+                  backgroundColor: "rgba(255,255,255,0.88)",
+                  padding:         { x: 5, y: 3 },
+                  borderRadius:    4,
+                },
+              },
+            },
+          },
+        },
+        scales: {
+          x: {
+            grid:   { color: "rgba(0,0,0,0.055)", lineWidth: 1 },
+            border: { display: false },
+            ticks:  { font: { family: "Georgia, serif", size: 12 }, color: "#64748b" },
+            title: {
+              display: true,
+              text: "Sequence Length",
+              font:  { family: "Georgia, serif", size: 12 },
+              color: "#64748b",
+              padding: { top: 4 },
+            },
+          },
+          y: {
+            min: -5,
+            max: 110,
+            grid:   { color: "rgba(0,0,0,0.055)", lineWidth: 1 },
+            border: { display: false },
+            ticks: {
+              stepSize: 20,
+              font:     { family: "Georgia, serif", size: 12 },
+              color:    "#64748b",
+              callback: v => (v < 0 || v > 100) ? "" : v + "%",
+            },
+            title: {
+              display: true,
+              text: "Accuracy (%)",
+              font:  { family: "Georgia, serif", size: 12 },
+              color: "#64748b",
+              padding: { bottom: 4 },
+            },
+          },
+        },
+      };
+    }
+
+    new Chart(document.getElementById("canvas-niah2"), {
+      type: "line",
+      data: { labels: RAW["niah2"].labels, datasets: buildDatasets(RAW["niah2"].models) },
+      options: makeOptions("NIAH-2  \u00b7  ~800M Hybrid"),
+    });
+
+    new Chart(document.getElementById("canvas-niah3"), {
+      type: "line",
+      data: { labels: RAW["niah3"].labels, datasets: buildDatasets(RAW["niah3"].models) },
+      options: makeOptions("NIAH-3  \u00b7  ~800M Hybrid"),
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Routing Slot Memories Table</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <style>
+        body {
+            background-color: transparent;
+            color: #0f172a; /* Slate 900 */
+            font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            margin: 0;
+            padding: 2rem 1rem;
+            display: flex;
+            justify-content: center;
+        }
+
+        .table-container {
+            background: #ffffff;
+            border-radius: 0.75rem;
+            border: 1px solid #e2e8f0;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            overflow: hidden;
+            position: relative;
+        }
+
+        /* The spectrum bar on the right */
+        .spectrum-bar {
+            position: absolute;
+            right: 0;
+            top: 0;
+            bottom: 0;
+            width: 6px;
+            background: linear-gradient(to bottom, 
+                #10b981 0%,     /* Emerald 500 (LinAtt) */
+                #6ee7b7 35%,    /* Emerald 300 (SSM variants) */
+                #3b82f6 60%,    /* Blue 500 (Raven) */
+                #fda4af 80%,    /* Rose 300 (GSA/ABC) */
+                #f43f5e 100%    /* Rose 500 (SWA) */
+            );
+            z-index: 10;
+        }
+
+        th {
+            background-color: #f8fafc;
+            color: #334155;
+            font-weight: 600;
+            letter-spacing: 0.05em;
+            font-size: 0.65rem;
+            border-bottom: 2px solid #e2e8f0;
+            padding: 0.25rem 0.5rem;
+            text-align: left;
+            /* white-space removed to allow wrapping if needed by fixed widths */
+        }
+
+        td {
+            padding: 0.25rem 0.5rem;
+            font-size: 0.75rem;
+            border-bottom: 1px solid #f1f5f9;
+            color: #1e293b;
+            /* white-space removed to allow wrapping */
+        }
+
+        @media (min-width: 640px) {
+            th { font-size: 0.75rem; padding: 0.35rem 0.75rem; }
+            td { font-size: 0.875rem; padding: 0.35rem 0.75rem; }
+        }
+
+        @media (min-width: 1024px) {
+            th { font-size: 0.875rem; padding: 0.5rem 1rem; }
+            td { font-size: 1rem; padding: 0.5rem 1rem; }
+        }
+
+        tr:last-child td {
+            border-bottom: none;
+        }
+
+        /* Row background colors mapping to the LaTeX spectrum */
+        table {
+            table-layout: fixed;
+            width: 100%;
+        }
+        .row-darkgreen { background-color: rgba(167, 243, 208, 0.35); } /* emerald-200 at 35% */
+        .row-darkgreen-light { background-color: rgba(209, 250, 229, 0.4); } /* emerald-100 at 40% */
+        .row-raven { 
+            background-color: rgba(219, 234, 254, 0.6); /* blue-100 at 60% */
+            font-weight: 500;
+        }
+        .row-red-light { background-color: rgba(255, 228, 230, 0.4); } /* rose-100 at 40% */
+        .row-red { background-color: rgba(254, 205, 211, 0.4); } /* rose-200 at 40% */
+
+        /* Caption Styling */
+        .caption-box {
+            max-width: 64rem; /* max-w-4xl */
+            margin-top: 1rem;
+            color: #475569; /* slate-600 */
+            font-size: 0.875rem;
+            line-height: 1.6;
+        }
+
+        .highlight-swa { color: #b91c1c; font-weight: 600; } /* red-700 */
+        .highlight-ssm { color: #047857; font-weight: 600; } /* emerald-700 */
+        .highlight-red { color: #ef4444; font-weight: 600; } /* red-500 */
+        .highlight-blue { color: #2563eb; font-weight: 600; } /* blue-600 */
+    </style>
+</head>
+<body>
+
+    <div class="w-full max-w-5xl">
+        
+        <!-- Table Container -->
+        <div class="table-container">
+            <div class="spectrum-bar"></div>
+            <div class="overflow-x-auto">
+                <table class="w-full text-left border-collapse">
+                    <thead>
+                        <tr>
+                            <th style="width: 16%;">MODEL</th>
+                            <th style="width: 25%;">ROUTER (\(\mathbf{r}_t\))</th>
+                            <th style="width: 20%;">CONTENT (\(\mathbf{u}_t\))</th>
+                            <th style="width: 19%;">DECAY (\(\mathbf{A}_t\))</th>
+                            <th style="width: 20%;" class="pr-6">READOUT (\(\mathbf{o}_t\))</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- LinAtt -->
+                        <tr class="row-darkgreen">
+                            <td>LinAtt</td>
+                            <td>\(\mathbf{1}_M\)</td>
+                            <td>\(\mathbf{v}_t\mathbf{k}_t^\top\)</td>
+                            <td>\(\mathbf{I}\)</td>
+                            <td class="pr-6">\(\mathbf{S}_t\mathbf{q}_t\)</td>
+                        </tr>
+                        <!-- RetNet -->
+                        <tr class="row-darkgreen-light">
+                            <td>RetNet</td>
+                            <td>\(\mathbf{1}_M\)</td>
+                            <td>\(\mathbf{v}_t\mathbf{k}_t^\top\)</td>
+                            <td>\(\gamma\)</td>
+                            <td class="pr-6">\(\mathbf{S}_t\mathbf{q}_t\)</td>
+                        </tr>
+                        <!-- GLA -->
+                        <tr class="row-darkgreen-light">
+                            <td>GLA</td>
+                            <td>\(\mathbf{1}_M\)</td>
+                            <td>\(\mathbf{v}_t\mathbf{k}_t^\top\)</td>
+                            <td>\(\text{diag}(\sigma(\mathbf{W}\mathbf{x}_t))^{1/\tau}\)</td>
+                            <td class="pr-6">\(\mathbf{S}_t\mathbf{q}_t\)</td>
+                        </tr>
+                        <!-- Mamba-2 -->
+                        <tr class="row-darkgreen-light">
+                            <td>Mamba-2</td>
+                            <td>\(\mathbf{1}_M\)</td>
+                            <td>\(\mathbf{v}_t\mathbf{k}_t^\top\)</td>
+                            <td>\(a_t\)</td>
+                            <td class="pr-6">\(\mathbf{S}_t\mathbf{q}_t\)</td>
+                        </tr>
+                        <!-- GDN -->
+                        <tr class="row-darkgreen-light">
+                            <td>GDN</td>
+                            <td>\(\mathbf{1}_M\)</td>
+                            <td>\(\mathbf{v}_t\mathbf{k}_t^\top\)</td>
+                            <td>\(a_t(\mathbf{I} - \mathbf{k}_t\mathbf{k}_t^\top)\)</td>
+                            <td class="pr-6">\(\mathbf{S}_t\mathbf{q}_t\)</td>
+                        </tr>
+                        <!-- Raven -->
+                        <tr class="row-raven">
+                            <td class="text-blue-700 font-bold">Raven</td>
+                            <td>\({\mathbf{g}_t} / {\mathbf{1}^\top \mathbf{g}_t}\)</td>
+                            <td>\([\mathbf{k}_t \ \mathbf{v}_t]^\top\)</td>
+                            <td>\(\mathbf{I}\)</td>
+                            <td class="pr-6">\((\mathbf{S}^v_t)^\top f(\mathbf{S}^k_t\mathbf{q}_t)\)</td>
+                        </tr>
+                        <!-- GSA -->
+                        <tr class="row-red-light">
+                            <td>GSA</td>
+                            <td>\(\mathbf{1}_M - \sigma(\mathbf{W}\mathbf{x}_t)^{1/\tau}\)</td>
+                            <td>\([\mathbf{k}_t \ \mathbf{v}_t]^\top\)</td>
+                            <td>\(\mathbf{I}\)</td>
+                            <td class="pr-6">\((\mathbf{S}^v_t)^\top f(\mathbf{S}^k_t\mathbf{q}_t)\)</td>
+                        </tr>
+                        <!-- ABC -->
+                        <tr class="row-red-light">
+                            <td>ABC</td>
+                            <td>\(\text{softmax}(\mathbf{W}\mathbf{x}_t)\)</td>
+                            <td>\([\mathbf{k}_t \ \mathbf{v}_t]^\top\)</td>
+                            <td>\(\mathbf{I}\)</td>
+                            <td class="pr-6">\((\mathbf{S}^v_t)^\top f(\mathbf{S}^k_t\mathbf{q}_t)\)</td>
+                        </tr>
+                        <!-- SWA -->
+                        <tr class="row-red">
+                            <td>SWA</td>
+                            <td>\(\mathbf{e}_t\)</td>
+                            <td>\([\mathbf{k}_t \ \mathbf{v}_t]^\top\)</td>
+                            <td>\(\mathbf{I}\)</td>
+                            <td class="pr-6">\((\mathbf{S}^v_t)^\top f(\mathbf{S}^k_t\mathbf{q}_t)\)</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Caption -->
+        <div class="caption-box">
+            <span class="font-bold text-slate-800">Table 1: Routing Slot Memories.</span> 
+            Design of the <i>Router</i> and <i>Decay</i> components across multiple architectures. The bar on the right along with row colors display each model's spectrum as a function of router sparsity, with <span class="highlight-swa">SWA</span> and <span class="highlight-ssm">SSM</span> marking the two extremes. For SSMs, the content matrix (\(\mathbf{u}_t\)) is <b><i>low-rank</i></b>, whereas SWA-like models use a <b><i>sparse</i></b> stacking of \(\mathbf{k}_t\) and \(\mathbf{v}_t\). \(f(\cdot)\) denotes the softmax. Dual-state models (highlighted in <span class="highlight-red">red</span> and <span class="highlight-blue">Raven</span>) apply slot-wise decay via \(\mathbf{D}_t\); therefore, their channel-wise decay \(\mathbf{A}_t\) equals \(\mathbf{I}\).
+        </div>
+
+    </div>
+
+</body>
+</html>

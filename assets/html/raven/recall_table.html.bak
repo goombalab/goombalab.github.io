@@ -1,0 +1,451 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>In-context Recall Benchmarks Table</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <style>
+        body {
+            background-color: transparent;
+            color: #0f172a; /* Slate 900 */
+            font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            
+        }
+
+        .table-container {
+            background: #ffffff;
+            border-radius: 0.75rem;
+            border: 1px solid #e2e8f0;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            overflow: hidden;
+            width: 100%;
+        }
+
+        .table-scroll-wrapper {
+            overflow-x: auto;
+            overflow-y: auto;
+            max-height: 480px;
+            width: 100%;
+            /* Custom scrollbar for better UX on wide tables */
+            scrollbar-width: thin;
+            scrollbar-color: #cbd5e1 #f8fafc;
+        }
+
+        .table-scroll-wrapper::-webkit-scrollbar {
+            height: 8px;
+        }
+        .table-scroll-wrapper::-webkit-scrollbar-track {
+            background: #f8fafc;
+        }
+        .table-scroll-wrapper::-webkit-scrollbar-thumb {
+            background-color: #cbd5e1;
+            border-radius: 4px;
+        }
+
+        table {
+            border-collapse: separate;
+            border-spacing: 0;
+            width: 100%;
+            min-width: 1200px;
+            text-align: center;
+        }
+
+        thead {
+            position: sticky;
+            top: 0;
+            z-index: 25;
+            background-color: #f8fafc;
+        }
+
+        th {
+            background-color: inherit;
+            color: #334155;
+            font-weight: 600;
+            font-size: clamp(0.55rem, 1.2vw, 0.8rem);
+            padding: 0.25rem 0.2rem;
+            border-bottom: 2px solid #e2e8f0;
+            white-space: nowrap;
+        }
+
+        td {
+            padding: 0.25rem 0.25rem;
+            font-size: clamp(0.6rem, 1.3vw, 0.85rem);
+            border-bottom: 1px solid #f1f5f9;
+            color: #1e293b;
+            white-space: nowrap;
+        }
+
+        /* Sticky first column */
+        thead tr:first-child th:first-child, td:first-child {
+            position: sticky;
+            left: 0;
+            background-color: inherit;
+            z-index: 20;
+            text-align: left;
+            padding-left: 1rem;
+            border-right: 1px solid #e2e8f0;
+        }
+        thead tr:first-child th:first-child {
+            top: 0; /* Ensures it stays sticky vertically as well */
+            z-index: 30; /* Header needs to sit above standard sticky column */
+        }
+
+        /* Default row background handling for sticky cols to cover scrolling content */
+        tr { background-color: #ffffff; }
+        
+        /* Column background colors mapping to gray!10 */
+        .col-recall { background-color: #f8fafc; }
+        
+        /* The thick vertical dividers mapping to LaTeX | */
+        .border-r-thick { border-right: 2px solid #cbd5e1 !important; }
+
+        /* Row background color mapping */
+        .row-phoenix { 
+            background-color: #eaf2fe; /* solid color so sticky cols cover content */
+        }
+        .row-phoenix .col-recall {
+            background-color: transparent; /* Let the blue bleed through */
+        }
+
+        /* Underline styling matching LaTeX \underline */
+        .ul { text-decoration: underline; text-underline-offset: 2px; text-decoration-color: #94a3b8; }
+
+        /* Caption Styling */
+        .caption-box {
+            max-width: 100%;
+            margin-bottom: 1.5rem;
+            color: #475569; /* slate-600 */
+            font-size: 0.875rem;
+            line-height: 1.6;
+            text-align: left;
+        }
+
+        .highlight-blue { color: #2563eb; font-weight: 600; } /* blue-600 */
+    </style>
+</head>
+<body>
+
+    <div class="w-full xl:max-w-[1400px]">
+        
+
+        <!-- Buttons -->
+        <div class="flex justify-center mb-4">
+            <div class="inline-flex rounded-md shadow-sm" role="group">
+                <button type="button" id="btn-400m" class="px-4 py-2 text-sm font-medium text-blue-700 bg-white border border-gray-200 rounded-l-lg hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:ring-2 focus:ring-blue-700 focus:text-blue-700 active-btn" style="background-color: #ebf5ff;">
+                    ~400M
+                </button>
+                <button type="button" id="btn-800m" class="px-4 py-2 text-sm font-medium text-gray-900 bg-white border border-gray-200 rounded-r-md hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:ring-2 focus:ring-blue-700 focus:text-blue-700">
+                    ~800M
+                </button>
+            </div>
+        </div>
+
+        <!-- Table Container -->
+        <div class="table-container">
+            <div class="table-scroll-wrapper">
+                <table>
+                    <thead>
+                        <tr>
+                            <th rowspan="2" class="border-r-thick">Model</th>
+                            <th rowspan="2"># Params<br><span class="font-normal text-slate-500">(M)</span></th>
+                            <th rowspan="2" class="border-r-thick">(Rec / Conv)<br><span class="font-normal text-slate-500">Mem. (M elts)</span></th>
+                            <th colspan="3" class="col-recall border-r-thick">Recall tasks</th>
+                            <th colspan="6" class="border-r-thick">NIAH-1</th>
+                            <th colspan="6" class="border-r-thick">NIAH-2</th>
+                            <th colspan="6">NIAH-3</th>
+                        </tr>
+                        <tr>
+                            <!-- Recall Tasks -->
+                            <th class="col-recall">SWDE</th>
+                            <th class="col-recall">FDA</th>
+                            <th class="col-recall border-r-thick">SQuAD</th>
+                            <!-- NIAH-1 -->
+                            <th><span class="len-1">1K</span></th><th><span class="len-2">2K</span></th><th><span class="len-3">4K</span></th><th><span class="len-4">8K</span></th><th><span class="len-5">16K</span></th><th class="border-r-thick"><span class="len-6">32K</span></th>
+                            <!-- NIAH-2 -->
+                            <th><span class="len-1">1K</span></th><th><span class="len-2">2K</span></th><th><span class="len-3">4K</span></th><th><span class="len-4">8K</span></th><th><span class="len-5">16K</span></th><th class="border-r-thick"><span class="len-6">32K</span></th>
+                            <!-- NIAH-3 -->
+                            <th><span class="len-1">1K</span></th><th><span class="len-2">2K</span></th><th><span class="len-3">4K</span></th><th><span class="len-4">8K</span></th><th><span class="len-5">16K</span></th><th><span class="len-6">32K</span></th>
+                        </tr>
+                    </thead>
+                    <tbody id="tbody-400m">
+                        <!-- BLOCK 1: ~400M -->
+                                                <tr>
+                            <td class="font-bold italic text-slate-700">Transformer</td>
+                            <td></td>
+                            <td class="border-r-thick"></td>
+                            <td colspan="3" class="col-recall border-r-thick"></td>
+                            <td colspan="6" class="border-r-thick"></td>
+                            <td colspan="6" class="border-r-thick"></td>
+                            <td colspan="6"></td>
+                        </tr>
+                        <tr>
+                            <td class="italic pl-6">w. RoPE</td>
+                            <td>340</td>
+                            <td class="border-r-thick">\(\boldsymbol{\infty}\) / 0.0</td>
+                            <td class="col-recall ul">42.3</td>
+                            <td class="col-recall ul">34.5</td>
+                            <td class="col-recall border-r-thick ul">22.1</td>
+                            <td class="font-bold">100</td><td class="font-bold">100</td><td>0.0</td><td>0.0</td><td>0.0</td><td class="border-r-thick">0.0</td>
+                            <td class="font-bold">100</td><td class="font-bold">100</td><td>0.0</td><td>0.0</td><td>0.0</td><td class="border-r-thick">0.0</td>
+                            <td class="ul">71.6</td><td class="ul">47.6</td><td>0.0</td><td>0.0</td><td>0.0</td><td>0.0</td>
+                        </tr>
+                        <tr>
+                            <td class="italic pl-6">w. Gate (FoX)</td>
+                            <td>376</td>
+                            <td class="border-r-thick">\(\boldsymbol{\infty}\) / 0.0</td>
+                            <td class="col-recall font-bold">52.5</td>
+                            <td class="col-recall font-bold">64.3</td>
+                            <td class="col-recall border-r-thick font-bold">30.1</td>
+                            <td class="font-bold">100</td><td class="font-bold">100</td><td class="font-bold">32.2</td><td class="font-bold">8.0</td><td class="font-bold">4.2</td><td class="border-r-thick">0.0</td>
+                            <td class="font-bold">100</td><td class="font-bold">100</td><td class="font-bold">100</td><td class="font-bold">24.0</td><td class="font-bold">11.6</td><td class="border-r-thick">3.2</td>
+                            <td class="font-bold">95.4</td><td class="font-bold">85.6</td><td class="font-bold">64.2</td><td class="font-bold">11.6</td><td class="font-bold">7.2</td><td>0.0</td>
+                        </tr>
+                        <tr>
+                            <td class="font-bold italic text-slate-700">SSM</td>
+                            <td></td>
+                            <td class="border-r-thick"></td>
+                            <td colspan="3" class="col-recall border-r-thick"></td>
+                            <td colspan="6" class="border-r-thick"></td>
+                            <td colspan="6" class="border-r-thick"></td>
+                            <td colspan="6"></td>
+                        </tr>
+                        <tr>
+                            <td class="pl-6">GLA</td>
+                            <td>475</td>
+                            <td class="border-r-thick">12.5 / 0.4</td>
+                            <td class="col-recall">29.0</td>
+                            <td class="col-recall">11.4</td>
+                            <td class="col-recall border-r-thick">30.3</td>
+                            <td>74.6</td><td>25.1</td><td>8.2</td><td>2.2</td><td>0.0</td><td class="border-r-thick">0.0</td>
+                            <td>91.2</td><td>37.2</td><td>21.4</td><td>3.6</td><td>0.0</td><td class="border-r-thick">0.0</td>
+                            <td class="ul">84.2</td><td class="ul">57.1</td><td class="ul">20.8</td><td class="font-bold">10.2</td><td class="ul">2.3</td><td>0.0</td>
+                        </tr>
+                        <tr>
+                            <td class="pl-6">GSA</td>
+                            <td>399</td>
+                            <td class="border-r-thick">12.5 / <span class="font-bold">0.0</span></td>
+                            <td class="col-recall">23.8</td>
+                            <td class="col-recall">14.5</td>
+                            <td class="col-recall border-r-thick">24.9</td>
+                            <td class="ul">99.2</td><td class="ul">97.1</td><td class="ul">90.0</td><td>67.4</td><td>29.6</td><td class="border-r-thick">11.0</td>
+                            <td>96.6</td><td class="font-bold">98.8</td><td>28.0</td><td>5.1</td><td>1.0</td><td class="border-r-thick">0.0</td>
+                            <td>60.0</td><td>30.1</td><td>13.5</td><td>1.0</td><td>0.0</td><td>0.0</td>
+                        </tr>
+                        <tr>
+                            <td class="pl-6">GDN</td>
+                            <td>475</td>
+                            <td class="border-r-thick">12.5 / 0.4</td>
+                            <td class="col-recall ul">29.5</td>
+                            <td class="col-recall">8.3</td>
+                            <td class="col-recall border-r-thick">31.3</td>
+                            <td class="ul">99.2</td><td class="font-bold">100</td><td class="font-bold">99.8</td><td class="ul">92.0</td><td class="ul">41.8</td><td class="border-r-thick ul">22.1</td>
+                            <td class="ul">99.2</td><td>92.0</td><td>43.6</td><td class="ul">17.8</td><td class="ul">6.2</td><td class="border-r-thick ul">4.0</td>
+                            <td class="font-bold">92.6</td><td class="font-bold">80.6</td><td class="font-bold">37.8</td><td class="ul">5.2</td><td class="font-bold">6.8</td><td class="ul">2.5</td>
+                        </tr>
+                        <tr>
+                            <td class="pl-6">Mamba-2</td>
+                            <td>382</td>
+                            <td class="border-r-thick">12.5 / 0.4</td>
+                            <td class="col-recall">25.7</td>
+                            <td class="col-recall ul">14.9</td>
+                            <td class="col-recall border-r-thick ul">31.9</td>
+                            <td class="ul">99.2</td><td>95.6</td><td>52.2</td><td>12.8</td><td>5.4</td><td class="border-r-thick">2.8</td>
+                            <td class="font-bold">99.8</td><td class="ul">98.0</td><td class="ul">68.2</td><td>15.4</td><td>4.4</td><td class="border-r-thick">3.8</td>
+                            <td>53.4</td><td>53.6</td><td>17.4</td><td>1.8</td><td>2.2</td><td class="font-bold">3.2</td>
+                        </tr>
+                        <tr>
+                            <td class="pl-6">SWA</td>
+                            <td>374</td>
+                            <td class="border-r-thick">12.5 / <span class="font-bold">0.0</span></td>
+                            <td class="col-recall">10.0</td>
+                            <td class="col-recall">14.4</td>
+                            <td class="col-recall border-r-thick">29.7</td>
+                            <td>29.8</td><td>11.0</td><td>6.2</td><td>3.4</td><td>1.2</td><td class="border-r-thick">0.0</td>
+                            <td>36.2</td><td>14.4</td><td>10.2</td><td>3.8</td><td>3.2</td><td class="border-r-thick">0.0</td>
+                            <td>26.2</td><td>9.2</td><td>7.4</td><td>1.4</td><td>1.8</td><td>0.0</td>
+                        </tr>
+                        <tr class="row-phoenix">
+                            <td class="pl-6 text-blue-700 font-bold">Phoenix</td>
+                            <td>424</td>
+                            <td class="border-r-thick">12.5 / <span class="font-bold">0.0</span></td>
+                            <td class="font-bold">34.1</td>
+                            <td class="font-bold">22.7</td>
+                            <td class="border-r-thick font-bold">35.4</td>
+                            <td class="font-bold">99.8</td><td class="font-bold">100</td><td class="font-bold">99.8</td><td class="font-bold">99.8</td><td class="font-bold">99.4</td><td class="border-r-thick font-bold">91.4</td>
+                            <td>98.8</td><td class="ul">98.0</td><td class="font-bold">98.8</td><td class="font-bold">81.6</td><td class="font-bold">23.0</td><td class="border-r-thick font-bold">8.8</td>
+                            <td>76.8</td><td>43.6</td><td>13.4</td><td>1.0</td><td>0.0</td><td>0.0</td>
+                        </tr>
+                    </tbody>
+                    <tbody id="tbody-800m" class="hidden">
+                        <!-- BLOCK 2: ~800M -->
+                                                <tr>
+                            <td class="font-bold italic text-slate-700">Transformer</td>
+                            <td></td>
+                            <td class="border-r-thick"></td>
+                            <td colspan="3" class="col-recall border-r-thick"></td>
+                            <td colspan="6" class="border-r-thick"></td>
+                            <td colspan="6" class="border-r-thick"></td>
+                            <td colspan="6"></td>
+                        </tr>
+                        <tr>
+                            <td class="italic pl-6">w. RoPE</td>
+                            <td>693</td>
+                            <td class="border-r-thick">\(\boldsymbol{\infty}\) / 0.0</td>
+                            <td class="col-recall ul">58.9</td>
+                            <td class="col-recall ul">63.6</td>
+                            <td class="col-recall border-r-thick ul">41.3</td>
+                            <td class="ul">92.4</td><td class="ul">90.8</td><td>0.0</td><td>0.0</td><td>0.0</td><td class="border-r-thick">0.0</td>
+                            <td class="ul">99.6</td><td class="ul">99.2</td><td>0.0</td><td>0.0</td><td>0.0</td><td class="border-r-thick">0.0</td>
+                            <td class="ul">33.4</td><td class="ul">9.0</td><td>0.0</td><td>0.0</td><td>0.0</td><td>0.0</td>
+                        </tr>
+                        <tr>
+                            <td class="italic pl-6">w. Gate (FoX)</td>
+                            <td>694</td>
+                            <td class="border-r-thick">\(\boldsymbol{\infty}\) / 0.0</td>
+                            <td class="col-recall font-bold">64.9</td>
+                            <td class="col-recall font-bold">80.0</td>
+                            <td class="col-recall border-r-thick font-bold">41.5</td>
+                            <td class="font-bold">100</td><td class="font-bold">100</td><td class="font-bold">99.0</td><td class="font-bold">28.6</td><td class="font-bold">12.4</td><td class="border-r-thick">0.0</td>
+                            <td class="font-bold">100</td><td class="font-bold">100</td><td class="font-bold">67.4</td><td class="font-bold">9.0</td><td class="font-bold">7.8</td><td class="border-r-thick">0.0</td>
+                            <td class="font-bold">83.2</td><td class="font-bold">63.8</td><td class="font-bold">0.2</td><td class="font-bold">0.4</td><td class="font-bold">0.2</td><td>0.0</td>
+                        </tr>
+                        <tr>
+                            <td class="font-bold italic text-slate-700">SSM</td>
+                            <td></td>
+                            <td class="border-r-thick"></td>
+                            <td colspan="3" class="col-recall border-r-thick"></td>
+                            <td colspan="6" class="border-r-thick"></td>
+                            <td colspan="6" class="border-r-thick"></td>
+                            <td colspan="6"></td>
+                        </tr>
+                        <tr>
+                            <td class="pl-6">GLA</td>
+                            <td>892</td>
+                            <td class="border-r-thick">16.5 / 0.4</td>
+                            <td class="col-recall font-bold">50.1</td>
+                            <td class="col-recall font-bold">35.9</td>
+                            <td class="col-recall border-r-thick ul">39.2</td>
+                            <td>100</td><td>94.2</td><td>29.4</td><td>3.6</td><td>0.0</td><td class="border-r-thick">0.0</td>
+                            <td>100</td><td>89.8</td><td>25.8</td><td>3.8</td><td>3.0</td><td class="border-r-thick">0.0</td>
+                            <td>94.6</td><td>51.2</td><td>3.2</td><td>1.8</td><td>1.6</td><td>0.0</td>
+                        </tr>
+                        <tr>
+                            <td class="pl-6">GSA</td>
+                            <td>750</td>
+                            <td class="border-r-thick">16.5 / <span class="font-bold">0.0</span></td>
+                            <td class="col-recall">42.8</td>
+                            <td class="col-recall">28.9</td>
+                            <td class="col-recall border-r-thick">33.6</td>
+                            <td>100</td><td>100</td><td>99.8</td><td>97.6</td><td>64.0</td><td class="border-r-thick">0.0</td>
+                            <td>99.4</td><td>90.0</td><td>29.8</td><td>3.6</td><td>2.4</td><td class="border-r-thick">0.0</td>
+                            <td>79.0</td><td>16.6</td><td>2.4</td><td>0.2</td><td>0.0</td><td>0.0</td>
+                        </tr>
+                        <tr>
+                            <td class="pl-6">GDN</td>
+                            <td>892</td>
+                            <td class="border-r-thick">16.5 / 0.4</td>
+                            <td class="col-recall ul">46.0</td>
+                            <td class="col-recall ul">31.9</td>
+                            <td class="col-recall border-r-thick">35.9</td>
+                            <td class="font-bold">100</td><td class="font-bold">100</td><td class="font-bold">100</td><td class="font-bold">100</td><td>94.8</td><td class="border-r-thick">45.2</td>
+                            <td class="font-bold">100</td><td>95.4</td><td>35.2</td><td>14.2</td><td class="font-bold">9.2</td><td class="border-r-thick font-bold">5.8</td>
+                            <td>79.4</td><td class="font-bold">65.4</td><td>10.6</td><td>6.4</td><td class="font-bold">4.2</td><td class="font-bold">2.0</td>
+                        </tr>
+                        <tr>
+                            <td class="pl-6">Mamba-2</td>
+                            <td>711</td>
+                            <td class="border-r-thick">16.5 / 0.6</td>
+                            <td class="col-recall">42.7</td>
+                            <td class="col-recall">21.3</td>
+                            <td class="col-recall border-r-thick">34.6</td>
+                            <td>99.8</td><td>63.4</td><td>13.6</td><td>1.8</td><td>0.8</td><td class="border-r-thick">0.6</td>
+                            <td>97.4</td><td>49.2</td><td>24.2</td><td>6.6</td><td>4.2</td><td class="border-r-thick">3.2</td>
+                            <td>89.8</td><td>17.4</td><td class="font-bold">14.6</td><td>1.4</td><td>2.4</td><td>0.6</td>
+                        </tr>
+                        <tr>
+                            <td class="pl-6">SWA</td>
+                            <td>693</td>
+                            <td class="border-r-thick">16.5 / <span class="font-bold">0.0</span></td>
+                            <td class="col-recall">14.9</td>
+                            <td class="col-recall">12.2</td>
+                            <td class="col-recall border-r-thick">28.8</td>
+                            <td>11.0</td><td>6.2</td><td>3.4</td><td>1.2</td><td>0.6</td><td class="border-r-thick">0.0</td>
+                            <td>14.4</td><td>6.4</td><td>5.0</td><td>1.2</td><td>2.4</td><td class="border-r-thick">0.0</td>
+                            <td>15.2</td><td>4.8</td><td>1.4</td><td>2.4</td><td>3.4</td><td>0.0</td>
+                        </tr>
+                        <tr class="row-phoenix">
+                            <td class="pl-6 text-blue-700 font-bold">Phoenix</td>
+                            <td>792</td>
+                            <td class="border-r-thick">16.5 / <span class="font-bold">0.0</span></td>
+                            <td>41.7</td>
+                            <td>24.1</td>
+                            <td class="border-r-thick font-bold">39.9</td>
+                            <td>99.8</td><td class="font-bold">100</td><td>99.8</td><td>99.2</td><td class="font-bold">98.2</td><td class="border-r-thick font-bold">91.0</td>
+                            <td class="font-bold">100</td><td class="font-bold">99.4</td><td class="font-bold">90.8</td><td class="font-bold">35.2</td><td>6.8</td><td class="border-r-thick">3.4</td>
+                            <td class="font-bold">90.4</td><td>5.2</td><td>0.6</td><td>0.0</td><td>0.0</td><td>0.0</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        const btn400 = document.getElementById('btn-400m');
+        const btn800 = document.getElementById('btn-800m');
+        const tbody400 = document.getElementById('tbody-400m');
+        const tbody800 = document.getElementById('tbody-800m');
+        
+        // Grab headers
+        const cols1 = document.querySelectorAll('.len-1');
+        const cols2 = document.querySelectorAll('.len-2');
+        const cols3 = document.querySelectorAll('.len-3');
+        const cols4 = document.querySelectorAll('.len-4');
+        const cols5 = document.querySelectorAll('.len-5');
+        const cols6 = document.querySelectorAll('.len-6');
+
+        btn400.addEventListener('click', () => {
+            tbody400.classList.remove('hidden');
+            tbody800.classList.add('hidden');
+            btn400.classList.add('text-blue-700');
+            btn400.classList.remove('text-gray-900');
+            btn400.style.backgroundColor = '#ebf5ff';
+            btn800.classList.remove('text-blue-700');
+            btn800.classList.add('text-gray-900');
+            btn800.style.backgroundColor = 'white';
+            
+            cols1.forEach(el => el.textContent = '1K');
+            cols2.forEach(el => el.textContent = '2K');
+            cols3.forEach(el => el.textContent = '4K');
+            cols4.forEach(el => el.textContent = '8K');
+            cols5.forEach(el => el.textContent = '16K');
+            cols6.forEach(el => el.textContent = '32K');
+        });
+
+        btn800.addEventListener('click', () => {
+            tbody800.classList.remove('hidden');
+            tbody400.classList.add('hidden');
+            btn800.classList.add('text-blue-700');
+            btn800.classList.remove('text-gray-900');
+            btn800.style.backgroundColor = '#ebf5ff';
+            btn400.classList.remove('text-blue-700');
+            btn400.classList.add('text-gray-900');
+            btn400.style.backgroundColor = 'white';
+            
+            cols1.forEach(el => el.textContent = '2K');
+            cols2.forEach(el => el.textContent = '4K');
+            cols3.forEach(el => el.textContent = '8K');
+            cols4.forEach(el => el.textContent = '16K');
+            cols5.forEach(el => el.textContent = '32K');
+            cols6.forEach(el => el.textContent = '64K');
+        });
+    </script>
+</body>
+</html>
