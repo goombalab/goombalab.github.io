@@ -57,6 +57,14 @@ profiles:
     website: https://iliao2345.github.io/
     github: https://github.com/iliao2345
 
+  - role: phd-student
+    image: /people/abi.jpg
+    name: Abi Kothapalli
+    google_scholar: https://scholar.google.com/citations?user=nPOl8YUAAAAJ&hl=en
+    website: https://abi-kothapalli.github.io
+    github: https://github.com/abi-kothapalli
+    twitter: https://x.com/abi_kothapalli
+
   - role: ms-student
     image: /people/ricardo.jpg
     name: Ricardo Buitrago
