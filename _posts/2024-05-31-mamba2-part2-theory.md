@@ -66,7 +66,7 @@ Each method is actually much more broad than the SSD model itself,
 and the union of these two strong generalizations is what we call the SSD *framework*.
 This framework provides a rich body of connections between state space models, attention, and structured matrices.
 While the SSD model can be viewed as a specific instantiation of each prong of the framework,
-the SSD framework is much more general opens up many directions for future work.
+the SSD framework is much more general and opens up many directions for future work.
 
 #### The State Space Duality framework
 
@@ -88,7 +88,7 @@ defined as a selective SSM
 $$
 \begin{aligned}
 h_{t} &= A_t h_{t-1} + B_t x_t \\
-y_t &= C_t^{\top} y_t
+y_t &= C_t^{\top} h_t
 \end{aligned}
 $$
 
@@ -399,7 +399,7 @@ all that is necessary is for $L$ to be *any structured matrix* --
 in other words any matrix that has subquadratic matrix-vector multiplication.
 
 This immediately motivates one of the main prongs of the SSD framework,
-which can be seen as a strong generation of LA.
+which can be seen as a strong generalization of LA.
 
 > #### Definition: Structured Masked Attention
 >
@@ -456,7 +456,7 @@ It's not too hard to see that multiplication $y = Lx$ can be computed in linear 
 $$
 \begin{aligned}
 y_0 &= x_0 \\
-y_1 &= a_1 x_0 + a_1 \\
+y_1 &= a_1 x_0 + x_1 \\
 y_2 &= a_2a_1 x_0 + a_2 x_1 + x_2 = a_2 y_1 + x_2 \\
 \vdots & \qquad \vdots
 \end{aligned}
