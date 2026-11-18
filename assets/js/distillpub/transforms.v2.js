@@ -845,7 +845,13 @@
     if (ent.author == null) {
       return "";
     }
+    // Keep a single braced organization name intact.
+    const literal = ent.author.trim().match(/^\{([^{}]*)\}$/);
+    if (literal) return literal[1];
     var names = ent.author.split(" and ");
+    // BibTeX uses a trailing "and others" for an abbreviated author list.
+    const omittedAuthors = names.length > 1 && names[names.length - 1].trim() === "others";
+    if (omittedAuthors) names.pop();
     let name_strings = names.map((name) => {
       name = name.trim();
       if (name.indexOf(",") != -1) {
@@ -867,6 +873,7 @@
       }
       return template.replace("${F}", firsts).replace("${L}", last).replace("${I}", initials).trim(); // in case one of first or last was empty
     });
+    if (omittedAuthors) return name_strings.join(sep) + sep + "et al.";
     if (names.length > 1) {
       var str = name_strings.slice(0, names.length - 1).join(sep);
       str += (finalSep || sep) + name_strings[names.length - 1];

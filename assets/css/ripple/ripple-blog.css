@@ -1,0 +1,22 @@
+/* Follow the blog's explicit theme choice, including when it differs from the OS. */
+.ripple-blog {
+  margin: 1.5rem 0 2rem;
+  min-width: 0;
+}
+.ripple-blog .ripple-chart,
+.ripple-blog .ripple-chart-switcher {
+  --rc-fg: var(--global-text-color);
+  --rc-muted: var(--global-text-color-light);
+  --rc-bg: var(--global-bg-color);
+  --rc-grid: var(--global-divider-color);
+  --rc-popover: var(--global-card-bg-color);
+  --rc-final-color: #0b2a5b;
+}
+html[data-theme="dark"] .ripple-blog .ripple-chart {
+  --rc-final-color: #8da7cf;
+}
+.ripple-blog .ripple-chart h2 {
+  margin: 0 0 0.5rem;
+  padding: 0;
+  border: 0;
+}

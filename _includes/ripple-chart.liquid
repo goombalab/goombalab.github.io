@@ -1,0 +1,17 @@
+{% if include.part == 'fit' %}
+  <link rel="stylesheet" href="{{ '/assets/css/ripple/ripple-charts.css' | relative_url | bust_file_cache }}">
+  <link rel="stylesheet" href="{{ '/assets/css/ripple/ripple-blog.css' | relative_url | bust_file_cache }}">
+  <script defer src="{{ '/assets/js/ripple/ripple-data.js' | relative_url | bust_file_cache }}"></script>
+  <script defer src="{{ '/assets/js/ripple/ripple-relative-data.js' | relative_url | bust_file_cache }}"></script>
+  <script defer src="{{ '/assets/js/ripple/ripple-charts.js' | relative_url | bust_file_cache }}"></script>
+  <script defer src="{{ '/assets/js/ripple/ripple-blog.js' | relative_url | bust_file_cache }}"></script>
+  <div class="ripple-blog">
+    <div id="ripple-blog-fit"></div>
+    <noscript>Enable JavaScript to explore the fitted baseline and its reported observations.</noscript>
+  </div>
+{% elsif include.part == 'efficiency' %}
+  <div class="ripple-blog">
+    <div id="ripple-blog-efficiency"></div>
+    <noscript>Enable JavaScript to explore compute efficiency across the Ripple recipes.</noscript>
+  </div>
+{% endif %}
